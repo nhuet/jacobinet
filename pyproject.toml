@@ -1,0 +1,78 @@
+
+[build-system]
+requires = ["setuptools>=64", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jacobinet"
+description = "JacobiNet is a Python library built on Keras that constructs the backward pass as a Keras model using the chain rule to compute Jacobians. It provides a clear, modular framework for understanding and analyzing gradient propagation, making it a valuable tool for researchers and educators in deep learning."
+readme = "README.md"
+authors = [
+    {email ="melanie.ducoffe@airbus.com"},
+]
+requires-python = ">=3.9"
+dependencies =[
+    "keras>=3",
+]
+license = {text = "MIT"}
+dynamic = ["version"]
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3 :: Only",
+    "Operating System :: Unix",
+    "Operating System :: MacOS",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development",
+]
+
+[project.urls]
+documentation = "https://ducoffeM.github.io/jacobinet"
+repository = "https://github.com/ducoffeM/jacobinet"
+
+[project.optional-dependencies]
+dev = ["tox>=4.6.4"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["jacobinet*"]
+
+[tool.setuptools_scm]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = [
+    "--import-mode=importlib",
+]
+
+[tool.black]
+line-length = 79
+target-version = ['py39']
+include = '\.pyi?$'
+exclude = '''
+
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+    | tests/.*/setup.py
+  )/
+  | foo.py           # also separately exclude a file named foo.py in
+                     # the root of the project
+)
+'''
+
+ignore_missing_imports = true
