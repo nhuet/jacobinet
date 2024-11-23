@@ -59,7 +59,13 @@ def get_backward_model(
     extra_inputs: Union[List[Input]] = [],
 ):
     # find output_nodes
-    grad_input = isinstance(gradient, InputLayer)
+    # for single output only ...
+    if gradient is not None:
+        if hasattr(gradient, '_keras_history'):
+            grad_input = isinstance(gradient._keras_history.operation, InputLayer)
+        else:
+            grad_input = False
+
     model_outputs = model.output
     model_inputs = model.input
     if not isinstance(model_outputs, list):
