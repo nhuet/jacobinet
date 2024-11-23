@@ -5,3 +5,4 @@ from .concatenate import get_backward_Concatenate
 from .maximum import get_backward_Maximum
 from .minimum import get_backward_Minimum
 from .subtract import get_backward_Subtract
+from .multiply import get_backward_Multiply

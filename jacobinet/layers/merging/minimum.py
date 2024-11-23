@@ -24,25 +24,7 @@ class BackwardMinimum(BackwardMergeNonLinearLayer):
         self, gradient, input=None, training=None, mask=None
     ):
         output_layer = self.layer(input)
-        return [
-            gradient * (2 * K.sign(output_layer - input_i) + 1)
-            for input_i in input
-        ]
-
-    """
-    def call(self, inputs, training=None, mask=None):
-        layer_output = inputs[0]
-        layer_inputs = inputs[1:]
-
-        reshape_tag, layer_output, n_out = reshape_to_batch(inputs, list(self.layer.output.shape))
-        output_layer = self.layer(layer_inputs)
-        output = [ layer_output*(2*K.sign(output_layer - input_i)+1) for input_i in layer_inputs]
-        
-        if reshape_tag:
-            output = [K.reshape(output[i], [-1]+n_out+list(self.input_dim_wo_batch[i])) for i in range(self.n_input)]   
-                
-        return output
-    """
+        return [gradient*(K.sign(output_layer-input_i) + 1) for input_i in input]
 
 
 def get_backward_Minimum(layer: Minimum, use_bias=True) -> Layer:

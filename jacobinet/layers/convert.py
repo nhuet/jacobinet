@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Optional
 
-from keras_custom.backward.layers.layer import BackwardLinearLayer, BackwardLayer
+from jacobinet.layers.layer import BackwardLinearLayer, BackwardLayer
 from keras.layers import (
     Activation,
     Add,
@@ -10,6 +10,7 @@ from keras.layers import (
     Concatenate,
     Maximum,
     Minimum,
+    Multiply,
     Dense,
     EinsumDense,
     Layer,
@@ -50,7 +51,7 @@ from keras.layers import (
     ELU,
 )
 
-from keras_custom.backward.layers import (
+from jacobinet.layers import (
     get_backward_BatchNormalization,
     get_backward_Conv2D,
     get_backward_Conv1D,
@@ -86,7 +87,8 @@ from keras_custom.backward.layers import (
     get_backward_Subtract,
     get_backward_Concatenate,
     get_backward_Maximum,
-    get_backward_Minimum
+    get_backward_Minimum,
+    get_backward_Multiply
 )
 
 
@@ -142,7 +144,8 @@ default_mapping_keras2backward_layer: dict[type[Layer], type[callable]] = {
     Subtract:get_backward_Subtract,
     Concatenate:get_backward_Concatenate,
     Maximum:get_backward_Maximum,
-    Minimum:get_backward_Minimum
+    Minimum:get_backward_Minimum,
+    Multiply: get_backward_Multiply
 }
 """Default mapping between keras layers and get_backward callable"""
 
