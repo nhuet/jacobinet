@@ -30,7 +30,7 @@ def get_backward(
     get_backward_model: Callable = None,
 ):
     if isinstance(layer, Layer):
-        return get_backward_layer(layer, False, mapping_keras2backward_classes)
+        return get_backward_layer(layer, mapping_keras2backward_classes)
     else:
 
         raise NotImplementedError()

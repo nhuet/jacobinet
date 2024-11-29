@@ -27,10 +27,9 @@ class BackwardDepthwiseConv2D(BackwardLinearLayer):
     def __init__(
         self,
         layer: DepthwiseConv2D,
-        use_bias: bool = True,
         **kwargs,
     ):
-        super().__init__(layer=layer, use_bias=use_bias, **kwargs)
+        super().__init__(layer=layer, **kwargs)
 
         # input_dim_wo_batch = self.layer.input.shape[1:]
         input_dim_wo_batch = self.input_dim_wo_batch
@@ -133,13 +132,13 @@ class BackwardDepthwiseConv2D(BackwardLinearLayer):
             self.axis,
             self.axis_c,
             self.c_in,
-            self.use_bias,
+            False,
         )
         return output
 
 
 def get_backward_DepthwiseConv2D(
-    layer: DepthwiseConv2D, use_bias=True
+    layer: DepthwiseConv2D
 ) -> Layer:
     """
     This function creates a `BackwardDepthwiseConv2D` layer based on a given `DepthwiseConv2D` layer. It provides
@@ -149,8 +148,6 @@ def get_backward_DepthwiseConv2D(
     ### Parameters:
     - `layer`: A Keras `DepthwiseConv2D` layer instance. The function uses this layer's configurations (input and output shapes,
       depth multiplier, data format) to set up the `BackwardDepthwiseConv2D` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardDepthwiseConv2D`, which acts as the reverse layer for the given `DepthwiseConv2D`.
@@ -161,8 +158,8 @@ def get_backward_DepthwiseConv2D(
     from keras_custom.backward import get_backward_DepthwiseConv2D
 
     # Assume `depthwise_conv_layer` is a pre-defined DepthwiseConv2D layer
-    backward_layer = get_backward_DepthwiseConv2D(depthwise_conv_layer, use_bias=True)
+    backward_layer = get_backward_DepthwiseConv2D(depthwise_conv_layer)
     output = backward_layer(input_tensor)
     """
-    layer_backward = BackwardDepthwiseConv2D(layer, use_bias)
+    layer_backward = BackwardDepthwiseConv2D(layer)
     return layer_backward

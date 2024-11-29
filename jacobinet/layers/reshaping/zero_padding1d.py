@@ -50,7 +50,7 @@ class BackwardZeroPadding1D(BackwardLinearLayer):
             self.layer_backward = model_backward
 
 
-def get_backward_ZeroPadding1D(layer: ZeroPadding1D, use_bias=True) -> Layer:
+def get_backward_ZeroPadding1D(layer: ZeroPadding1D) -> Layer:
     """
     This function creates a `BackwardZeroPadding1D` layer based on a given `ZeroPadding1D` layer. It provides
     a convenient way to obtain a backward approximation of the input `ZeroPadding1D` layer, using the
@@ -58,8 +58,6 @@ def get_backward_ZeroPadding1D(layer: ZeroPadding1D, use_bias=True) -> Layer:
 
     ### Parameters:
     - `layer`: A Keras `ZeroPadding1D` layer instance. The function uses this layer's configurations to set up the `BackwardZeroPadding1D` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardZeroPadding1D`, which acts as the reverse layer for the given `ZeroPadding1D`.
@@ -70,7 +68,7 @@ def get_backward_ZeroPadding1D(layer: ZeroPadding1D, use_bias=True) -> Layer:
     from keras_custom.backward import get_backward_ZeroPadding1D
 
     # Assume `zero_padding_layer` is a pre-defined ZeroPadding1D layer
-    backward_layer = get_backward_ZeroPadding1D(zero_padding_layer, use_bias=True)
+    backward_layer = get_backward_ZeroPadding1D(zero_padding_layer)
     output = backward_layer(input_tensor)
     """
 

@@ -32,7 +32,7 @@ class BackwardPermute(BackwardLinearLayer):
         self.layer_backward = Permute(dims=dims_invert)
 
 
-def get_backward_Permute(layer: Permute, use_bias=True) -> Layer:
+def get_backward_Permute(layer: Permute) -> Layer:
     """
     This function creates a `BackwardPermute` layer based on a given `Permute` layer. It provides
     a convenient way to obtain a backward approximation of the input `Permute` layer, using the
@@ -40,8 +40,6 @@ def get_backward_Permute(layer: Permute, use_bias=True) -> Layer:
 
     ### Parameters:
     - `layer`: A Keras `Permute` layer instance. The function uses this layer's configurations to set up the `BackwardPermute` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardPermute`, which acts as the reverse layer for the given `Permute`.
@@ -52,7 +50,7 @@ def get_backward_Permute(layer: Permute, use_bias=True) -> Layer:
     from keras_custom.backward import get_backward_Permute
 
     # Assume `permute_layer` is a pre-defined Permute layer
-    backward_layer = get_backward_Permute(permute_layer, use_bias=True)
+    backward_layer = get_backward_Permute(permute_layer)
     output = backward_layer(input_tensor)
     """
 

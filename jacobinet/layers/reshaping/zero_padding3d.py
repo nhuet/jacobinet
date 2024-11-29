@@ -36,7 +36,7 @@ class BackwardZeroPadding3D(BackwardLinearLayer):
         self.layer_backward.built = True
 
 
-def get_backward_ZeroPadding3D(layer: ZeroPadding3D, use_bias=True) -> Layer:
+def get_backward_ZeroPadding3D(layer: ZeroPadding3D) -> Layer:
     """
     This function creates a `BackwardZeroPadding3D` layer based on a given `ZeroPadding3D` layer. It provides
     a convenient way to obtain a backward approximation of the input `ZeroPadding3D` layer, using the
@@ -44,8 +44,6 @@ def get_backward_ZeroPadding3D(layer: ZeroPadding3D, use_bias=True) -> Layer:
 
     ### Parameters:
     - `layer`: A Keras `ZeroPadding3D` layer instance. The function uses this layer's configurations to set up the `BackwardZeroPadding3D` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardZeroPadding3D`, which acts as the reverse layer for the given `ZeroPadding3D`.
@@ -56,7 +54,7 @@ def get_backward_ZeroPadding3D(layer: ZeroPadding3D, use_bias=True) -> Layer:
     from keras_custom.backward import get_backward_ZeroPadding3D
 
     # Assume `zero_padding_layer` is a pre-defined ZeroPadding3D layer
-    backward_layer = get_backward_ZeroPadding3D(zero_padding_layer, use_bias=True)
+    backward_layer = get_backward_ZeroPadding3D(zero_padding_layer)
     output = backward_layer(input_tensor)
     """
 

@@ -38,7 +38,7 @@ class BackwardConcatenate(BackwardMergeLinearLayer):
         return K.split(gradient, indices_or_sections=K.cumsum(self.dims[:-1]), axis=self.layer.axis)
 
 
-def get_backward_Concatenate(layer: Concatenate, use_bias=True) -> Layer:
+def get_backward_Concatenate(layer: Concatenate) -> Layer:
     """
     This function creates a `BackwardConcatenate` layer based on a given `Concatenate` layer. It provides
     a convenient way to obtain the backward pass of the input `Concatenate` layer, using the
@@ -46,8 +46,6 @@ def get_backward_Concatenate(layer: Concatenate, use_bias=True) -> Layer:
 
     ### Parameters:
     - `layer`: A Keras `Concatenate` layer instance. The function uses this layer's configurations to set up the `BackwardConcatenate` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardConcatenate`, which acts as the reverse layer for the given `Concatenate`.

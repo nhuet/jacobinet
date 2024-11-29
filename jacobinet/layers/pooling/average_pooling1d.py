@@ -106,7 +106,7 @@ class BackwardAveragePooling1D(BackwardLinearLayer):
 
 
 def get_backward_AveragePooling1D(
-    layer: AveragePooling1D, use_bias=True
+    layer: AveragePooling1D
 ) -> Layer:
     """
     This function creates a `BackwardAveragePooling1D` layer based on a given `AveragePooling1D` layer. It provides
@@ -115,8 +115,6 @@ def get_backward_AveragePooling1D(
 
     ### Parameters:
     - `layer`: A Keras `AveragePooling1D` layer instance. The function uses this layer's configurations to set up the `BackwardAveragePooling1D` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardAveragePooling1D`, which acts as the reverse layer for the given `AveragePooling1D`.
@@ -127,7 +125,7 @@ def get_backward_AveragePooling1D(
     from keras_custom.backward import get_backward_AveragePooling1D
 
     # Assume `average_layer` is a pre-defined AveragePooling1D layer
-    backward_layer = get_backward_AveragePooling1D(average_layer, use_bias=True)
+    backward_layer = get_backward_AveragePooling1D(average_layer)
     output = backward_layer(input_tensor)
     """
 

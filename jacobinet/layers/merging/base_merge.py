@@ -16,7 +16,7 @@ class BackwardMergeLinearLayer(BackwardLinearLayer):
     ------
     ```python
     from keras.layers import Dense
-    backward_layer = BackwardMergeLinearLayer(layer, use_bias=False)
+    backward_layer = BackwardMergeLinearLayer(layer)
     ```
 
     This layer can be useful in advanced neural network architectures that
@@ -45,7 +45,7 @@ class BackwardMergeNonLinearLayer(BackwardNonLinearLayer):
     ------
     ```python
     from keras.layers import Dense
-    backward_layer = BackwardMergeLinearLayer(layer, use_bias=False)
+    backward_layer = BackwardMergeLinearLayer(layer)
     ```
 
     This layer can be useful in advanced neural network architectures that

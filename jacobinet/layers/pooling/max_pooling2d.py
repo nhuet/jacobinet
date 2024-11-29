@@ -76,7 +76,7 @@ class BackwardMaxPooling2D(BackwardNonLinearLayer):
         return output
 
 
-def get_backward_MaxPooling2D(layer: MaxPooling2D, use_bias=True) -> Layer:
+def get_backward_MaxPooling2D(layer: MaxPooling2D) -> Layer:
     """
     This function creates a `BackwardMaxPooling2D` layer based on a given `MaxPooling2D` layer. It provides
     a convenient way to obtain a backward approximation of the input `MaxPooling2D` layer, using the
@@ -84,8 +84,6 @@ def get_backward_MaxPooling2D(layer: MaxPooling2D, use_bias=True) -> Layer:
 
     ### Parameters:
     - `layer`: A Keras `MaxPooling2D` layer instance. The function uses this layer's configurations to set up the `BackwardMaxPooling2D` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardMaxPooling2D`, which acts as the reverse layer for the given `MaxPooling2D`.
@@ -96,7 +94,7 @@ def get_backward_MaxPooling2D(layer: MaxPooling2D, use_bias=True) -> Layer:
     from keras_custom.backward import get_backward_MaxPooling2D
 
     # Assume `maxpool_layer` is a pre-defined MaxPooling2D layer
-    backward_layer = get_backward_MaxPooling2D(maxpool_layer, use_bias=True)
+    backward_layer = get_backward_MaxPooling2D(maxpool_layer)
     output = backward_layer(input_tensor)
     """
 

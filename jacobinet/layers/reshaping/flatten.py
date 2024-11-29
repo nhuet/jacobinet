@@ -47,7 +47,7 @@ class BackwardFlatten(BackwardLinearLayer):
             self.layer_backward = Reshape(target_shape=input_shape_wo_batch)
 
 
-def get_backward_Flatten(layer: Flatten, use_bias=True) -> Layer:
+def get_backward_Flatten(layer: Flatten) -> Layer:
     """
     This function creates a `BackwardFlatten` layer based on a given `Flatten` layer. It provides
     a convenient way to obtain a backward approximation of the input `Flatten` layer, using the
@@ -55,8 +55,6 @@ def get_backward_Flatten(layer: Flatten, use_bias=True) -> Layer:
 
     ### Parameters:
     - `layer`: A Keras `Flatten` layer instance. The function uses this layer's configurations to set up the `BackwardFlatten` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardFlatten`, which acts as the reverse layer for the given `Flatten`.
@@ -67,7 +65,7 @@ def get_backward_Flatten(layer: Flatten, use_bias=True) -> Layer:
     from keras_custom.backward import get_backward_Flatten
 
     # Assume `flatten_layer` is a pre-defined Flatten layer
-    backward_layer = get_backward_Flatten(flatten_layer, use_bias=True)
+    backward_layer = get_backward_Flatten(flatten_layer)
     output = backward_layer(input_tensor)
     """
 

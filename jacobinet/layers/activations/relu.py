@@ -14,8 +14,6 @@ class BackwardReLU(BackwardNonLinearLayer):
 
     ### Parameters:
     - `layer`: A Keras `ReLU` layer instance. The function uses this layer's configurations to set up the `BackwardReLU` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardReLU`, which acts as the reverse layer for the given `ReLU`.
@@ -26,17 +24,15 @@ class BackwardReLU(BackwardNonLinearLayer):
     from keras_custom.backward import get_backward_ReLU
 
     # Assume `activation_layer` is a pre-defined ReLU layer
-    backward_layer = get_backward_ReLU(activation_layer, use_bias=True)
     output = backward_layer(input_tensor)
     """
 
     def __init__(
         self,
         layer: ReLU,
-        use_bias: bool = True,
         **kwargs,
     ):
-        super().__init__(layer=layer, use_bias=use_bias, **kwargs)
+        super().__init__(layer=layer, **kwargs)
 
     def call_on_reshaped_gradient(
         self, gradient, input=None, training=None, mask=None
@@ -51,7 +47,7 @@ class BackwardReLU(BackwardNonLinearLayer):
         return output
 
 
-def get_backward_ReLU(layer: ReLU, use_bias=True) -> Layer:
+def get_backward_ReLU(layer: ReLU) -> Layer:
     """
     This function creates a `BackwardELU` layer based on a given `ReLU` layer. It provides
     a convenient way to obtain the backward pass of the input `ReLU` layer, using the
@@ -59,8 +55,6 @@ def get_backward_ReLU(layer: ReLU, use_bias=True) -> Layer:
 
     ### Parameters:
     - `layer`: A Keras `ReLU` layer instance. The function uses this layer's configurations to set up the `BackwardReLU` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardReLU`, which acts as the reverse layer for the given `ReLU`.
@@ -71,7 +65,7 @@ def get_backward_ReLU(layer: ReLU, use_bias=True) -> Layer:
     from keras_custom.backward import get_backward_ReLU
 
     # Assume `activation_layer` is a pre-defined ReLU layer
-    backward_layer = get_backward_ReLU(activation_layer, use_bias=True)
+    backward_layer = get_backward_ReLU(activation_layer)
     output = backward_layer(input_tensor)
     """
-    return BackwardReLU(layer, use_bias)
+    return BackwardReLU(layer)

@@ -24,10 +24,9 @@ class BackwardConv1D(BackwardLinearLayer):
     def __init__(
         self,
         layer: Conv1D,
-        use_bias: bool = True,
         **kwargs,
     ):
-        super().__init__(layer=layer, use_bias=use_bias, **kwargs)
+        super().__init__(layer=layer, **kwargs)
         dico_conv = layer.get_config()
         dico_conv.pop("groups")
         # input_shape = list(layer.input.shape[1:])
@@ -40,19 +39,17 @@ class BackwardConv1D(BackwardLinearLayer):
         else:
             dico_conv["filters"] = input_shape[-1]
 
-        dico_conv["use_bias"] = self.use_bias
+        dico_conv["use_bias"] = False
         dico_conv["padding"] = "valid"
 
         layer_backward = Conv1DTranspose.from_config(dico_conv)
         layer_backward.kernel = layer.kernel
-        if self.use_bias:
-            layer_backward.bias = layer.bias
 
         layer_backward.built = True
 
         input_shape_wo_batch = self.input_dim_wo_batch
         input_shape_wo_batch_wo_pad = list(
-            layer_backward(layer.output)[0].shape
+            layer_backward(Input(self.output_dim_wo_batch))[0].shape
         )
 
         if layer.data_format == "channels_first":
@@ -68,7 +65,7 @@ class BackwardConv1D(BackwardLinearLayer):
         self.layer_backward = layer_backward
 
 
-def get_backward_Conv1D(layer: Conv1D, use_bias=True) -> Layer:
+def get_backward_Conv1D(layer: Conv1D) -> Layer:
     """
     This function creates a `BackwardConv1D` layer based on a given `Conv1D` layer. It provides
     a convenient way to obtain the backward pass of the input `Conv1D` layer, using the
@@ -76,8 +73,6 @@ def get_backward_Conv1D(layer: Conv1D, use_bias=True) -> Layer:
 
     ### Parameters:
     - `layer`: A Keras `Conv1D` layer instance. The function uses this layer's configurations to set up the `BackwardConv1D` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardConv1D`, which acts as the reverse layer for the given `Conv1D`.
@@ -88,8 +83,8 @@ def get_backward_Conv1D(layer: Conv1D, use_bias=True) -> Layer:
     from keras_custom.backward import get_backward_Conv1D
 
     # Assume `conv_layer` is a pre-defined Conv1D layer
-    backward_layer = get_backward_Conv1D(conv_layer, use_bias=True)
+    backward_layer = get_backward_Conv1D(conv_layer)
     output = backward_layer(input_tensor)
     """
 
-    return BackwardConv1D(layer, use_bias)
+    return BackwardConv1D(layer)

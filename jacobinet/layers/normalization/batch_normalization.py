@@ -33,7 +33,7 @@ class BackwardBatchNormalization(BackwardLinearLayer):
                     f"mask.shape={gradient.shape}, inputs.shape={gradient.shape}"
                 )
 
-        compute_dtype = backend.result_type(inputs.dtype, "float32")
+        compute_dtype = backend.result_type(gradient.dtype, "float32")
         # BN is prone to overflow with float16/bfloat16 inputs, so we upcast to
         # float32 for the subsequent computations.
         gradient = ops.cast(gradient, compute_dtype)
@@ -74,13 +74,6 @@ class BackwardBatchNormalization(BackwardLinearLayer):
         # x = z*ops.sqrt(variance_+self.layer.epsilon) + mean_
         w = ops.sqrt(variance_ + self.layer.epsilon) / gamma_
         outputs = w * gradient
-
-        if self.use_bias:
-            b = (
-                -beta_ * ops.sqrt(variance_ + self.layer.epsilon) / gamma_
-                + mean_
-            )
-            return outputs + b
 
         return outputs
 
@@ -152,7 +145,7 @@ class BackwardBatchNormalization(BackwardLinearLayer):
 
 
 def get_backward_BatchNormalization(
-    layer: BatchNormalization, use_bias=True
+    layer: BatchNormalization
 ) -> Layer:
     """
     This function creates a `BackwardBatchNormalization` layer based on a given `BatchNormalization` layer. It provides
@@ -161,8 +154,6 @@ def get_backward_BatchNormalization(
 
     ### Parameters:
     - `layer`: A Keras `BatchNormalization` layer instance. The function uses this layer's configurations to set up the `BackwardBatchNormalization` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardBatchNormalization`, which acts as the reverse layer for the given `BatchNormalization`.
@@ -173,9 +164,9 @@ def get_backward_BatchNormalization(
     from my_custom_layers import get_backward_BatchNormalization
 
     # Assume `batch_norm_layer` is a pre-defined BatchNormalization layer
-    backward_layer = get_backward_BatchNormalization(batch_norm_layer, use_bias=True)
+    backward_layer = get_backward_BatchNormalization(batch_norm_layer)
     output = backward_layer(input_tensor)
     """
-    layer_backward = BackwardBatchNormalization(layer=layer, use_bias=use_bias)
+    layer_backward = BackwardBatchNormalization(layer=layer)
 
     return layer_backward

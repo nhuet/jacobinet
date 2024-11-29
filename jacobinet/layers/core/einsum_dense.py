@@ -25,31 +25,22 @@ class BackwardEinsumDense(BackwardLinearLayer):
     def __init__(
         self,
         layer: EinsumDense,
-        use_bias: bool,
         **kwargs,
     ):
-        super().__init__(layer=layer, use_bias=use_bias, **kwargs)
+        super().__init__(layer=layer, **kwargs)
 
     def call_on_reshaped_gradient(
         self, gradient, input=None, training=None, mask=None
     ):
-        if self.use_bias:
-            input_dim_wo_batch = list(self.layer.input.shape[1:])
-            gradient = K.add(
-                gradient, -self.layer(K.zeros([1] + input_dim_wo_batch))
-            )
-            output = ops.einsum(
+
+        output = ops.einsum(
                 self.layer.equation, gradient, K.transpose(self.layer.kernel)
-            )
-        else:
-            output = ops.einsum(
-                self.layer.equation, gradient, K.transpose(self.layer.kernel)
-            )
+        )
 
         return output
 
 
-def get_backward_EinsumDense(layer: EinsumDense, use_bias=True) -> Layer:
+def get_backward_EinsumDense(layer: EinsumDense) -> Layer:
     """
     This function creates a `BackwardEinsumDense` layer based on a given `EinsumDense` layer. It provides
     a convenient way to obtain the ackward pass of the input `EinsumDense` layer, using the
@@ -57,8 +48,6 @@ def get_backward_EinsumDense(layer: EinsumDense, use_bias=True) -> Layer:
 
     ### Parameters:
     - `layer`: A Keras `EinsumDense` layer instance. The function uses this layer's configurations to set up the `BackwardEinsumDense` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardEinsumDense`, which acts as the reverse layer for the given `EinsumDense`.
@@ -69,7 +58,7 @@ def get_backward_EinsumDense(layer: EinsumDense, use_bias=True) -> Layer:
     from keras_custom.backward import get_backward_EinsumDense
 
     # Assume `dense_layer` is a pre-defined Dense layer
-    backward_layer = get_backward_EinsumDense(dense_layer, use_bias=True)
+    backward_layer = get_backward_EinsumDense(dense_layer)
     output = backward_layer(input_tensor)
     """
-    return BackwardEinsumDense(layer, use_bias)
+    return BackwardEinsumDense(layer)

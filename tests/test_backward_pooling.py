@@ -68,10 +68,9 @@ def _test_backward_AveragePooling2D(input_shape, pool_size, strides, padding):
             output_pooling.cpu().numpy(), output_conv.cpu().numpy(), decimal=5
         )
 
-    backward_layer = get_backward(layer, use_bias=False)
+    backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
-    backward_layer = get_backward(layer, use_bias=True)
     serialize(layer, backward_layer)
 
     # data_format == 'channels_last'
@@ -85,10 +84,9 @@ def _test_backward_AveragePooling2D(input_shape, pool_size, strides, padding):
     )
     model_layer = Sequential([layer])
     _ = model_layer(np.ones(input_shape)[None])
-    backward_layer = get_backward(layer, use_bias=False)
+    backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
-    backward_layer = get_backward(layer, use_bias=True)
     serialize(layer, backward_layer)
 
 
@@ -157,10 +155,9 @@ def _test_backward_AveragePooling1D(input_shape, pool_size, strides, padding):
             output_pooling.cpu().numpy(), output_conv.cpu().numpy(), decimal=5
         )
 
-    backward_layer = get_backward(layer, use_bias=False)
+    backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
-    backward_layer = get_backward(layer, use_bias=True)
     serialize(layer, backward_layer)
 
     # data_format == 'channels_last'
@@ -173,10 +170,9 @@ def _test_backward_AveragePooling1D(input_shape, pool_size, strides, padding):
     )
     model_layer = Sequential([layer])
     _ = model_layer(np.ones(input_shape)[None])
-    backward_layer = get_backward(layer, use_bias=False)
+    backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
-    backward_layer = get_backward(layer, use_bias=True)
     serialize(layer, backward_layer)
 
 
@@ -216,10 +212,9 @@ def _test_backward_AveragePooling3D(input_shape, pool_size, strides, padding):
     model_layer = Sequential([layer])
     _ = model_layer(np.ones(input_shape)[None])
 
-    backward_layer = get_backward(layer, use_bias=False)
+    backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
-    backward_layer = get_backward(layer, use_bias=True)
     serialize(layer, backward_layer)
 
     # data_format == 'channels_last'
@@ -232,10 +227,9 @@ def _test_backward_AveragePooling3D(input_shape, pool_size, strides, padding):
     )
     model_layer = Sequential([layer])
     _ = model_layer(np.ones(input_shape)[None])
-    backward_layer = get_backward(layer, use_bias=False)
+    backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
-    backward_layer = get_backward(layer, use_bias=True)
     serialize(layer, backward_layer)
 
 
@@ -281,10 +275,9 @@ def _test_backward_GlobalAveragePooling2D(input_shape, keepdims):
     model_layer = Sequential([layer])
     _ = model_layer(np.ones(input_shape)[None])
 
-    backward_layer = get_backward(layer, use_bias=False)
+    backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
-    backward_layer = get_backward(layer, use_bias=True)
     serialize(layer, backward_layer)
 
     # data_format == 'channels_last'
@@ -295,10 +288,9 @@ def _test_backward_GlobalAveragePooling2D(input_shape, keepdims):
     )
     model_layer = Sequential([layer])
     _ = model_layer(np.ones(input_shape)[None])
-    backward_layer = get_backward(layer, use_bias=False)
+    backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
-    backward_layer = get_backward(layer, use_bias=True)
     serialize(layer, backward_layer)
 
 
@@ -324,10 +316,9 @@ def _test_backward_GlobalAveragePooling1D(input_shape, keepdims):
     model_layer = Sequential([layer])
     _ = model_layer(np.ones(input_shape)[None])
 
-    backward_layer = get_backward(layer, use_bias=False)
+    backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
-    backward_layer = get_backward(layer, use_bias=True)
     serialize(layer, backward_layer)
 
     # data_format == 'channels_last'
@@ -338,10 +329,9 @@ def _test_backward_GlobalAveragePooling1D(input_shape, keepdims):
     )
     model_layer = Sequential([layer])
     _ = model_layer(np.ones(input_shape)[None])
-    backward_layer = get_backward(layer, use_bias=False)
+    backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
-    backward_layer = get_backward(layer, use_bias=True)
     serialize(layer, backward_layer)
 
 

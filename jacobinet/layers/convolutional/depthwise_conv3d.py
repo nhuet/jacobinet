@@ -26,10 +26,9 @@ class BackwardDepthwiseConv3D(BackwardLinearLayer):
     def __init__(
         self,
         layer: DepthwiseConv3D,
-        use_bias: bool = True,
         **kwargs,
     ):
-        super().__init__(layer=layer, use_bias=use_bias, **kwargs)
+        super().__init__(layer=layer, **kwargs)
 
         # input_dim_wo_batch = self.layer.input.shape[1:]
         input_dim_wo_batch = self.input_dim_wo_batch
@@ -134,22 +133,10 @@ class BackwardDepthwiseConv3D(BackwardLinearLayer):
     def call_on_reshaped_gradient(
         self, gradient, input=None, training=None, mask=None
     ):
-        # remove bias if needed
-        if self.layer.use_bias and self.use_bias:
-            if self.layer.data_format == "channels_first":
-                gradient = (
-                    gradient - self.layer.bias[None, :, None, None, None]
-                )  # (batch, d_m*c_in, d_out, w_out, h_out)
-            else:
-                gradient = (
-                    gradient - self.layer.bias[None, None, None, None, :]
-                )  # (batch, d_out, w_out, h_out, d_m*c_in)
-
         outputs = self.op_reshape(
             gradient
         )  # (batch, d_m, c_in, d_out, w_out, h_out) if data_format=channel_first
 
-        # if self.layer.use_bias and self.use_bias:
 
         split_outputs = K.split(
             outputs, self.c_in, axis=self.axis_c
@@ -169,7 +156,7 @@ class BackwardDepthwiseConv3D(BackwardLinearLayer):
 
 
 def get_backward_DepthwiseConv3D(
-    layer: DepthwiseConv3D, use_bias=True
+    layer: DepthwiseConv3D
 ) -> Layer:
     """
     This function creates a `BackwardDepthwiseConv3D` layer based on a given `DepthwiseConv3D` layer. It provides
@@ -179,8 +166,6 @@ def get_backward_DepthwiseConv3D(
     ### Parameters:
     - `layer`: A Keras `DepthwiseConv3D` layer instance. The function uses this layer's configurations (input and output shapes,
       depth multiplier, data format) to set up the `BackwardDepthwiseConv3D` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardDepthwiseConv3D`, which acts as the reverse layer for the given `DepthwiseConv3D`.
@@ -191,8 +176,8 @@ def get_backward_DepthwiseConv3D(
     from keras_custom.backward import get_backward_DepthwiseConv3D
 
     # Assume `depthwise_conv_layer` is a pre-defined DepthwiseConv3D layer
-    backward_layer = get_backward_DepthwiseConv3D(depthwise_conv_layer, use_bias=True)
+    backward_layer = get_backward_DepthwiseConv3D(depthwise_conv_layer)
     output = backward_layer(input_tensor)
     """
-    layer_backward = BackwardDepthwiseConv3D(layer, use_bias)
+    layer_backward = BackwardDepthwiseConv3D(layer)
     return layer_backward

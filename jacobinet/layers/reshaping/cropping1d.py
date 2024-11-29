@@ -36,7 +36,7 @@ class BackwardCropping1D(BackwardLinearLayer):
         self.layer_backward.built = True
 
 
-def get_backward_Cropping1D(layer: Cropping1D, use_bias=True) -> Layer:
+def get_backward_Cropping1D(layer: Cropping1D) -> Layer:
     """
     This function creates a `BackwardCropping1D` layer based on a given `Cropping1D` layer. It provides
     a convenient way to obtain a backward approximation of the input `Cropping1D` layer, using the
@@ -44,8 +44,6 @@ def get_backward_Cropping1D(layer: Cropping1D, use_bias=True) -> Layer:
 
     ### Parameters:
     - `layer`: A Keras `Cropping1D` layer instance. The function uses this layer's configurations to set up the `BackwardCropping1D` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardCropping1D`, which acts as the reverse layer for the given `Cropping1D`.
@@ -56,7 +54,7 @@ def get_backward_Cropping1D(layer: Cropping1D, use_bias=True) -> Layer:
     from keras_custom.backward import get_backward_Cropping1D
 
     # Assume `cropping_layer` is a pre-defined Cropping1D layer
-    backward_layer = get_backward_Cropping1D(cropping_layer, use_bias=True)
+    backward_layer = get_backward_Cropping1D(cropping_layer)
     output = backward_layer(input_tensor)
     """
 

@@ -24,10 +24,9 @@ class BackwardPReLU(BackwardNonLinearLayer):
     def __init__(
         self,
         layer: PReLU,
-        use_bias: bool = True,
         **kwargs,
     ):
-        super().__init__(layer=layer, use_bias=use_bias, **kwargs)
+        super().__init__(layer=layer, **kwargs)
 
     def call_on_reshaped_gradient(
         self, gradient, input=None, training=None, mask=None
@@ -40,7 +39,7 @@ class BackwardPReLU(BackwardNonLinearLayer):
         return output
 
 
-def get_backward_PReLU(layer: PReLU, use_bias=True) -> Layer:
+def get_backward_PReLU(layer: PReLU) -> Layer:
     """
     This function creates a `BackwardELU` layer based on a given `PReLU` layer. It provides
     a convenient way to obtain the backward pass of the input `PReLU` layer, using the
@@ -48,8 +47,6 @@ def get_backward_PReLU(layer: PReLU, use_bias=True) -> Layer:
 
     ### Parameters:
     - `layer`: A Keras `PReLU` layer instance. The function uses this layer's configurations to set up the `BackwardPReLU` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardPReLU`, which acts as the reverse layer for the given `PReLU`.
@@ -60,7 +57,7 @@ def get_backward_PReLU(layer: PReLU, use_bias=True) -> Layer:
     from keras_custom.backward import get_backward_PReLU
 
     # Assume `activation_layer` is a pre-defined PReLU layer
-    backward_layer = get_backward_PReLU(activation_layer, use_bias=True)
+    backward_layer = get_backward_PReLU(activation_layer)
     output = backward_layer(input_tensor)
     """
-    return BackwardPReLU(layer, use_bias)
+    return BackwardPReLU(layer)

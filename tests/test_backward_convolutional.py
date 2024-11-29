@@ -21,11 +21,9 @@ def _test_backward_Conv3D(input_shape, filters, kernel_size, strides, padding, u
     )
     model_layer = Sequential([layer])
     _ = model_layer(np.ones(input_shape)[None])
-    backward_layer = get_backward(layer, use_bias=False)
+    backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
-    # use_bias should have an impact
-    backward_layer = get_backward(layer, use_bias=True)
-    # serialize(layer, backward_layer)
+    serialize(layer, backward_layer)
 
     # data_format == 'channels_last'
     layer = Conv2D(
@@ -39,11 +37,10 @@ def _test_backward_Conv3D(input_shape, filters, kernel_size, strides, padding, u
     model_layer = Sequential([layer])
     input_shape = input_shape[::-1]
     _ = model_layer(np.ones(input_shape)[None])
-    backward_layer = get_backward(layer, use_bias=False)
+    backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
-    backward_layer = get_backward(layer, use_bias=True)
-    # serialize(layer, backward_layer)
+    serialize(layer, backward_layer)
 
 
 # pool_size, strides=None, padding="valid", data_format=None
@@ -60,11 +57,10 @@ def _test_backward_Conv2D(input_shape, filters, kernel_size, strides, padding, u
     )
     model_layer = Sequential([layer])
     _ = model_layer(np.ones(input_shape)[None])
-    backward_layer = get_backward(layer, use_bias=False)
+    backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
-    backward_layer = get_backward(layer, use_bias=True)
-    # serialize(layer, backward_layer)
+    serialize(layer, backward_layer)
 
     # data_format == 'channels_last'
     layer = Conv2D(
@@ -78,11 +74,10 @@ def _test_backward_Conv2D(input_shape, filters, kernel_size, strides, padding, u
     model_layer = Sequential([layer])
     input_shape = input_shape[::-1]
     _ = model_layer(np.ones(input_shape)[None])
-    backward_layer = get_backward(layer, use_bias=False)
+    backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
-    backward_layer = get_backward(layer, use_bias=True)
-    # serialize(layer, backward_layer)
+    serialize(layer, backward_layer)
 
 
 def _test_backward_Conv1D(input_shape, filters, kernel_size, strides, padding, use_bias):
@@ -98,11 +93,10 @@ def _test_backward_Conv1D(input_shape, filters, kernel_size, strides, padding, u
     )
     model_layer = Sequential([layer])
     _ = model_layer(np.ones(input_shape)[None])
-    backward_layer = get_backward(layer, use_bias=False)
+    backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
-    backward_layer = get_backward(layer, use_bias=True)
-    # serialize(layer, backward_layer)
+    serialize(layer, backward_layer)
 
     # data_format == 'channels_last'
     layer = Conv1D(
@@ -116,11 +110,10 @@ def _test_backward_Conv1D(input_shape, filters, kernel_size, strides, padding, u
     model_layer = Sequential([layer])
     input_shape = input_shape[::-1]
     _ = model_layer(np.ones(input_shape)[None])
-    backward_layer = get_backward(layer, use_bias=False)
+    backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
-    backward_layer = get_backward(layer, use_bias=True)
-    # serialize(layer, backward_layer)
+    serialize(layer, backward_layer)
 
 
 # pool_size, strides=None, padding="valid", data_format=None
@@ -137,10 +130,9 @@ def _test_backward_DepthwiseConv2D(input_shape, depth_multiplier, kernel_size, s
     )
     model_layer = Sequential([layer])
     _ = model_layer(np.ones(input_shape)[None])
-    backward_layer = get_backward(layer, use_bias=False)
+    backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
-    backward_layer = get_backward(layer, use_bias=True)
     serialize(layer, backward_layer)
 
     # data_format == 'channels_last'
@@ -155,10 +147,9 @@ def _test_backward_DepthwiseConv2D(input_shape, depth_multiplier, kernel_size, s
     model_layer = Sequential([layer])
     input_shape = input_shape[::-1]
     _ = model_layer(np.ones(input_shape)[None])
-    backward_layer = get_backward(layer, use_bias=False)
+    backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
-    backward_layer = get_backward(layer, use_bias=True)
     serialize(layer, backward_layer)
 
 
@@ -176,10 +167,9 @@ def _test_backward_DepthwiseConv1D(input_shape, depth_multiplier, kernel_size, s
     )
     model_layer = Sequential([layer])
     _ = model_layer(np.ones(input_shape)[None])
-    backward_layer = get_backward(layer, use_bias=False)
+    backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
-    backward_layer = get_backward(layer, use_bias=True)
     serialize(layer, backward_layer)
 
     # data_format == 'channels_last'
@@ -194,10 +184,9 @@ def _test_backward_DepthwiseConv1D(input_shape, depth_multiplier, kernel_size, s
     model_layer = Sequential([layer])
     input_shape = input_shape[::-1]
     _ = model_layer(np.ones(input_shape)[None])
-    backward_layer = get_backward(layer, use_bias=False)
+    backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
-    backward_layer = get_backward(layer, use_bias=True)
     serialize(layer, backward_layer)
 
 

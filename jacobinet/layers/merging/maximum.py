@@ -28,7 +28,7 @@ class BackwardMaximum(BackwardMergeNonLinearLayer):
         return [gradient*(K.sign(input_i - output_layer)+1)for input_i in input]
 
 
-def get_backward_Maximum(layer: Maximum, use_bias=True) -> Layer:
+def get_backward_Maximum(layer: Maximum) -> Layer:
     """
     This function creates a `BackwardMaximum` layer based on a given `Maximum` layer. It provides
     a convenient way to obtain the backward pass of the input `Maximum` layer, using the
@@ -36,8 +36,6 @@ def get_backward_Maximum(layer: Maximum, use_bias=True) -> Layer:
 
     ### Parameters:
     - `layer`: A Keras `Maximum` layer instance. The function uses this layer's configurations to set up the `BackwardMaximum` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardMaximum`, which acts as the reverse layer for the given `Maximum`.

@@ -150,8 +150,9 @@ default_mapping_keras2backward_layer: dict[type[Layer], type[callable]] = {
 """Default mapping between keras layers and get_backward callable"""
 
 
-def get_backward(layer: Layer, use_bias: bool = True, mapping_keras2backward_classes: Optional[dict[type[Layer], type[BackwardLayer]]] = None):
+def get_backward(layer: Layer, mapping_keras2backward_classes: Optional[dict[type[Layer], type[BackwardLayer]]] = None):
     keras_class = type(layer)
+    """
     if isinstance(layer, BackwardLinearLayer):
         if use_bias:
             return layer.layer
@@ -165,6 +166,9 @@ def get_backward(layer: Layer, use_bias: bool = True, mapping_keras2backward_cla
             layer_.weights = layer.layer.weights[:1]
             layer_.built = True
             return layer_
+    """
 
+    if mapping_keras2backward_classes is not None:
+        raise NotImplementedError()
     get_backward_layer = default_mapping_keras2backward_layer.get(keras_class)
-    return get_backward_layer(layer, use_bias)
+    return get_backward_layer(layer)

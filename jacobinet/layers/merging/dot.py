@@ -45,7 +45,7 @@ class BackwardDot(BackwardMergeNonLinearLayer):
         return output
 
 
-def get_backward_Dot(layer: Dot, use_bias=True) -> Layer:
+def get_backward_Dot(layer: Dot) -> Layer:
     """
     This function creates a `BackwardDot` layer based on a given `Dot` layer. It provides
     a convenient way to obtain the backward pass of the input `Dot` layer, using the
@@ -53,8 +53,6 @@ def get_backward_Dot(layer: Dot, use_bias=True) -> Layer:
 
     ### Parameters:
     - `layer`: A Keras `Dot` layer instance. The function uses this layer's configurations to set up the `BackwardDot` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardDot`, which acts as the reverse layer for the given `Dot`.

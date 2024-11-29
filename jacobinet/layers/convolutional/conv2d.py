@@ -24,10 +24,9 @@ class BackwardConv2D(BackwardLinearLayer):
     def __init__(
         self,
         layer: Conv2D,
-        use_bias: bool = True,
         **kwargs,
     ):
-        super().__init__(layer=layer, use_bias=use_bias, **kwargs)
+        super().__init__(layer=layer, **kwargs)
         dico_conv = layer.get_config()
         dico_conv.pop("groups")
         # input_shape = list(layer.input.shape[1:])
@@ -40,13 +39,11 @@ class BackwardConv2D(BackwardLinearLayer):
         else:
             dico_conv["filters"] = input_shape[-1]
 
-        dico_conv["use_bias"] = use_bias
+        dico_conv["use_bias"] = False
         dico_conv["padding"] = "valid"
 
         layer_backward = Conv2DTranspose.from_config(dico_conv)
         layer_backward.kernel = layer.kernel
-        if use_bias:
-            layer_backward.bias = layer.bias
 
         layer_backward.built = True
 
@@ -72,7 +69,7 @@ class BackwardConv2D(BackwardLinearLayer):
         self.layer_backward = layer_backward
 
 
-def get_backward_Conv2D(layer: Conv2D, use_bias=True) -> Layer:
+def get_backward_Conv2D(layer: Conv2D) -> Layer:
     """
     This function creates a `BackwardConv2D` layer based on a given `Conv2D` layer. It provides
     a convenient way to obtain the backward pass of the input `Conv2D` layer, using the
@@ -80,8 +77,6 @@ def get_backward_Conv2D(layer: Conv2D, use_bias=True) -> Layer:
 
     ### Parameters:
     - `layer`: A Keras `Conv2D` layer instance. The function uses this layer's configurations to set up the `BackwardConv2D` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardConv2D`, which acts as the reverse layer for the given `Conv2D`.
@@ -92,7 +87,7 @@ def get_backward_Conv2D(layer: Conv2D, use_bias=True) -> Layer:
     from keras_custom.backward import get_backward_Conv2D
 
     # Assume `conv_layer` is a pre-defined Conv2D layer
-    backward_layer = get_backward_Conv2D(conv_layer, use_bias=True)
+    backward_layer = get_backward_Conv2D(conv_layer)
     output = backward_layer(input_tensor)
     """
-    return BackwardConv2D(layer, use_bias)
+    return BackwardConv2D(layer)

@@ -45,7 +45,7 @@ class BackwardMultiply(BackwardMergeNonLinearLayer):
     """
 
 
-def get_backward_Multiply(layer: Multiply, use_bias=True) -> Layer:
+def get_backward_Multiply(layer: Multiply) -> Layer:
     """
     This function creates a `BackwardMultiply` layer based on a given `Multiply` layer. It provides
     a convenient way to obtain the backward pass of the input `Multiply` layer, using the
@@ -53,8 +53,6 @@ def get_backward_Multiply(layer: Multiply, use_bias=True) -> Layer:
 
     ### Parameters:
     - `layer`: A Keras `Multiply` layer instance. The function uses this layer's configurations to set up the `BackwardMultiply` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardMultiply`, which acts as the reverse layer for the given `Multiply`.

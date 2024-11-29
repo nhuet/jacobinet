@@ -26,7 +26,7 @@ class BackwardAverage(BackwardMergeLinearLayer):
         return [coeff * gradient] * self.n_input
 
 
-def get_backward_Average(layer: Average, use_bias=True) -> Layer:
+def get_backward_Average(layer: Average) -> Layer:
     """
     This function creates a `BackwardAverage` layer based on a given `Average` layer. It provides
     a convenient way to obtain the backward pass of the input `Average` layer, using the
@@ -34,8 +34,6 @@ def get_backward_Average(layer: Average, use_bias=True) -> Layer:
 
     ### Parameters:
     - `layer`: A Keras `Average` layer instance. The function uses this layer's configurations to set up the `BackwardAverage` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardAverage`, which acts as the reverse layer for the given `Average`.

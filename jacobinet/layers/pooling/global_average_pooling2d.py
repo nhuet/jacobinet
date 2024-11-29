@@ -58,7 +58,7 @@ class BackwardGlobalAveragePooling2D(BackwardLinearLayer):
 
 
 def get_backward_GlobalAveragePooling2D(
-    layer: GlobalAveragePooling2D, use_bias=True
+    layer: GlobalAveragePooling2D
 ) -> Layer:
     """
     This function creates a `BackwardGlobalAveragePooling2D` layer based on a given `GlobalAveragePooling2D` layer. It provides
@@ -67,8 +67,6 @@ def get_backward_GlobalAveragePooling2D(
 
     ### Parameters:
     - `layer`: A Keras `GlobalAveragePooling2D` layer instance. The function uses this layer's configurations to set up the `BackwardGlobalAveragePooling2D` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardGlobalAveragePooling2D`, which acts as the reverse layer for the given `GlobalAveragePooling2D`.
@@ -79,7 +77,7 @@ def get_backward_GlobalAveragePooling2D(
     from keras_custom.backward import get_backward_GlobalAveragePooling2D
 
     # Assume `average_layer` is a pre-defined GlobalAveragePooling2D layer
-    backward_layer = get_backward_GlobalAveragePooling2D(average_layer, use_bias=True)
+    backward_layer = get_backward_GlobalAveragePooling2D(average_layer)
     output = backward_layer(input_tensor)
     """
 

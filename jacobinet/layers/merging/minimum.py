@@ -27,7 +27,7 @@ class BackwardMinimum(BackwardMergeNonLinearLayer):
         return [gradient*(K.sign(output_layer-input_i) + 1) for input_i in input]
 
 
-def get_backward_Minimum(layer: Minimum, use_bias=True) -> Layer:
+def get_backward_Minimum(layer: Minimum) -> Layer:
     """
     This function creates a `BackwardMinimum` layer based on a given `Minimum` layer. It provides
     a convenient way to obtain the backward pass of the input `Minimum` layer, using the
@@ -35,8 +35,6 @@ def get_backward_Minimum(layer: Minimum, use_bias=True) -> Layer:
 
     ### Parameters:
     - `layer`: A Keras `Minimum` layer instance. The function uses this layer's configurations to set up the `BackwardMinimum` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardMinimum`, which acts as the reverse layer for the given `Minimum`.

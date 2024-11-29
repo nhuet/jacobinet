@@ -34,7 +34,7 @@ class BackwardRepeatVector(BackwardLinearLayer):
 
 
 def get_backward_RepeatVector(
-    layer: BackwardRepeatVector, use_bias=True
+    layer: BackwardRepeatVector
 ) -> Layer:
     """
     This function creates a `BackwardRepeatVector` layer based on a given `RepeatVector` layer. It provides
@@ -43,8 +43,6 @@ def get_backward_RepeatVector(
 
     ### Parameters:
     - `layer`: A Keras `RepeatVector` layer instance. The function uses this layer's configurations to set up the `BackwardRepeatVector` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardRepeatVector`, which acts as the reverse layer for the given `RepeatVector`.
@@ -55,7 +53,7 @@ def get_backward_RepeatVector(
     from keras_custom.backward import get_backward_RepeatVector
 
     # Assume `repeat_layer` is a pre-defined RepeatVector layer
-    backward_layer = get_backward_RepeatVector(repeat_layer, use_bias=True)
+    backward_layer = get_backward_RepeatVector(repeat_layer)
     output = backward_layer(input_tensor)
     """
 

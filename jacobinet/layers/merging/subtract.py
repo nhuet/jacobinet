@@ -38,7 +38,7 @@ class BackwardSubtract(BackwardMergeLinearLayer):
     """
 
 
-def get_backward_Subtract(layer: Subtract, use_bias=True) -> Layer:
+def get_backward_Subtract(layer: Subtract) -> Layer:
     """
     This function creates a `BackwardSubtract` layer based on a given `Subtract` layer. It provides
     a convenient way to obtain the backward pass of the input `Subtract` layer, using the
@@ -46,8 +46,6 @@ def get_backward_Subtract(layer: Subtract, use_bias=True) -> Layer:
 
     ### Parameters:
     - `layer`: A Keras `Subtract` layer instance. The function uses this layer's configurations to set up the `BackwardSubtract` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardSubtract`, which acts as the reverse layer for the given `Subtract`.

@@ -25,7 +25,7 @@ class BackwardAdd(BackwardMergeLinearLayer):
         return [gradient] * self.n_input
 
 
-def get_backward_Add(layer: Add, use_bias=True) -> Layer:
+def get_backward_Add(layer: Add) -> Layer:
     """
     This function creates a `BackwardAdd` layer based on a given `Add` layer. It provides
     a convenient way to obtain the backward pass of the input `Add` layer, using the
@@ -33,8 +33,6 @@ def get_backward_Add(layer: Add, use_bias=True) -> Layer:
 
     ### Parameters:
     - `layer`: A Keras `Add` layer instance. The function uses this layer's configurations to set up the `BackwardAdd` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardAdd`, which acts as the reverse layer for the given `Add`.

@@ -24,10 +24,9 @@ class BackwardActivation(BackwardNonLinearLayer):
     def __init__(
         self,
         layer: Activation,
-        use_bias: bool = True,
         **kwargs,
     ):
-        super().__init__(layer=layer, use_bias=use_bias, **kwargs)
+        super().__init__(layer=layer, **kwargs)
         activation_name = layer.get_config()["activation"]
         self.layer_backward = deserialize(activation_name)
 
@@ -39,7 +38,7 @@ class BackwardActivation(BackwardNonLinearLayer):
         return output
 
 
-def get_backward_Activation(layer: Activation, use_bias=True) -> Layer:
+def get_backward_Activation(layer: Activation) -> Layer:
     """
     This function creates a `BackwardActivation` layer based on a given `Activation` layer. It provides
     a convenient way to obtain the backward pass of the input `Activation` layer, using the
@@ -47,8 +46,6 @@ def get_backward_Activation(layer: Activation, use_bias=True) -> Layer:
 
     ### Parameters:
     - `layer`: A Keras `Activation` layer instance. The function uses this layer's configurations to set up the `BackwardActivation` layer.
-    - `use_bias`: Boolean, optional (default=True). Specifies whether the bias should be included in the
-      backward layer.
 
     ### Returns:
     - `layer_backward`: An instance of `BackwardActivation`, which acts as the reverse layer for the given `Activation`.
@@ -59,7 +56,7 @@ def get_backward_Activation(layer: Activation, use_bias=True) -> Layer:
     from keras_custom.backward import get_backward_Activation
 
     # Assume `activation_layer` is a pre-defined Activation layer
-    backward_layer = get_backward_Activation(activation_layer, use_bias=True)
+    backward_layer = get_backward_Activation(activation_layer)
     output = backward_layer(input_tensor)
     """
-    return BackwardActivation(layer, use_bias)
+    return BackwardActivation(layer)
