@@ -1,5 +1,6 @@
 from keras.layers import Input, Layer
-from keras.models import Sequential, Model
+from keras.models import Sequential
+from .base_model import BackwardModel
 
 from jacobinet import get_backward_layer
 from jacobinet.layers.layer import (
@@ -12,7 +13,7 @@ from typing import Union, Optional, Tuple, Any, List
 
 
 def get_backward_sequential(
-    model: Model,
+    model: Sequential,
     gradient: Union[None, Tensor, List[Tensor]] = None,
     use_gradient_as_backward_input: bool = False,
     mapping_keras2backward_classes: Optional[
@@ -82,4 +83,4 @@ def get_backward_sequential(
                 else:
                     gradient = backward_layer([gradient, input_forward])
 
-        return Model([input_tensor, backward_input_tensor], gradient)
+        return BackwardModel([input_tensor, backward_input_tensor], gradient)

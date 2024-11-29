@@ -2,6 +2,7 @@ import keras
 from keras.layers import Layer, Input, InputLayer
 from keras.models import Model, Sequential
 from .node import get_backward_node
+from .base_model import BackwardModel
 from jacobinet.layers.layer import BackwardLayer
 from keras import KerasTensor as Tensor
 from typing import Union, Optional, Tuple, Any, List
@@ -120,4 +121,4 @@ def get_backward_model(
     if len(outputs) == 1:
         outputs = outputs[0]
 
-    return Model(inputs, outputs)
+    return BackwardModel(inputs, outputs)

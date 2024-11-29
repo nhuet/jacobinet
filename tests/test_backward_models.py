@@ -11,7 +11,7 @@ from keras.layers import (
 from keras.models import Sequential, Model
 from jacobinet.models.sequential import get_backward_sequential
 from jacobinet.models.model import get_backward_model
-from .conftest import compute_backward_model, serialize_model
+from .conftest import compute_backward_model, serialize_model, compute_output
 import numpy as np
 import torch
 
@@ -142,7 +142,7 @@ def test_model_multiD_channel_last():
 
 
 
-#### multi output neural network #####
+### multi output neural network #####
 def test_model_multiD_multi_output():
 
     input_dim = 36
@@ -164,7 +164,7 @@ def test_model_multiD_multi_output():
     for i in range(10):
         compute_backward_model((input_dim,), model, backward_model, i)
     
-    serialize_model([input_dim, 10], backward_model)
+    serialize_model([input_dim, 10], backward_model)#
 
 ###### encode gradient as a KerasVariable #####
 def test_model_multiD_with_gradient_set():
@@ -186,7 +186,6 @@ def test_model_multiD_with_gradient_set():
     _ = backward_model(torch.ones((1, input_dim)))
     compute_backward_model((input_dim,), model, backward_model)
     serialize_model([input_dim], backward_model)
-
 
 
 # extra inputs
@@ -230,7 +229,35 @@ def test_model_multiD_extra_input():
 
     serialize_model([input_dim, 10], backward_model)
 
+# multiple outputs
+### multi output neural network #####
+def test_model_multiD_multi_outputs():
+
+    input_dim = 36
+    layers_0 = [Reshape((1, 6, 6)), Conv2D(2, (3, 3)), ReLU(), Reshape((-1,)), Dense(10)]
+    layers_1 = [Reshape((1, 6, 6)), Conv2D(2, (3, 3)), ReLU(), Reshape((-1,)), Dense(20)]
+    input_ = Input((input_dim,))
+    output=None
+    output_0 = compute_output(input_, layers_0)
+    output_1 = compute_output(input_, layers_1)
+
+    model = Model(input_, [output_0, output_1])
+    _ = model(torch.ones((1, input_dim)))
+    backward_model = get_backward_model(model, gradient=[Input((10,)), Input((20,))])
+    # model is not linear
+    _ = backward_model([torch.ones((1, input_dim)), torch.ones((1,10)),  torch.ones((1,20))])
+
+    # freeze one model and computer backward on the other branch
+    """
+
+    mask_output = torch.eye(10)
+    for i in range(10):
+        compute_backward_model((input_dim,), model, backward_model, i)
+    """
+    serialize_model([input_dim, 10], backward_model)
+
 
 # nested models that are sequential or models ...
+
 
 # custom layers
