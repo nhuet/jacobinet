@@ -57,7 +57,7 @@ class BackwardMaxPooling2D(BackwardNonLinearLayer):
 
         self.backward_reshape_op = BackwardReshape(layer=self.reshape_op)
         self.backward_conv2d = BackwardDepthwiseConv2D(
-            layer=self.conv_op, use_bias=False
+            layer=self.conv_op
         )
 
     def call_on_reshaped_gradient(

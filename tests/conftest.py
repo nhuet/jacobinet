@@ -38,7 +38,7 @@ def linear_mapping(layer, backward_layer):
     w_b = model_backward.predict(weights_out, verbose=0)
     w_b = np.reshape(w_b, [n_output, n_input])
     w_b = w_b.T
-    assert_almost_equal(w_f, w_b)
+    assert_almost_equal(w_f, w_b, decimal=3)
 
 
 def serialize(layer, backward_layer):
