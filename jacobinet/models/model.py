@@ -121,4 +121,4 @@ def get_backward_model(
     if len(outputs) == 1:
         outputs = outputs[0]
 
-    return Model(inputs, outputs)
+    return BackwardModel(inputs, outputs)
