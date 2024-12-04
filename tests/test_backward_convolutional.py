@@ -26,7 +26,7 @@ def _test_backward_Conv3D(input_shape, filters, kernel_size, strides, padding, u
     serialize(layer, backward_layer)
 
     # data_format == 'channels_last'
-    layer = Conv2D(
+    layer = Conv3D(
         filters=filters,
         kernel_size=kernel_size,
         strides=strides,
