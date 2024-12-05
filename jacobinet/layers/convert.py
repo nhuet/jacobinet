@@ -168,7 +168,11 @@ def get_backward(layer: Layer, mapping_keras2backward_classes: Optional[dict[typ
             return layer_
     """
 
+
     if mapping_keras2backward_classes is not None:
-        raise NotImplementedError()
+        default_mapping_keras2backward_layer.update(mapping_keras2backward_classes)
+
     get_backward_layer = default_mapping_keras2backward_layer.get(keras_class)
+    if get_backward_layer is None:
+        raise ValueError('The backward mapping from the current class is not native and not available in mapping_keras2backward_layer, {} not found'.format(keras_class))
     return get_backward_layer(layer)

@@ -4,51 +4,11 @@ from keras.models import Model, Sequential
 from .node import get_backward_node
 from .base_model import BackwardModel
 from jacobinet.layers.layer import BackwardLayer
+from .utils import get_gradient
+
 from keras import KerasTensor as Tensor
 from typing import Union, Optional, Tuple, Any, List
 
-
-class GradConstant(Layer):
-
-    def __init__(self, gradient, **kwargs):
-        """
-        to fill
-        """
-        super(GradConstant, self).__init__(**kwargs)
-        self.grad_const = keras.ops.convert_to_tensor(gradient)
-
-    def call(self, inputs_):
-        return self.grad_const
-
-    def get_config(self):
-        config = super().get_config()
-        config.update(
-            {
-                "grad_const": keras.saving.serialize_keras_object(
-                    self.grad_const
-                ),
-            }
-        )
-        return config
-
-    def compute_output_shape(self, input_shape):
-
-        return list(self.grad_const.shape)
-
-    @classmethod
-    def from_config(cls, config):
-        sublayer_config = config.pop("grad_const")
-        sublayer = keras.saving.deserialize_keras_object(sublayer_config)
-        return cls(sublayer, **config)
-
-
-def get_gradient(grad: Tensor, input) -> Tuple[Any, bool]:
-    # if grad is an InputLayer return grad
-    if isinstance(grad, InputLayer) or isinstance(grad, keras.KerasTensor):
-        return grad  # grad is a KerasTensor that come from input or extra_inputs or is an Input Tensor
-    # else return it as a Constant of a layer
-    constant = GradConstant(gradient=grad)(input)
-    return constant
 
 
 def get_backward_model(
