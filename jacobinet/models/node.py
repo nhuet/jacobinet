@@ -40,7 +40,8 @@ def get_backward_node(
 
     # step 3.1 if layer is an InputLayer stop the algorithm
     if isinstance(layer_node, InputLayer):
-        return gradient, True
+        # check we reach the right input
+        return gradient, True, True
 
     # step 4: get backward layer
     backward_layer_node: BackwardLayer = get_backward(
@@ -58,8 +59,10 @@ def get_backward_node(
         gradients = backward_layer_node([gradient] + layer_node_inputs)
         is_linear = False
 
+    """
     if len(parent_nodes) == 0:
-        return gradients
+        return gradients, is_linear, True
+    """
 
     if backward_layer_node.n_input != 1:
         results = [
@@ -80,4 +83,4 @@ def get_backward_node(
         if is_linear:
             is_linear = min(is_linear, result[1])
 
-    return output, is_linear
+    return output, is_linear, True

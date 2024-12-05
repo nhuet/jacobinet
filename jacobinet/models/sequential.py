@@ -57,11 +57,25 @@ def get_backward_sequential(
         ]
     )
     if is_linear:
-        raise NotImplementedError()
-        backward_model = Sequential(layers=layers_backward[::-1])
-        # init shape
-        backward_model(model.outputs)
-        return backward_model
+        if gradient is None:
+            backward_model = Sequential(layers=layers_backward[::-1])
+            # init shape
+            backward_model(model.outputs)
+            return backward_model
+        elif grad_input or len(extra_inputs):
+            output = None
+            for layer in layers_backward[::-1]:
+                if output is None:
+                    output = layer(gradient)
+                else:
+                    output = layer(gradient)
+            if grad_input:
+                return Model(gradient, output)
+            else:
+                return Model(extra_inputs, output)
+        else:
+            raise NotImplementedError()
+
     else:
         input_tensor = Input(input_dim_wo_batch)
 
@@ -101,6 +115,6 @@ def get_backward_sequential(
 
         inputs = [input_tensor]+extra_inputs
         if grad_input:
-            inputs = [gradient]+inputs
+            inputs.append(gradient)
 
         return BackwardModel(inputs, output_backward)

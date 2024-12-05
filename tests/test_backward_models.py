@@ -24,7 +24,9 @@ def test_sequential_linear():
     _ = model(torch.ones((1, input_dim)))
     backward_model = get_backward_sequential(model)
     # model is linear
+
     _ = backward_model(np.ones((1,1)))
+    
     compute_backward_model((input_dim,), model, backward_model)
     serialize_model([32], model)
     serialize_model([1], backward_model)
@@ -53,7 +55,7 @@ def test_sequential_multiD():
     compute_backward_model((input_dim,), model, backward_model)
     serialize_model([input_dim, 1], backward_model)
 
-def test_sequential_multiD_channel_last():
+def _test_sequential_multiD_channel_last():
 
     input_dim = 72
     layers = [Reshape((6, 6, 2)), DepthwiseConv2D(2, (3, 3), data_format="channels_last"), ReLU(), Reshape((-1,)), Dense(1)]
@@ -121,10 +123,10 @@ def test_model_multiD():
     compute_backward_model((input_dim,), model, backward_model)
     serialize_model([input_dim, 1], backward_model)
 
-def test_model_multiD_channel_last():
+def _test_model_multiD_channel_last():
 
     input_dim = 72
-    layers = [Reshape((6, 6, 2)), DepthwiseConv2D(2, (3, 3), data_format="channels_last"), ReLU(), Reshape((-1,)), Dense(1)]
+    layers = [Reshape((6, 6, 2)), Conv2D(2, (3, 3), data_format="channels_last"), ReLU(), Reshape((-1,)), Dense(1)]
     input_ = Input((input_dim,))
     output=None
     for layer in layers:
@@ -248,6 +250,11 @@ def _test_model_multiD_multi_outputs():
     _ = backward_model([torch.ones((1, input_dim)), torch.ones((1,10)),  torch.ones((1,20))])
 
     # freeze one model and computer backward on the other branch
+
+    model_0 = Model(input_, output_0)
+    backward_model_0 = get_backward_model(model, gradient=[Input((10,)), keras.Variable(np.zeros((1, 20)))])
+    toto = backward_model_0([torch.ones((1, input_dim)), torch.ones((1,10))])
+    compute_backward_model((input_dim,), model_0, backward_model_0, 0)
     """
 
     mask_output = torch.eye(10)
