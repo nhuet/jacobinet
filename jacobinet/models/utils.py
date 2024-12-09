@@ -92,3 +92,16 @@ def get_gradient(grad: Tensor, input) -> Tuple[Any, bool]:
     # else return it as a Constant of a layer
     constant = GradConstant(gradient=grad)(input)
     return constant
+
+class FuseGradients(Layer):
+
+    def call(self, inputs, training=None, mask=None):
+        # expand
+        output = [K.expand_dims(input_, -1) for input_ in inputs]
+        # concat
+        output = K.concatenate(output, axis=-1)
+        # sum
+        return K.sum(output, axis=-1)
+
+    def compute_output_shape(self, input_shape):
+        return input_shape[0]

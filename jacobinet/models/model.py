@@ -4,7 +4,7 @@ from keras.models import Model, Sequential
 from .node import get_backward_node
 from .base_model import BackwardModel
 from jacobinet.layers.layer import BackwardLayer
-from .utils import get_gradient
+from .utils import get_gradient, FuseGradients
 import numpy as np
 
 from keras import KerasTensor as Tensor
@@ -19,15 +19,17 @@ def get_backward_model(
         dict[type[Layer], type[BackwardLayer]]
     ] = None,
     extra_inputs: Union[List[Input]] = [],
+    input_mask=None,
 ):
     # find output_nodes
-    grad_input=[]
-
+    grad_input=[] # list of boolean to check whether the gradient should be used as an input of the backward model
     if gradient is not None:
         if not isinstance(gradient, List):
             gradient = [gradient]
 
         for grad in gradient:
+            if grad is None:
+                raise ValueError('None values among not None values of gradient is not considered. Mismatch between gradient and output nodes: The gradient must be specified for every output node, or not specified at all.')
             if hasattr(grad, '_keras_history'):
                 grad_input_i = isinstance(grad._keras_history.operation, InputLayer)
             else:
@@ -35,12 +37,18 @@ def get_backward_model(
 
             grad_input.append(grad_input_i)
 
+    # convert model inputs and outputs as list
     model_outputs = model.output
     model_inputs = model.input
     if not isinstance(model_outputs, list):
         model_outputs = [model_outputs]
     if not isinstance(model_inputs, list):
         model_inputs = [model_inputs]
+
+    if input_mask is None:
+        # keep every input
+        #input_mask=[input_.name for input_ in model_inputs]
+        input_mask=[]
 
     """
     output_names = [o.name for o in model_outputs]
@@ -59,9 +67,8 @@ def get_backward_model(
         node = [node for node in nodes if node.operation.output.name == model_output.name][0]
         output_nodes.append(node)  
 
-    # if multiple output, merge the backward given the different inputs
     
-    # if gradient is None: create inputs for backward mask ...
+    # if gradient is None: create inputs for backward mask
     if gradient is None:
         gradient = [
             Input(list(output_i.shape[1:])) for output_i in model_outputs
@@ -78,23 +85,51 @@ def get_backward_model(
     gradient = [get_gradient(grad, model_inputs) for grad in gradient]
 
     outputs = []
+    outputs_dict={}
     is_linear = True
 
-    dico_input={}
-    for grad, output_node in zip(gradient, output_nodes):
+    for input_ in model_inputs:
+        if not input_.name in input_mask:
 
-        output_node, is_linear_node, keep_branch = get_backward_node(
-            output_node, grad, mapping_keras2backward_classes
-        )
-        outputs.append(output_node)
-        is_linear = min(is_linear, is_linear_node)
+            outputs_i=[]
+            is_linear_i = True
+
+            for grad, output_node in zip(gradient, output_nodes):
+                output_node, is_linear_node, keep_branch = get_backward_node(
+                    output_node, grad, mapping_keras2backward_classes, input_name=input_.name
+                )
+                if keep_branch:
+                    outputs_i.append(output_node)
+                    is_linear_i = min(is_linear_i, is_linear_node)
+            
+
+            if not len(outputs_i):
+                continue
+            else:
+                outputs+=outputs_i
+                is_linear = min(is_linear, is_linear_i)
+            """
+            if len(outputs_i)==1:
+                outputs+=outputs_i
+                outputs_dict[input_.name]=outputs_i[0]
+                is_linear = min(is_linear, is_linear_i)
+            else:
+                # chain rule along multiple inputs: expand, concat and sum
+                fuse_layer = FuseGradients()
+                output_i = fuse_layer(outputs_i)
+                outputs.append(output_i)
+                outputs_dict[input_.name]=output_i
+            """
+
+
+            
 
     inputs = []
     # check if the model is linear
     if not is_linear:
-        inputs = [inp for inp in model_inputs]
+        inputs = [inp for inp in model_inputs] # due to masking some inputs may be not required to produce the input (aka linear branches of the model). Up to now we have no way to track it
     inputs += extra_inputs
-        
+
     inputs += [gradient[i] for i in range(len(model_outputs)) if grad_input[i]]
 
     if len(inputs) == 1:
@@ -102,4 +137,5 @@ def get_backward_model(
     if len(outputs) == 1:
         outputs = outputs[0]
 
+    # or dictionary
     return BackwardModel(inputs, outputs)
