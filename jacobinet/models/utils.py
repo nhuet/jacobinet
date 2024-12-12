@@ -1,6 +1,6 @@
 import keras
 from keras.layers import Layer, Input
-from keras.models import Model
+from keras.models import Model, Sequential
 from jacobinet.layers.layer import (
     BackwardLayer,
     BackwardLinearLayer,
@@ -14,14 +14,10 @@ from typing import Union, Optional, Tuple, Any, List, Callable
 
 
 def is_linear(model_backward: keras.models.Model) -> bool:
-    return min(
-        [
-            isinstance(layer, BackwardLinearLayer)
-            for layer in model_backward.layers
-            if isinstance(layer, BackwardLayer)
-        ]
-    )
+    return hasattr(model_backward, 'is_linear') and model_backward.is_linear
 
+def is_linear_layer(layer):
+    return isinstance(layer, BackwardLinearLayer) or (hasattr(layer, 'is_linear') and layer.is_linear)
 
 def get_backward(
     layer: Union[Layer, Model],

@@ -12,7 +12,7 @@ from typing import Union, Optional, Tuple, Any, List
 
 
 
-def get_backward_model(
+def get_backward_functional(
     model: Model,
     gradient: Union[None, Tensor, List[Tensor]] = None,
     mapping_keras2backward_classes: Optional[

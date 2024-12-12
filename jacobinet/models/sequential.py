@@ -1,6 +1,6 @@
 from keras.layers import Input, Layer, InputLayer
 from keras.models import Sequential, Model
-from .base_model import BackwardModel
+from .base_model import BackwardModel, BackwardSequential
 
 from jacobinet import get_backward_layer
 from jacobinet.layers.layer import (
@@ -8,7 +8,8 @@ from jacobinet.layers.layer import (
     BackwardLinearLayer,
     BackwardNonLinearLayer,
 )
-from .utils import get_gradient
+from jacobinet.models.model import get_backward_functional
+from .utils import get_gradient, is_linear_layer
 from keras import KerasTensor as Tensor
 from typing import Union, Optional, Tuple, Any, List
 
@@ -16,7 +17,6 @@ from typing import Union, Optional, Tuple, Any, List
 def get_backward_sequential(
     model: Sequential,
     gradient: Union[None, Tensor, List[Tensor]] = None,
-    use_gradient_as_backward_input: bool = False,
     mapping_keras2backward_classes: Optional[
         dict[type[Layer], type[BackwardLayer]]
     ] = None,
@@ -40,10 +40,19 @@ def get_backward_sequential(
         else:
             grad_input = False
 
-
+    def get_backward_priv(layer, mapping_keras2backward_classes):
+        if isinstance(layer, Sequential):
+            return get_backward_sequential(model= layer,mapping_keras2backward_classes = mapping_keras2backward_classes)
+        elif isinstance(layer, Model):
+            return get_backward_functional(model= layer,mapping_keras2backward_classes = mapping_keras2backward_classes)
+        elif isinstance(layer, Layer):
+            return get_backward_layer(layer, mapping_keras2backward_classes)
+        else: 
+            raise ValueError('unsupported object layer={}'.format(layer))
+                
     # convert every layers
     layers_backward = [
-        get_backward_layer(
+        get_backward_priv(
             layer,
             mapping_keras2backward_classes=mapping_keras2backward_classes,
         )
@@ -52,13 +61,13 @@ def get_backward_sequential(
     # check if the layers are all linear
     is_linear = min(
         [
-            isinstance(layer_backward, BackwardLinearLayer)
+            is_linear_layer(layer_backward)
             for layer_backward in layers_backward
         ]
     )
     if is_linear:
         if gradient is None:
-            backward_model = Sequential(layers=layers_backward[::-1])
+            backward_model = BackwardSequential(layers=layers_backward[::-1])
             # init shape
             backward_model(model.outputs)
             return backward_model
@@ -70,9 +79,9 @@ def get_backward_sequential(
                 else:
                     output = layer(gradient)
             if grad_input:
-                return Model(gradient, output)
+                return BackwardModel(gradient, output)
             else:
-                return Model(extra_inputs, output)
+                return BackwardModel(extra_inputs, output)
         else:
             raise NotImplementedError()
 
@@ -92,9 +101,13 @@ def get_backward_sequential(
             if output is None:
                 if isinstance(backward_layer, BackwardNonLinearLayer):
                     dico_input_layer[id(backward_layer)] = input_tensor
+                elif isinstance(backward_layer, BackwardModel) and not backward_layer.is_linear: 
+                    dico_input_layer[id(backward_layer)] = input_tensor
                 output = layer(input_tensor)
             else:
                 if isinstance(backward_layer, BackwardNonLinearLayer):
+                    dico_input_layer[id(backward_layer)] = output
+                elif isinstance(backward_layer, BackwardModel) and not backward_layer.is_linear: 
                     dico_input_layer[id(backward_layer)] = output
                 output = layer(output)
 
@@ -106,6 +119,9 @@ def get_backward_sequential(
             else:
                 input_backward = [output_backward]
             if isinstance(backward_layer, BackwardLinearLayer):
+                # no need for forward input
+                output_backward = backward_layer(input_backward[0])
+            elif (isinstance(backward_layer, BackwardModel) or isinstance(backward_layer, BackwardSequential)) and backward_layer.is_linear:
                 # no need for forward input
                 output_backward = backward_layer(input_backward[0])
             else:

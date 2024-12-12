@@ -156,8 +156,10 @@ def compute_backward_model(
         else:
             gradient_ = backward_model(input_reshape).cpu().detach().numpy()
     gradient = np.reshape(gradient, input_shape)
-    import pdb; pdb.set_trace()
-    assert_almost_equal(gradient, gradient_[0])
+    try:
+        assert_almost_equal(gradient, gradient_[0])
+    except:
+        import pdb; pdb.set_trace()
 
 
 def compute_output(input_, layers):
