@@ -90,7 +90,7 @@ def softmax_prime(inputs: Tensor):
     raise NotImplementedError()
 
 # do a custom gradient because of non continuity
-@keras.ops.custom_gradient
+#@keras.ops.custom_gradient
 def relu_prime(
     inputs: Tensor,
     negative_slope: float = 0.0,
@@ -129,7 +129,7 @@ def relu_prime(
     def grad(*args, upstream=None):
         return keras.ops.sigmoid(upstream)
     
-    return backward_relu, grad
+    return backward_relu #, grad
 
 
 def relu6_prime(
