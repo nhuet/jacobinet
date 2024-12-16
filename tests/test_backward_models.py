@@ -1,5 +1,6 @@
 import keras
 from keras.layers import (
+    Activation,
     Dense,
     Reshape,
     Flatten,
@@ -9,20 +10,21 @@ from keras.layers import (
     Input,
 )
 from keras.models import Sequential, Model
-from jacobinet.models.sequential import get_backward_sequential
-from jacobinet.models.model import get_backward_functional
+#from jacobinet.models.sequential import get_backward_sequential
+#from jacobinet.models.model import get_backward_functional
+from jacobinet.models import clone_to_backward
 from .conftest import compute_backward_model, serialize_model, compute_output
 import numpy as np
 import torch
 
 # preliminary tests: gradient is derived automatically by considering single output model
-"""
+
 def test_sequential_linear():
     input_dim = 32
     layers = [Dense(2, use_bias=False), Dense(1, use_bias=False)]
     model = Sequential(layers)
     _ = model(torch.ones((1, input_dim)))
-    backward_model = get_backward_sequential(model)
+    backward_model = clone_to_backward(model)
     # model is linear
 
     _ = backward_model(np.ones((1,1)))
@@ -37,11 +39,12 @@ def test_sequential_nonlinear():
     layers = [Dense(2, use_bias=False), ReLU(), Dense(1, use_bias=False)]
     model = Sequential(layers)
     _ = model(torch.ones((1, input_dim)))
-    backward_model = get_backward_sequential(model)
+    backward_model = clone_to_backward(model)
     # model is not linear
     _ = backward_model([np.ones((1, input_dim)), np.ones((1,1))])
     compute_backward_model((input_dim,), model, backward_model)
     serialize_model([input_dim, 1], backward_model)
+
 
 def test_sequential_multiD():
 
@@ -49,11 +52,12 @@ def test_sequential_multiD():
     layers = [Reshape((1, 6, 6)), Conv2D(2, (3, 3)), ReLU(), Reshape((-1,)), Dense(1)]
     model = Sequential(layers)
     _ = model(torch.ones((1, input_dim)))
-    backward_model = get_backward_sequential(model)
+    backward_model = clone_to_backward(model)
     # model is not linear
     _ = backward_model([torch.ones((1, input_dim)), torch.ones((1,1))])
     compute_backward_model((input_dim,), model, backward_model)
     serialize_model([input_dim, 1], backward_model)
+
 
 def _test_sequential_multiD_channel_last():
 
@@ -61,7 +65,7 @@ def _test_sequential_multiD_channel_last():
     layers = [Reshape((6, 6, 2)), DepthwiseConv2D(2, (3, 3), data_format="channels_last"), ReLU(), Reshape((-1,)), Dense(1)]
     model = Sequential(layers)
     _ = model(torch.ones((1, input_dim)))
-    backward_model = get_backward_sequential(model)
+    backward_model = clone_to_backward(model)
     # model is not linear
     _ = backward_model([torch.ones((1, input_dim)), torch.ones((1,1))])
     compute_backward_model((input_dim,), model, backward_model)
@@ -73,18 +77,21 @@ def test_model_linear():
     layers = [Dense(2, use_bias=False), Dense(1, use_bias=False)]
     input_ = Input((input_dim,))
     output=None
+
     for layer in layers:
         if output is None:
             output = layer(input_)
         else:
             output = layer(output)
+    
     model = Model(input_, output)
     _ = model(torch.ones((1, input_dim)))
-    backward_model = get_backward_functional(model)
+    backward_model = clone_to_backward(model)
     # model is linear
     _ = backward_model(np.ones((1,1)))
     compute_backward_model((input_dim,), model, backward_model)
     serialize_model([1], backward_model)
+
 
 def test_model_nonlinear():
     input_dim = 32
@@ -98,7 +105,7 @@ def test_model_nonlinear():
             output = layer(output)
     model = Model(input_, output)
     _ = model(torch.ones((1, input_dim)))
-    backward_model = get_backward_functional(model)
+    backward_model = clone_to_backward(model)
     # model is not linear
     _ = backward_model([np.ones((1, input_dim)), np.ones((1,1))])
     compute_backward_model((input_dim,), model, backward_model)
@@ -117,7 +124,7 @@ def test_model_multiD():
             output = layer(output)
     model = Model(input_, output)
     _ = model(torch.ones((1, input_dim)))
-    backward_model = get_backward_functional(model)
+    backward_model = clone_to_backward(model)
     # model is not linear
     _ = backward_model([torch.ones((1, input_dim)), torch.ones((1,1))])
     compute_backward_model((input_dim,), model, backward_model)
@@ -136,7 +143,7 @@ def _test_model_multiD_channel_last():
             output = layer(output)
     model = Model(input_, output)
     _ = model(torch.ones((1, input_dim)))
-    backward_model = get_backward_functional(model)
+    backward_model = clone_to_backward(model)
     # model is not linear
     _ = backward_model([torch.ones((1, input_dim)), torch.ones((1,1))])
     compute_backward_model((input_dim,), model, backward_model)
@@ -158,7 +165,7 @@ def test_model_multiD_with_gradient_set():
             output = layer(output)
     model = Model(input_, output)
     _ = model(torch.ones((1, input_dim)))
-    backward_model = get_backward_functional(model, gradient=gradient)
+    backward_model = clone_to_backward(model, gradient=gradient)
     # model is not linear
     _ = backward_model(torch.ones((1, input_dim)))
     compute_backward_model((input_dim,), model, backward_model)
@@ -188,7 +195,7 @@ def test_model_multiD_extra_input():
     # gradient is the result of extra_inputs
     extra_input = Input((10,))
     gradient = keras.ops.max(extra_input, axis=-1)
-    backward_model = get_backward_functional(
+    backward_model = clone_to_backward(
         model, gradient=gradient, extra_inputs=[extra_input]
     )
     # model is not linear
@@ -206,6 +213,8 @@ def test_model_multiD_extra_input():
 
     serialize_model([input_dim, 10], backward_model)
 
+
+
 # multiple outputs
 ### multi output neural network #####
 def test_model_multiD_multi_output():
@@ -221,7 +230,7 @@ def test_model_multiD_multi_output():
             output = layer(output)
     model = Model(input_, output)
     _ = model(torch.ones((1, input_dim)))
-    backward_model = get_backward_functional(model, gradient=Input((10,)))
+    backward_model = clone_to_backward(model, gradient=Input((10,)))
     # model is not linear
     _ = backward_model([torch.ones((1, input_dim)), torch.ones((1,10))])
 
@@ -229,7 +238,8 @@ def test_model_multiD_multi_output():
         compute_backward_model((input_dim,), model, backward_model, i)
     
     serialize_model([input_dim, 10], backward_model)#
-"""
+
+
 
 ### multi output neural network #####
 def _test_model_multiD_multi_outputs():
@@ -244,7 +254,7 @@ def _test_model_multiD_multi_outputs():
 
     model = Model(input_, [output_0, output_1])
     _ = model(torch.ones((1, input_dim)))
-    backward_model = get_backward_functional(model, gradient=[Input((10,)), Input((20,))])
+    backward_model = clone_to_backward(model, gradient=[Input((10,)), Input((20,))])
     # model is not linear
 
     _ = backward_model([torch.ones((1, input_dim)), torch.ones((1,10)),  torch.ones((1,20))])
@@ -252,20 +262,20 @@ def _test_model_multiD_multi_outputs():
     # freeze one model and computer backward on the other branch
 
     model_0 = Model(input_, output_0)
-    backward_model_0 = get_backward_functional(model, gradient=[Input((10,)), keras.Variable(np.zeros((1, 20)))])
-    backward_model_0_bis = get_backward_functional(model_0)
+    backward_model_0 = clone_to_backward(model, gradient=[Input((10,)), keras.Variable(np.zeros((1, 20)))])
+    backward_model_0_bis = clone_to_backward(model_0)
     grad_0 = backward_model_0([torch.ones((1, input_dim)), torch.ones((1,10))])
     grad_0_bis = backward_model_0_bis([torch.ones((1, input_dim)), torch.ones((1,10))])
     #import pdb; pdb.set_trace()
 
     for i in range(10):
         compute_backward_model((input_dim,), model_0, backward_model_0_bis, i)
-    """
+    
 
     mask_output = torch.eye(10)
     for i in range(10):
         compute_backward_model((input_dim,), model, backward_model, i)
-    """
+    
     #serialize_model([input_dim, 10], backward_model)
 
 
@@ -280,10 +290,10 @@ def test_nested_sequential_linear():
     inner_model_bis = Sequential(layers)
     _ = inner_model_bis(torch.ones((1, input_dim)))
 
-    model = Sequential([inner_model, inner_model_bis, Dense(1)])
-    backward_model = get_backward_sequential(model)
+    model = Sequential([Dense(input_dim), inner_model, inner_model_bis, Dense(1)])
+    _ = model(torch.ones((1, input_dim)))
+    backward_model = clone_to_backward(model)
     # model is linear
-
     _ = backward_model(np.ones((1,1)))
     
     compute_backward_model((input_dim,), model, backward_model)
@@ -292,13 +302,114 @@ def test_nested_sequential_linear():
 
 
 def test_nested_sequential_nonlinear_linear():
+
     input_dim = 32
-    layers = [Dense(2, use_bias=False), ReLU(), Dense(1, use_bias=False)]
+    layers = [Dense(input_dim), ReLU(), Dense(3)]
     nested_model = Sequential(layers)
     _ = nested_model(torch.ones((1, input_dim)))
 
-    backward_model = get_backward_sequential(nested_model)
+    
+    model = Sequential([nested_model, Dense(1)])
+    _ = model(torch.ones((1, input_dim)))
+
+    backward_model = clone_to_backward(model)
+
+    # check nested
     # model is not linear
     _ = backward_model([np.ones((1, input_dim)), np.ones((1,1))])
-    compute_backward_model((input_dim,), nested_model, backward_model)
+
+    backward_nested_model = backward_model.layers[-1]
+    
+    compute_backward_model((input_dim,), nested_model, backward_nested_model, 0)
+    compute_backward_model((input_dim,), model, backward_model)
     serialize_model([input_dim, 1], backward_model)
+
+def test_nested_sequential_linear_nonlinear():
+
+    input_dim = 32
+    layers = [Dense(input_dim), ReLU(), Dense(3)]
+    nested_model = Sequential(layers)
+    _ = nested_model(torch.ones((1, input_dim)))
+
+    model = Sequential([nested_model, ReLU(), Dense(1)])
+    _ = model(torch.ones((1, input_dim)))
+
+    backward_model = clone_to_backward(model)
+
+    _ = backward_model([np.ones((1, input_dim)), np.ones((1,1))])
+    compute_backward_model((input_dim,), model, backward_model)
+
+    # not supported with torch backend: to check with other backends
+    #serialize_model([input_dim, 1], backward_model)
+
+
+def test_nested_sequential_model():
+
+    input_dim = 32
+    layers = [Dense(input_dim), ReLU(), Dense(3)]
+    input_nested = Input((input_dim,))
+    output_nested = input_nested
+    for layer in layers:
+        output_nested = layer(output_nested)
+
+    nested_model = Model(input_nested, output_nested)
+    _ = nested_model(torch.ones((1, input_dim)))
+
+    model = Sequential([nested_model, ReLU(), Dense(1)])
+    _ = model(torch.ones((1, input_dim)))
+
+    backward_model = clone_to_backward(model)
+
+    _ = backward_model([np.ones((1, input_dim)), np.ones((1,1))])
+    compute_backward_model((input_dim,), model, backward_model)
+
+
+
+def test_model_linear_nested_sequential():
+    input_dim = 32
+    layer_nested = [Dense(input_dim), Dense(input_dim)]
+    model_nested = Sequential(layer_nested)
+    _ = model_nested(torch.ones((1, input_dim)))
+
+    layers = [model_nested, Dense(2, use_bias=False), Dense(1, use_bias=False)]
+    input_ = Input((input_dim,))
+    output=None
+    for layer in layers:
+        if output is None:
+            output = layer(input_)
+        else:
+            output = layer(output)
+    model = Model(input_, output)
+    _ = model(torch.ones((1, input_dim)))
+    backward_model = clone_to_backward(model)
+    # model is linear
+    _ = backward_model(np.ones((1,1)))
+    compute_backward_model((input_dim,), model, backward_model)
+
+
+def test_nested_model_linear_nonlinear():
+
+    input_dim = 32
+    layers = [Dense(input_dim), ReLU(), Dense(3)]
+    z = Input((input_dim,))
+    y = z
+    for layer in layers:
+        y = layer(y)
+    nested_model = Model(z, y)
+    #nested_model = Sequential(layers)
+    _ = nested_model(torch.ones((1, input_dim)))
+
+    x = Input((input_dim,))
+    output = x
+    for layer in [nested_model, ReLU(), Dense(1)]:
+        output = layer(output)
+    model = Model(x, output)
+    _ = model(torch.ones((1, input_dim)))
+
+    backward_model = clone_to_backward(model)
+    _ = backward_model([np.ones((1, input_dim)), np.ones((1,1))])
+    compute_backward_model((input_dim,), model, backward_model)
+
+
+
+

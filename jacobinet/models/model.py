@@ -4,7 +4,10 @@ from keras.models import Model, Sequential
 from .node import get_backward_node
 from .base_model import BackwardModel
 from jacobinet.layers.layer import BackwardLayer
-from .utils import get_gradient, FuseGradients
+from .utils import get_gradient, FuseGradients, to_list
+from jacobinet import get_backward_layer
+
+
 import numpy as np
 
 from keras import KerasTensor as Tensor
@@ -20,6 +23,7 @@ def get_backward_functional(
     ] = None,
     extra_inputs: Union[List[Input]] = [],
     input_mask=None,
+    get_backward:callable= get_backward_layer,
 ):
     # find output_nodes
     grad_input=[] # list of boolean to check whether the gradient should be used as an input of the backward model
@@ -38,27 +42,13 @@ def get_backward_functional(
             grad_input.append(grad_input_i)
 
     # convert model inputs and outputs as list
-    model_outputs = model.output
-    model_inputs = model.input
-    if not isinstance(model_outputs, list):
-        model_outputs = [model_outputs]
-    if not isinstance(model_inputs, list):
-        model_inputs = [model_inputs]
+    model_inputs = to_list(model.input)
+    model_outputs = to_list(model.output)
 
     if input_mask is None:
         # keep every input
         #input_mask=[input_.name for input_ in model_inputs]
-        input_mask=[]
-
-    """
-    output_names = [o.name for o in model_outputs]
-    output_nodes = []
-    nodes_names = []
-    for _, nodes in model._nodes_by_depth.items():
-        for node in nodes:
-            if node.operation.output.name in output_names:
-                output_nodes.append(node)
-    """
+        input_mask=[] 
     
     output_nodes = []
     for model_output in model_outputs:
@@ -71,7 +61,7 @@ def get_backward_functional(
     # if gradient is None: create inputs for backward mask
     if gradient is None:
         gradient = [
-            Input(list(output_i.shape[1:])) for output_i in model_outputs
+            Input(list(output_i.shape[1:]), name='{}_{}'.format(output_i.name, 'gradient')) for output_i in model_outputs
         ]
         grad_input = [True]*len(model_outputs)
 
@@ -85,44 +75,28 @@ def get_backward_functional(
     gradient = [get_gradient(grad, model_inputs) for grad in gradient]
 
     outputs = []
-    outputs_dict={}
     is_linear = True
 
     for input_ in model_inputs:
-        if not input_.name in input_mask:
+        input_name = input_.name
+        if not  input_name in input_mask:
 
             outputs_i=[]
             is_linear_i = True
 
-            for grad, output_node in zip(gradient, output_nodes):
+            for i, (grad, output_node) in enumerate(zip(gradient, output_nodes)):
                 output_node, is_linear_node, keep_branch = get_backward_node(
-                    output_node, grad, mapping_keras2backward_classes, input_name=input_.name
+                    output_node, grad, mapping_keras2backward_classes, input_name=input_name, get_backward=get_backward
                 )
                 if keep_branch:
                     outputs_i.append(output_node)
                     is_linear_i = min(is_linear_i, is_linear_node)
-            
 
             if not len(outputs_i):
                 continue
             else:
                 outputs+=outputs_i
                 is_linear = min(is_linear, is_linear_i)
-            """
-            if len(outputs_i)==1:
-                outputs+=outputs_i
-                outputs_dict[input_.name]=outputs_i[0]
-                is_linear = min(is_linear, is_linear_i)
-            else:
-                # chain rule along multiple inputs: expand, concat and sum
-                fuse_layer = FuseGradients()
-                output_i = fuse_layer(outputs_i)
-                outputs.append(output_i)
-                outputs_dict[input_.name]=output_i
-            """
-
-
-            
 
     inputs = []
     # check if the model is linear
@@ -138,4 +112,4 @@ def get_backward_functional(
         outputs = outputs[0]
 
     # or dictionary
-    return BackwardModel(inputs, outputs)
+    return BackwardModel(inputs, outputs, n_input=len(model.inputs))

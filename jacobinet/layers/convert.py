@@ -150,7 +150,7 @@ default_mapping_keras2backward_layer: dict[type[Layer], type[callable]] = {
 """Default mapping between keras layers and get_backward callable"""
 
 
-def get_backward(layer: Layer, mapping_keras2backward_classes: Optional[dict[type[Layer], type[BackwardLayer]]] = None):
+def get_backward(layer: Layer, mapping_keras2backward_classes: Optional[dict[type[Layer], type[BackwardLayer]]] = None, **kwargs):
     keras_class = type(layer)
     """
     if isinstance(layer, BackwardLinearLayer):

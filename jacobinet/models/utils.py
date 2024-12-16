@@ -12,11 +12,17 @@ from keras.layers import Layer, InputLayer
 from keras import KerasTensor as Tensor
 from typing import Union, Optional, Tuple, Any, List, Callable
 
+def to_list(tensor:Union[Tensor, List[Tensor]])->List[Tensor]:
+        if isinstance(tensor, list):
+            return tensor
+        return [tensor]
 
 def is_linear(model_backward: keras.models.Model) -> bool:
     return hasattr(model_backward, 'is_linear') and model_backward.is_linear
 
 def is_linear_layer(layer):
+    if not (isinstance(layer, BackwardLayer) or (hasattr(layer, 'is_linear'))):
+        return True
     return isinstance(layer, BackwardLinearLayer) or (hasattr(layer, 'is_linear') and layer.is_linear)
 
 def get_backward(
@@ -32,20 +38,6 @@ def get_backward(
     else:
 
         raise NotImplementedError()
-        if gradient_shape is None:
-            return get_backward_model(
-                layer,
-                mapping_keras2backward_classes=mapping_keras2backward_classes,
-            )
-        else:
-            gradient_shape = list(gradient_shape)
-            gradients = [Input(shape_i) for shape_i in gradient_shape]
-            return get_backward_model(
-                layer,
-                gradient=gradients,
-                use_gradient_as_backward_input=True,
-                mapping_keras2backward_classes=mapping_keras2backward_classes,
-            )
 
 class GradConstant(Layer):
 
