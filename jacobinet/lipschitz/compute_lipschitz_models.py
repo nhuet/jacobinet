@@ -12,6 +12,7 @@ def get_lipschitz_model(backward_model:Union[BackwardModel, BackwardSequential],
 
     inputs = backward_model.input
     outputs = backward_model.output
+    
     if isinstance(outputs, list):
         lip_output = [Lipschitz(p)(output_i) for output_i in outputs]
     else:
