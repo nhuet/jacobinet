@@ -1,6 +1,10 @@
-from jacobinet.layers.layer import BackwardLinearLayer
-from keras.layers import Layer, Dense
+from jacobinet.layers.layer import BackwardLinearLayer, BackwardNonLinearLayer, BackwardWithActivation
+from jacobinet.layers.core.activations import BackwardActivation
+from jacobinet.layers.utils import share_weights_and_build
+from keras.layers import Layer, Dense, Activation, Input
 import keras.ops as K
+
+from keras import KerasTensor as Tensor
 
 
 class BackwardDense(BackwardLinearLayer):
@@ -34,6 +38,27 @@ class BackwardDense(BackwardLinearLayer):
         return K.matmul(gradient, K.transpose(self.layer.kernel))
 
 
+class BackwardDenseWithActivation(BackwardWithActivation):
+    """"
+    This class implements a custom layer for backward pass of a `DepthwiseConv1D` layer in Keras with a non linear activation function.
+    It can be used to apply operations in a reverse manner back to the original input shape.
+
+    ### Example Usage:
+    ```python
+    from keras.layers import DepthwiseConv1
+    from keras_custom.backward.layers import BackwardDenseWithActivation
+
+    # Assume `dense_layer` is a pre-defined Dense layer with an activation function
+    backward_layer = BackwardDenseWithActivation(dense_layer)
+    output = backward_layer(input_tensor)
+    """
+    def __init__(
+        self,
+        layer: Dense,
+        **kwargs,
+    ):
+        super().__init__(layer=layer, backward_linear=BackwardDense, backward_activation=BackwardActivation,**kwargs)
+
 
 def get_backward_Dense(layer: Dense) -> Layer:
     """
@@ -56,4 +81,7 @@ def get_backward_Dense(layer: Dense) -> Layer:
     backward_layer = get_backward_Dense(dense_layer)
     output = backward_layer(input_tensor)
     """
-    return BackwardDense(layer)
+    if layer.get_config()['activation']=='linear':
+        return BackwardDense(layer)
+    else:
+        return BackwardDenseWithActivation(layer)

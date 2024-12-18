@@ -1,5 +1,5 @@
 from typing import List, Union
-from keras.layers import ZeroPadding2D, Cropping2D, ZeroPadding1D, Cropping1D, ZeroPadding3D, Cropping3D, Permute
+from keras.layers import Layer, ZeroPadding2D, Cropping2D, ZeroPadding1D, Cropping1D, ZeroPadding3D, Cropping3D, Permute, Input
 import keras.ops as K
 
 
@@ -140,4 +140,53 @@ def reshape_to_batch(input_tensor, layer_output_shape):
         return True, K.reshape(input_tensor, [-1]+layer_output_shape[1:]), n_out
     else:
         return False, input_tensor, []
+    
+# source: decomon/keras_utils.py
+# author: nolwen huet
+def share_weights_and_build(original_layer: Layer, new_layer: Layer, weight_names: list[str], input_shape_wo_batch:list[int]) -> None:
+    """Share the weights specidifed by names of an already built layer to another unbuilt layer.
+
+    We assume that each weight is also an original_laer's attribute whose name is the weight name.
+
+    Args:
+        original_layer: the layer used to share the weights
+        new_layer: the new layer which will be buit and will share the weights of the original layer
+        weight_names: names of the weights to share
+
+    Returns:
+
+    """
+    # Check the original_layer is built and the new_layer is not built
+    if not original_layer.built:
+        raise ValueError("The original layer must already be built for sharing its weights.")
+    if new_layer.built:
+        raise ValueError("The new layer must not be built to get the weights of the original layer")
+
+    # store the weights as a new_layer variable before build (ie before the lock)
+    for w_name in weight_names:
+        w = getattr(original_layer, w_name)
+        try:
+            setattr(new_layer, w_name, w)
+        except AttributeError:
+            # manage hidden weights introduced for LoRA https://github.com/keras-team/keras/pull/18942
+            w_name = f"_{w_name}"
+            w = getattr(original_layer, w_name)
+            setattr(new_layer, w_name, w)
+
+    # build the layer
+    new_layer(Input(input_shape_wo_batch))
+    # overwrite the newly generated weights and untrack them
+    for w_name in weight_names:
+        w = getattr(original_layer, w_name)
+        w_to_drop = getattr(new_layer, w_name)
+        try:
+            setattr(new_layer, w_name, w)
+        except AttributeError:
+            # manage hidden weights introduced for LoRA https://github.com/keras-team/keras/pull/18942
+            w_name = f"_{w_name}"
+            w = getattr(original_layer, w_name)
+            w_to_drop = getattr(new_layer, w_name)
+            setattr(new_layer, w_name, w)
+        # untrack the not used anymore weight
+        new_layer._tracker.untrack(w_to_drop)
 

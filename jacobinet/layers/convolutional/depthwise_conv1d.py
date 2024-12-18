@@ -1,5 +1,5 @@
 from keras.layers import Layer, DepthwiseConv1D, Conv1DTranspose, Reshape, Activation
-from jacobinet.layers.layer import BackwardLinearLayer, BackwardNonLinearLayer
+from jacobinet.layers.layer import BackwardLinearLayer, BackwardNonLinearLayer, BackwardWithActivation
 from jacobinet.layers.core.activations import BackwardActivation
 from jacobinet.layers.utils import pooling_layer1D
 from keras.models import Sequential
@@ -141,61 +141,28 @@ class BackwardDepthwiseConv1D(BackwardLinearLayer):
             conv_outputs, axis=self.axis
         )  # (batch_size, c_in, w_in, h_in)
         return output
-    
-class BackwardDepthwiseConv1DWithActivation(BackwardNonLinearLayer):
+
+
+class BackwardDepthwiseConv1DWithActivation(BackwardWithActivation):
     """
     This class implements a custom layer for backward pass of a `DepthwiseConv1D` layer in Keras with a non linear activation function.
     It can be used to apply operations in a reverse manner back to the original input shape.
 
     ### Example Usage:
     ```python
-    from keras.layers import DepthwiseConv1
-    from keras_custom.backward.layers import BackwardConv1D
+    from keras.layers import DepthwiseConv1D
+    from keras_custom.backward.layers import BackwardDepthwiseConv1DWithActivatio
 
-    # Assume `conv_layer` is a pre-defined Conv1D layer with an activation function
-    backward_layer = BackwardConv1DDWithActivation(conv_layer)
+    # Assume `conv_layer` is a pre-defined DepthwiseConv1D layer with an activation function
+    backward_layer = BackwardDepthwiseConv1DWithActivatio(conv_layer)
     output = backward_layer(input_tensor)
     """
-
     def __init__(
         self,
         layer: DepthwiseConv1D,
         **kwargs,
     ):
-        super().__init__(layer=layer, **kwargs)
-        activation_name = layer.get_config()["activation"]
-        self.activation_backward = BackwardActivation(Activation(activation_name), 
-                                                      input_dim_wo_batch = self.output_dim_wo_batch,
-                                                      output_dim_wo_batch = self.output_dim_wo_batch)
-        
-        #deserialize(activation_name)
-
-        dico_config = self.layer.get_config()
-        dico_config['activation']='linear'
-        self.layer_wo_activation = DepthwiseConv1D.from_config(dico_config)
-        #self.layer_wo_activation._kernel = self.layer._kernel
-        #self.layer_wo_activation.bias = self.layer.bias
-        self.layer_wo_activation.built=True
-        self.layer_backward = BackwardDepthwiseConv1D(self.layer_wo_activation, 
-                                             input_dim_wo_batch= self.input_dim_wo_batch, 
-                                             output_dim_wo_batch = self.output_dim_wo_batch)
-        
-        self.layer_wo_activation.built=True
-
-    def call(self, inputs, training=None, mask=None):
-         # apply locally the chain rule
-        # (f(g(x)))' = f'(x)*g'(f(x))
-        # compute f(x) as inner_input
-        
-        gradient = inputs[0]
-        input = inputs[1]
-        inner_input = self.layer_wo_activation(input)
-        # computer gradient*g'(f(x))
-        backward_output: Tensor = self.activation_backward(inputs=[gradient, inner_input])
-        # compute gradient*g'(f(x))*f'(x)
-        output = self.layer_backward(inputs=[backward_output])
-
-        return output
+        super().__init__(layer=layer, backward_linear=BackwardDepthwiseConv1D, backward_activation=BackwardActivation,**kwargs)
 
 
 def get_backward_DepthwiseConv1D(
