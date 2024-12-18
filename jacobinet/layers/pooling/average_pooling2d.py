@@ -12,6 +12,7 @@ from keras.models import Sequential
 import keras.ops as K
 from jacobinet.layers.layer import BackwardLinearLayer
 from jacobinet.layers.utils import pooling_layer2D
+import warnings
 
 
 class BackwardAveragePooling2D(BackwardLinearLayer):
@@ -41,7 +42,7 @@ class BackwardAveragePooling2D(BackwardLinearLayer):
             raise ValueError("layer {} is not built".format(layer.name))
 
         if self.layer.padding == "same":
-            raise UserWarning(
+            warnings.warn(
                 "Padding same with AveragePooling is not reperoductible in pure keras operations. See github issue https://github.com/mil-tokyo/webdnn/issues/694"
             )
 
