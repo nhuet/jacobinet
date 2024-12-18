@@ -3,8 +3,7 @@ from keras.layers import Layer, Input, Activation
 import keras
 from typing import Union, List
 import keras.ops as K
-from keras_custom.backward.layers.utils import reshape_to_batch
-from jacobinet.layers.utils import share_weights_and_build
+from jacobinet.layers.utils import share_weights_and_build, reshape_to_batch
 
 from keras import KerasTensor as Tensor
 

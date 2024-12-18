@@ -129,7 +129,7 @@ def relu_prime(
     def grad(*args, upstream=None):
         return keras.ops.sigmoid(upstream)
     
-    return backward_relu #, grad
+    return backward_relu# , grad
 
 
 def relu6_prime(

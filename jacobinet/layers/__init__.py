@@ -38,6 +38,6 @@ from .activations import (
     get_backward_ELU,
 )
 
-from .merging import get_backward_Add, get_backward_Average, get_backward_Concatenate, get_backward_Maximum, get_backward_Minimum, get_backward_Subtract, get_backward_Multiply
+from .merging import BackwardMergeNonLinearLayer, get_backward_Add, get_backward_Average, get_backward_Concatenate, get_backward_Maximum, get_backward_Minimum, get_backward_Subtract, get_backward_Multiply
 
 from .layer import BackwardLayer, BackwardLinearLayer, BackwardNonLinearLayer

@@ -1,4 +1,5 @@
 import keras
+import keras.ops as K
 from keras.layers import Layer, Input
 from keras.models import Model, Sequential
 from jacobinet.layers.layer import (

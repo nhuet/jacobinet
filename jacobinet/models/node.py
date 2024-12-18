@@ -48,6 +48,7 @@ def get_backward_node(
             gradients = backward_layer_node(gradient)
         else:
             is_linear = False
+            layer_node_inputs = to_list(layer_node.input)
             gradients = backward_layer_node(layer_node_inputs+[gradient])
     elif isinstance(layer_node, Model):
         if backward_layer_node.is_linear:
