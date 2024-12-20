@@ -63,7 +63,7 @@ def get_adv_model_base(model,
         raise NotImplementedError('actually not working wih multiple loss. Raise a dedicated PR if needed')
     if len(model.inputs)>1:
         raise NotImplementedError('actually not working wih multiple inputs. Raise a dedicated PR if needed')
-    
+
     if loss=='logits':
         # simple backward
         backward_model_base_attack = clone_to_backward(

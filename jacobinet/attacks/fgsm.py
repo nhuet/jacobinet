@@ -56,7 +56,7 @@ class FastGradientSign(AdvLayer):
     
 
 def get_fgsm_model(model, 
-                  loss:Union[str, Loss, Layer]='categorical_crossentropy', attack:str='fgsm',
+                  loss:Union[str, Loss, Layer]='categorical_crossentropy',
                   mapping_keras2backward_classes={}, # define type
                   mapping_keras2backward_losses={},
                   **kwargs)->AdvModel: # we do not compute gradient on extra_inputs, loss should return (None, 1)

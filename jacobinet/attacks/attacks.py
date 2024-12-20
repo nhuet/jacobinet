@@ -3,13 +3,15 @@ from keras.losses import Loss
 
 from jacobinet.attacks import AdvModel
 from jacobinet.attacks.fgsm import get_fgsm_model
-from .utils import FGSM
+from jacobinet.attacks.pgd import get_pgd_model
+from .utils import FGSM, PGD
 
 from typing import Union, Callable
 
 
 default_mapping_attack: dict[str, type[Callable]] = { # type: ignore
     FGSM: get_fgsm_model,
+    PGD: get_pgd_model,
 }
 
 
