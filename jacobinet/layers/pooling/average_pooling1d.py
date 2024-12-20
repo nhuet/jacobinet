@@ -105,9 +105,7 @@ class BackwardAveragePooling1D(BackwardLinearLayer):
         return outputs
 
 
-def get_backward_AveragePooling1D(
-    layer: AveragePooling1D
-) -> Layer:
+def get_backward_AveragePooling1D(layer: AveragePooling1D) -> Layer:
     """
     This function creates a `BackwardAveragePooling1D` layer based on a given `AveragePooling1D` layer. It provides
     a convenient way to obtain a backward approximation of the input `AveragePooling1D` layer, using the

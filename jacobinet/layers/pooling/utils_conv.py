@@ -84,9 +84,7 @@ def get_backward_layer(layer: DepthwiseConv2D) -> Layer:
     # dico_conv.pop("groups")
     input_shape = list(layer.input.shape[1:])
     # update filters to match input, pay attention to data_format
-    if (
-        layer.data_format == "channels_first"
-    ):  # better to use enum than raw str
+    if layer.data_format == "channels_first":  # better to use enum than raw str
         dico_conv["filters"] = 1  # input_shape[0]
     else:
         dico_conv["filters"] = 1  # input_shape[-1]

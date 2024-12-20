@@ -78,9 +78,7 @@ class BackwardBatchNormalization(BackwardLinearLayer):
         return outputs
 
 
-def get_backward_BatchNormalization(
-    layer: BatchNormalization
-) -> Layer:
+def get_backward_BatchNormalization(layer: BatchNormalization) -> Layer:
     """
     This function creates a `BackwardBatchNormalization` layer based on a given `BatchNormalization` layer. It provides
     a convenient way to obtain a backward approximation of the input `BatchNormalization` layer, using the

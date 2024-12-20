@@ -6,6 +6,7 @@ import keras.ops as K
 from jacobinet.layers.utils import share_weights_and_build, reshape_to_batch
 
 from keras import KerasTensor as Tensor
+from typing import Type
 
 
 class BackwardLayer(Layer):
@@ -73,8 +74,8 @@ class BackwardLayer(Layer):
         dico_params = {}
         dico_params["layer"] = layer_config
         # save input shape
-        dico_params["input_dim_wo_batch"] = (
-            keras.saving.serialize_keras_object(self.input_dim_wo_batch)
+        dico_params["input_dim_wo_batch"] = keras.saving.serialize_keras_object(
+            self.input_dim_wo_batch
         )
         dico_params["output_dim_wo_batch"] = (
             keras.saving.serialize_keras_object(self.output_dim_wo_batch)
@@ -103,12 +104,12 @@ class BackwardLayer(Layer):
             elif len(inputs) > 2:
                 layer_input = inputs[1:]
         reshape_tag, gradient_, n_out = reshape_to_batch(
-                gradient, [1] + self.output_dim_wo_batch
-            )
+            gradient, [1] + self.output_dim_wo_batch
+        )
         batch_size = gradient_.shape[0]
         output = self.call_on_reshaped_gradient(
-                    gradient_, input=layer_input, training=training, mask=mask
-                )
+            gradient_, input=layer_input, training=training, mask=mask
+        )
 
         if reshape_tag:
             if isinstance(output, list):
@@ -211,7 +212,6 @@ class BackwardNonLinearLayer(BackwardLayer):
     """
 
 
-
 class BackwardWithActivation(BackwardNonLinearLayer):
     """
     This class implements a custom layer for backward pass of a layer in Keras with a non linear activation function.
@@ -228,44 +228,55 @@ class BackwardWithActivation(BackwardNonLinearLayer):
     def __init__(
         self,
         layer: Layer,
-        backward_linear: BackwardLinearLayer.type,
-        backward_activation: BackwardNonLinearLayer.type,
+        backward_linear: Type[BackwardLinearLayer],
+        backward_activation: Type[BackwardNonLinearLayer],
         **kwargs,
     ):
         super().__init__(layer=layer, **kwargs)
         activation_name = layer.get_config()["activation"]
-        self.activation_backward = backward_activation(Activation(activation_name), 
-                                                      input_dim_wo_batch = self.output_dim_wo_batch,
-                                                      output_dim_wo_batch = self.output_dim_wo_batch)
-        
+        self.activation_backward = backward_activation(
+            Activation(activation_name),
+            input_dim_wo_batch=self.output_dim_wo_batch,
+            output_dim_wo_batch=self.output_dim_wo_batch,
+        )
+
         dico_config = self.layer.get_config()
         dico_config.pop("activation")
         cls = self.layer.__class__
         self.layer_wo_activation = cls.from_config(dico_config)
-        layer_wo_activation_tmp = cls.from_config(dico_config)# create a temporary layer w/o activation
+        layer_wo_activation_tmp = cls.from_config(
+            dico_config
+        )  # create a temporary layer w/o activation
         layer_wo_activation_tmp(Input(self.input_dim_wo_batch))
         weights_names = [w.name for w in layer_wo_activation_tmp.weights]
-        share_weights_and_build(original_layer=self.layer, new_layer=self.layer_wo_activation, weight_names=weights_names,
-                                input_shape_wo_batch=self.input_dim_wo_batch)
+        share_weights_and_build(
+            original_layer=self.layer,
+            new_layer=self.layer_wo_activation,
+            weight_names=weights_names,
+            input_shape_wo_batch=self.input_dim_wo_batch,
+        )
 
-        self.layer_backward = backward_linear(self.layer_wo_activation, 
-                                             input_dim_wo_batch= self.input_dim_wo_batch, 
-                                             output_dim_wo_batch = self.output_dim_wo_batch)
-        
-        self.layer_wo_activation.built=True
+        self.layer_backward = backward_linear(
+            self.layer_wo_activation,
+            input_dim_wo_batch=self.input_dim_wo_batch,
+            output_dim_wo_batch=self.output_dim_wo_batch,
+        )
+
+        self.layer_wo_activation.built = True
 
     def call(self, inputs, training=None, mask=None):
-         # apply locally the chain rule
+        # apply locally the chain rule
         # (f(g(x)))' = f'(x)*g'(f(x))
         # compute f(x) as inner_input
-        
+
         gradient = inputs[0]
         input = inputs[1]
         inner_input = self.layer_wo_activation(input)
         # computer gradient*g'(f(x))
-        backward_output: Tensor = self.activation_backward(inputs=[gradient, inner_input])
+        backward_output: Tensor = self.activation_backward(
+            inputs=[gradient, inner_input]
+        )
         # compute gradient*g'(f(x))*f'(x)
         output = self.layer_backward(inputs=[backward_output])
 
         return output
-        

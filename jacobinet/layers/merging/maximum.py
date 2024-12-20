@@ -25,7 +25,9 @@ class BackwardMaximum(BackwardMergeNonLinearLayer):
     ):
 
         output_layer = self.layer(input)
-        return [gradient*(K.sign(input_i - output_layer)+1)for input_i in input]
+        return [
+            gradient * (K.sign(input_i - output_layer) + 1) for input_i in input
+        ]
 
 
 def get_backward_Maximum(layer: Maximum) -> Layer:

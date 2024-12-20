@@ -1,10 +1,22 @@
 from typing import List, Union
-from keras.layers import Layer, ZeroPadding2D, Cropping2D, ZeroPadding1D, Cropping1D, ZeroPadding3D, Cropping3D, Permute, Input
+from keras.layers import (
+    Layer,
+    ZeroPadding2D,
+    Cropping2D,
+    ZeroPadding1D,
+    Cropping1D,
+    ZeroPadding3D,
+    Cropping3D,
+    Permute,
+    Input,
+)
 import keras.ops as K
 
 
 # compute output shape post convolution
-def compute_output_pad(input_shape_wo_batch, kernel_size, strides, padding, data_format):
+def compute_output_pad(
+    input_shape_wo_batch, kernel_size, strides, padding, data_format
+):
     if data_format == "channels_first":
         w, h = input_shape_wo_batch[1:]
     else:
@@ -19,17 +31,25 @@ def compute_output_pad(input_shape_wo_batch, kernel_size, strides, padding, data
     return (w_pad, h_pad)
 
 
-def pooling_layer2D(w_pad, h_pad, data_format) -> List[Union[ZeroPadding2D, Cropping2D]]:
+def pooling_layer2D(
+    w_pad, h_pad, data_format
+) -> List[Union[ZeroPadding2D, Cropping2D]]:
     if w_pad or h_pad:
         # add padding
         if w_pad >= 0 and h_pad >= 0:
-            padding = ((w_pad // 2, w_pad // 2 + w_pad % 2), (h_pad // 2, h_pad // 2 + h_pad % 2))
+            padding = (
+                (w_pad // 2, w_pad // 2 + w_pad % 2),
+                (h_pad // 2, h_pad // 2 + h_pad % 2),
+            )
             pad_layer = [ZeroPadding2D(padding, data_format=data_format)]
         elif w_pad <= 0 and h_pad <= 0:
             w_pad *= -1
             h_pad *= -1
             # padding = ((0, -w_pad), (0, -h_pad))
-            cropping = ((w_pad // 2, w_pad // 2 + w_pad % 2), (h_pad // 2, h_pad // 2 + h_pad % 2))
+            cropping = (
+                (w_pad // 2, w_pad // 2 + w_pad % 2),
+                (h_pad // 2, h_pad // 2 + h_pad % 2),
+            )
             pad_layer = [Cropping2D(cropping, data_format=data_format)]
         elif w_pad > 0 and h_pad < 0:
             h_pad *= -1
@@ -51,7 +71,9 @@ def pooling_layer2D(w_pad, h_pad, data_format) -> List[Union[ZeroPadding2D, Crop
     return []
 
 
-def pooling_layer1D(w_pad, data_format) -> List[Union[ZeroPadding1D, Cropping1D]]:
+def pooling_layer1D(
+    w_pad, data_format
+) -> List[Union[ZeroPadding1D, Cropping1D]]:
     if w_pad:
         # add padding
         if w_pad >= 0:
@@ -71,7 +93,9 @@ def pooling_layer1D(w_pad, data_format) -> List[Union[ZeroPadding1D, Cropping1D]
     return []
 
 
-def pooling_layer3D(d_pad, w_pad, h_pad, data_format) -> List[Union[ZeroPadding3D, Cropping3D]]:
+def pooling_layer3D(
+    d_pad, w_pad, h_pad, data_format
+) -> List[Union[ZeroPadding3D, Cropping3D]]:
     if d_pad or w_pad or h_pad:
         # add padding
         if d_pad >= 0 and w_pad >= 0 and h_pad >= 0:
@@ -113,37 +137,71 @@ def pooling_layer3D(d_pad, w_pad, h_pad, data_format) -> List[Union[ZeroPadding3
         return []
 
 
-def call_backward_depthwise2d(inputs, layer, op_reshape, op_split, inner_models, axis, axis_c, c_in, use_bias):
+def call_backward_depthwise2d(
+    inputs,
+    layer,
+    op_reshape,
+    op_split,
+    inner_models,
+    axis,
+    axis_c,
+    c_in,
+    use_bias,
+):
     # remove bias if needed
     if hasattr(layer, "use_bias") and layer.use_bias and use_bias:
         if layer.data_format == "channels_first":
-            inputs = inputs - layer.bias[None, :, None, None]  # (batch, d_m*c_in, w_out, h_out)
+            inputs = (
+                inputs - layer.bias[None, :, None, None]
+            )  # (batch, d_m*c_in, w_out, h_out)
         else:
-            inputs = inputs - layer.bias[None, None, None, :]  # (batch, w_out, h_out, d_m*c_in)
+            inputs = (
+                inputs - layer.bias[None, None, None, :]
+            )  # (batch, w_out, h_out, d_m*c_in)
 
-    outputs = op_reshape(inputs)  # (batch, d_m, c_in, w_out, h_out) if data_format=channel_first
+    outputs = op_reshape(
+        inputs
+    )  # (batch, d_m, c_in, w_out, h_out) if data_format=channel_first
 
     # if self.layer.use_bias and self.use_bias:
 
-    split_outputs = K.split(outputs, c_in, axis=axis_c)  # [(batch, d_m, 1, w_out, h_out)]
-    split_outputs = [op_split(s_o_i) for s_o_i in split_outputs]  # [(batch_size, d_m, w_out, h_out)]
+    split_outputs = K.split(
+        outputs, c_in, axis=axis_c
+    )  # [(batch, d_m, 1, w_out, h_out)]
+    split_outputs = [
+        op_split(s_o_i) for s_o_i in split_outputs
+    ]  # [(batch_size, d_m, w_out, h_out)]
 
-    conv_outputs = [inner_models[i](s_o_i) for (i, s_o_i) in enumerate(split_outputs)]  # [(batch_size, 1, w_in, h_in)]
-    return K.concatenate(conv_outputs, axis=axis)  # (batch_size, c_in, w_in, h_in)
+    conv_outputs = [
+        inner_models[i](s_o_i) for (i, s_o_i) in enumerate(split_outputs)
+    ]  # [(batch_size, 1, w_in, h_in)]
+    return K.concatenate(
+        conv_outputs, axis=axis
+    )  # (batch_size, c_in, w_in, h_in)
 
 
 def reshape_to_batch(input_tensor, layer_output_shape):
-    if len(input_tensor.shape)!= len(layer_output_shape):
+    if len(input_tensor.shape) != len(layer_output_shape):
         # backward is not in a diagonal format, current shape is [batch_size]+n_out+layer_output_shape
         # we reshape it to [batch_size*np.prod(n_out_)]+layer_output_shape
-        n_out = list(input_tensor.shape[:-len(layer_output_shape[1:])][1:])
-        return True, K.reshape(input_tensor, [-1]+layer_output_shape[1:]), n_out
+        n_out = list(input_tensor.shape[: -len(layer_output_shape[1:])][1:])
+        return (
+            True,
+            K.reshape(input_tensor, [-1] + layer_output_shape[1:]),
+            n_out,
+        )
     else:
         return False, input_tensor, []
-    
+
+
 # source: decomon/keras_utils.py
 # author: nolwen huet
-def share_weights_and_build(original_layer: Layer, new_layer: Layer, weight_names: list[str], input_shape_wo_batch:list[int]) -> None:
+def share_weights_and_build(
+    original_layer: Layer,
+    new_layer: Layer,
+    weight_names: list[str],
+    input_shape_wo_batch: list[int],
+) -> None:
     """Share the weights specidifed by names of an already built layer to another unbuilt layer.
 
     We assume that each weight is also an original_laer's attribute whose name is the weight name.
@@ -158,9 +216,13 @@ def share_weights_and_build(original_layer: Layer, new_layer: Layer, weight_name
     """
     # Check the original_layer is built and the new_layer is not built
     if not original_layer.built:
-        raise ValueError("The original layer must already be built for sharing its weights.")
+        raise ValueError(
+            "The original layer must already be built for sharing its weights."
+        )
     if new_layer.built:
-        raise ValueError("The new layer must not be built to get the weights of the original layer")
+        raise ValueError(
+            "The new layer must not be built to get the weights of the original layer"
+        )
 
     # store the weights as a new_layer variable before build (ie before the lock)
     for w_name in weight_names:
@@ -189,4 +251,3 @@ def share_weights_and_build(original_layer: Layer, new_layer: Layer, weight_name
             setattr(new_layer, w_name, w)
         # untrack the not used anymore weight
         new_layer._tracker.untrack(w_to_drop)
-

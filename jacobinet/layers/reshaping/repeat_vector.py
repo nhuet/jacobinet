@@ -33,9 +33,7 @@ class BackwardRepeatVector(BackwardLinearLayer):
         return K.max(gradient, axis=1)
 
 
-def get_backward_RepeatVector(
-    layer: BackwardRepeatVector
-) -> Layer:
+def get_backward_RepeatVector(layer: BackwardRepeatVector) -> Layer:
     """
     This function creates a `BackwardRepeatVector` layer based on a given `RepeatVector` layer. It provides
     a convenient way to obtain a backward approximation of the input `RepeatVector` layer, using the

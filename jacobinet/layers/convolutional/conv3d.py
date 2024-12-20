@@ -88,12 +88,18 @@ class BackwardConv3DWithActivation(BackwardWithActivation):
     backward_layer = BackwardConv3DWithActivation(conv_layer)
     output = backward_layer(input_tensor)
     """
+
     def __init__(
         self,
         layer: Conv3D,
         **kwargs,
     ):
-        super().__init__(layer=layer, backward_linear=BackwardConv3D, backward_activation=BackwardActivation,**kwargs)
+        super().__init__(
+            layer=layer,
+            backward_linear=BackwardConv3D,
+            backward_activation=BackwardActivation,
+            **kwargs,
+        )
 
 
 def get_backward_Conv3D(layer: Conv3D) -> Layer:
@@ -117,9 +123,7 @@ def get_backward_Conv3D(layer: Conv3D) -> Layer:
     backward_layer = get_backward_Conv3D(conv_layer)
     output = backward_layer(input_tensor)
     """
-    if layer.get_config()['activation']=='linear':
+    if layer.get_config()["activation"] == "linear":
         return BackwardConv3D(layer)
     else:
         return BackwardConv3DWithActivation(layer)
-
-

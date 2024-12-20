@@ -77,7 +77,7 @@ class BackwardGlobalAveragePooling3D(BackwardLinearLayer):
 
 
 def get_backward_GlobalAveragePooling3D(
-    layer: GlobalAveragePooling3D
+    layer: GlobalAveragePooling3D,
 ) -> Layer:
     """
     This function creates a `BackwardGlobalAveragePooling3D` layer based on a given `GlobalAveragePooling3D` layer. It provides

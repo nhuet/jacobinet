@@ -12,8 +12,6 @@ from jacobinet.utils import to_list
 from keras import KerasTensor as Tensor
 
 
-
-
 def init_backward_conv1D(layer, input_dim_wo_batch, output_dim_wo_batch):
 
     dico_conv = layer.get_config()
@@ -21,12 +19,10 @@ def init_backward_conv1D(layer, input_dim_wo_batch, output_dim_wo_batch):
     # input_shape = list(layer.input.shape[1:])
     input_shape = input_dim_wo_batch
     # update filters to match input, pay attention to data_format
-    if (
-            layer.data_format == "channels_first"
-    ):  # better to use enum than raw str
-            dico_conv["filters"] = input_shape[0]
+    if layer.data_format == "channels_first":  # better to use enum than raw str
+        dico_conv["filters"] = input_shape[0]
     else:
-            dico_conv["filters"] = input_shape[-1]
+        dico_conv["filters"] = input_shape[-1]
 
     dico_conv["use_bias"] = False
     dico_conv["padding"] = "valid"
@@ -38,22 +34,21 @@ def init_backward_conv1D(layer, input_dim_wo_batch, output_dim_wo_batch):
 
     input_shape_wo_batch = input_dim_wo_batch
     input_shape_wo_batch_wo_pad = list(
-            layer_backward(Input(output_dim_wo_batch))[0].shape
+        layer_backward(Input(output_dim_wo_batch))[0].shape
     )
 
     if layer.data_format == "channels_first":
-            w_pad = input_shape_wo_batch[1] - input_shape_wo_batch_wo_pad[1]
+        w_pad = input_shape_wo_batch[1] - input_shape_wo_batch_wo_pad[1]
     else:
-            w_pad = input_shape_wo_batch[0] - input_shape_wo_batch_wo_pad[0]
+        w_pad = input_shape_wo_batch[0] - input_shape_wo_batch_wo_pad[0]
 
     pad_layers = pooling_layer1D(w_pad, layer.data_format)
     if len(pad_layers):
-            layer_backward = Sequential([layer_backward] + pad_layers)
-            _ = layer_backward(Input(output_dim_wo_batch))
+        layer_backward = Sequential([layer_backward] + pad_layers)
+        _ = layer_backward(Input(output_dim_wo_batch))
 
     return layer_backward
 
-        
 
 class BackwardConv1D(BackwardLinearLayer):
     """
@@ -76,7 +71,9 @@ class BackwardConv1D(BackwardLinearLayer):
         **kwargs,
     ):
         super().__init__(layer=layer, **kwargs)
-        self.layer_backward = init_backward_conv1D(layer, self.input_dim_wo_batch, self.output_dim_wo_batch)
+        self.layer_backward = init_backward_conv1D(
+            layer, self.input_dim_wo_batch, self.output_dim_wo_batch
+        )
 
 
 class BackwardConv1DWithActivation(BackwardWithActivation):
@@ -93,12 +90,18 @@ class BackwardConv1DWithActivation(BackwardWithActivation):
     backward_layer = BackwardConv1DWithActivation(conv_layer)
     output = backward_layer(input_tensor)
     """
+
     def __init__(
         self,
         layer: Conv1D,
         **kwargs,
     ):
-        super().__init__(layer=layer, backward_linear=BackwardConv1D, backward_activation=BackwardActivation,**kwargs)
+        super().__init__(
+            layer=layer,
+            backward_linear=BackwardConv1D,
+            backward_activation=BackwardActivation,
+            **kwargs,
+        )
 
 
 def get_backward_Conv1D(layer: Conv1D) -> Layer:
@@ -123,7 +126,7 @@ def get_backward_Conv1D(layer: Conv1D) -> Layer:
     output = backward_layer(input_tensor)
     """
     # check whether there is a non linear activation
-    if layer.get_config()['activation']=='linear':
+    if layer.get_config()["activation"] == "linear":
         return BackwardConv1D(layer)
     else:
         return BackwardConv1DWithActivation(layer)

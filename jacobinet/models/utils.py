@@ -13,18 +13,24 @@ from keras.layers import Layer, InputLayer
 from keras import KerasTensor as Tensor
 from typing import Union, Optional, Tuple, Any, List, Callable
 
-def to_list(tensor:Union[Tensor, List[Tensor]])->List[Tensor]:
-        if isinstance(tensor, list):
-            return tensor
-        return [tensor]
+
+def to_list(tensor: Union[Tensor, List[Tensor]]) -> List[Tensor]:
+    if isinstance(tensor, list):
+        return tensor
+    return [tensor]
+
 
 def is_linear(model_backward: keras.models.Model) -> bool:
-    return hasattr(model_backward, 'is_linear') and model_backward.is_linear
+    return hasattr(model_backward, "is_linear") and model_backward.is_linear
+
 
 def is_linear_layer(layer):
-    if not (isinstance(layer, BackwardLayer) or (hasattr(layer, 'is_linear'))):
+    if not (isinstance(layer, BackwardLayer) or (hasattr(layer, "is_linear"))):
         return True
-    return isinstance(layer, BackwardLinearLayer) or (hasattr(layer, 'is_linear') and layer.is_linear)
+    return isinstance(layer, BackwardLinearLayer) or (
+        hasattr(layer, "is_linear") and layer.is_linear
+    )
+
 
 def get_backward(
     layer: Union[Layer, Model],
@@ -39,6 +45,7 @@ def get_backward(
     else:
 
         raise NotImplementedError()
+
 
 class GradConstant(Layer):
 
@@ -81,6 +88,7 @@ def get_gradient(grad: Tensor, input) -> Tuple[Any, bool]:
     # else return it as a Constant of a layer
     constant = GradConstant(gradient=grad)(input)
     return constant
+
 
 class FuseGradients(Layer):
 

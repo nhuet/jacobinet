@@ -1,5 +1,15 @@
-from keras.layers import Layer, DepthwiseConv1D, Conv1DTranspose, Reshape, Activation
-from jacobinet.layers.layer import BackwardLinearLayer, BackwardNonLinearLayer, BackwardWithActivation
+from keras.layers import (
+    Layer,
+    DepthwiseConv1D,
+    Conv1DTranspose,
+    Reshape,
+    Activation,
+)
+from jacobinet.layers.layer import (
+    BackwardLinearLayer,
+    BackwardNonLinearLayer,
+    BackwardWithActivation,
+)
 from jacobinet.layers.core.activations import BackwardActivation
 from jacobinet.layers.utils import pooling_layer1D
 from keras.models import Sequential
@@ -7,7 +17,6 @@ import keras.ops as K
 
 from typing import List
 from keras import KerasTensor as Tensor
-
 
 
 class BackwardDepthwiseConv1D(BackwardLinearLayer):
@@ -157,17 +166,21 @@ class BackwardDepthwiseConv1DWithActivation(BackwardWithActivation):
     backward_layer = BackwardDepthwiseConv1DWithActivatio(conv_layer)
     output = backward_layer(input_tensor)
     """
+
     def __init__(
         self,
         layer: DepthwiseConv1D,
         **kwargs,
     ):
-        super().__init__(layer=layer, backward_linear=BackwardDepthwiseConv1D, backward_activation=BackwardActivation,**kwargs)
+        super().__init__(
+            layer=layer,
+            backward_linear=BackwardDepthwiseConv1D,
+            backward_activation=BackwardActivation,
+            **kwargs,
+        )
 
 
-def get_backward_DepthwiseConv1D(
-    layer: DepthwiseConv1D
-) -> Layer:
+def get_backward_DepthwiseConv1D(layer: DepthwiseConv1D) -> Layer:
     """
     This function creates a `BackwardDepthwiseConv1D` layer based on a given `DepthwiseConv1D` layer. It provides
     a convenient way to obtain a backward pass of the input `DepthwiseConv1D` layer, using the
@@ -189,7 +202,7 @@ def get_backward_DepthwiseConv1D(
     backward_layer = get_backward_DepthwiseConv1D(depthwise_conv_layer)
     output = backward_layer(input_tensor)
     """
-    if layer.get_config()['activation']=='linear':
+    if layer.get_config()["activation"] == "linear":
         return BackwardDepthwiseConv1D(layer)
     else:
         return BackwardDepthwiseConv1DWithActivation(layer)

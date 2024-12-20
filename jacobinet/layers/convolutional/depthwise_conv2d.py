@@ -1,4 +1,10 @@
-from keras.layers import Layer, DepthwiseConv2D, Conv2DTranspose, Reshape, Activation
+from keras.layers import (
+    Layer,
+    DepthwiseConv2D,
+    Conv2DTranspose,
+    Reshape,
+    Activation,
+)
 from keras.models import Sequential
 import keras.ops as K
 from jacobinet.layers.layer import BackwardLinearLayer, BackwardWithActivation
@@ -137,7 +143,7 @@ class BackwardDepthwiseConv2D(BackwardLinearLayer):
         )
         return output
 
-    
+
 class BackwardDepthwiseConv2DWithActivation(BackwardWithActivation):
     """
     This class implements a custom layer for backward pass of a `DepthwiseConv2D` layer in Keras with a non linear activation function.
@@ -152,17 +158,21 @@ class BackwardDepthwiseConv2DWithActivation(BackwardWithActivation):
     backward_layer = BackwardDepthwiseConv2DWithActivatio(conv_layer)
     output = backward_layer(input_tensor)
     """
+
     def __init__(
         self,
         layer: DepthwiseConv2D,
         **kwargs,
     ):
-        super().__init__(layer=layer, backward_linear=BackwardDepthwiseConv2D, backward_activation=BackwardActivation,**kwargs)
+        super().__init__(
+            layer=layer,
+            backward_linear=BackwardDepthwiseConv2D,
+            backward_activation=BackwardActivation,
+            **kwargs,
+        )
 
-    
-def get_backward_DepthwiseConv2D(
-    layer: DepthwiseConv2D
-) -> Layer:
+
+def get_backward_DepthwiseConv2D(layer: DepthwiseConv2D) -> Layer:
     """
     This function creates a `BackwardDepthwiseConv2D` layer based on a given `DepthwiseConv2D` layer. It provides
     a convenient way to obtain a backward pass of the input `DepthwiseConv2D` layer, using the
@@ -184,8 +194,7 @@ def get_backward_DepthwiseConv2D(
     backward_layer = get_backward_DepthwiseConv2D(depthwise_conv_layer)
     output = backward_layer(input_tensor)
     """
-    if layer.get_config()['activation']=='linear':
+    if layer.get_config()["activation"] == "linear":
         return BackwardDepthwiseConv2D(layer)
     else:
         return BackwardDepthwiseConv2DWithActivation(layer)
-

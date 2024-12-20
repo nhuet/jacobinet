@@ -137,7 +137,6 @@ class BackwardDepthwiseConv3D(BackwardLinearLayer):
             gradient
         )  # (batch, d_m, c_in, d_out, w_out, h_out) if data_format=channel_first
 
-
         split_outputs = K.split(
             outputs, self.c_in, axis=self.axis_c
         )  # [(batch, d_m, 1, d_out, w_out, h_out)]
@@ -155,9 +154,7 @@ class BackwardDepthwiseConv3D(BackwardLinearLayer):
         return output
 
 
-def get_backward_DepthwiseConv3D(
-    layer: DepthwiseConv3D
-) -> Layer:
+def get_backward_DepthwiseConv3D(layer: DepthwiseConv3D) -> Layer:
     """
     This function creates a `BackwardDepthwiseConv3D` layer based on a given `DepthwiseConv3D` layer. It provides
     a convenient way to obtain a backward pass of the input `DepthwiseConv3D` layer, using the

@@ -60,4 +60,3 @@ class BackwardMergeNonLinearLayer(BackwardNonLinearLayer):
     """
 
     layer: Merge
-

@@ -20,7 +20,7 @@ def get_backward_sequential(
         dict[type[Layer], type[BackwardLayer]]
     ] = None,
     extra_inputs: List[Input] = [],
-    get_backward:Callable = get_backward_layer
+    get_backward: Callable = get_backward_layer,
 ):
     # get input_dim without batch
     input_dim_wo_batch = list(model.inputs[0].shape[1:])
@@ -34,11 +34,11 @@ def get_backward_sequential(
         else:
             grad = gradient
 
-        if hasattr(grad, '_keras_history'):
+        if hasattr(grad, "_keras_history"):
             grad_input = isinstance(grad._keras_history.operation, InputLayer)
         else:
             grad_input = False
-                
+
     # convert every layers
     layers_backward = [
         get_backward(
@@ -49,10 +49,7 @@ def get_backward_sequential(
     ]
     # check if the layers are all linear
     is_linear = min(
-        [
-            is_linear_layer(layer_backward)
-            for layer_backward in layers_backward
-        ]
+        [is_linear_layer(layer_backward) for layer_backward in layers_backward]
     )
     if is_linear:
         if gradient is None:
@@ -82,7 +79,7 @@ def get_backward_sequential(
             grad_input = True
         else:
             gradient = get_gradient(gradient, input_tensor)
-        
+
         # forward propagation
         dico_input_layer = dict()
         output = None
@@ -90,13 +87,19 @@ def get_backward_sequential(
             if output is None:
                 if isinstance(backward_layer, BackwardNonLinearLayer):
                     dico_input_layer[id(backward_layer)] = input_tensor
-                elif isinstance(backward_layer, BackwardModel) and not backward_layer.is_linear: 
+                elif (
+                    isinstance(backward_layer, BackwardModel)
+                    and not backward_layer.is_linear
+                ):
                     dico_input_layer[id(backward_layer)] = input_tensor
                 output = layer(input_tensor)
             else:
                 if isinstance(backward_layer, BackwardNonLinearLayer):
                     dico_input_layer[id(backward_layer)] = output
-                elif isinstance(backward_layer, BackwardModel) and not backward_layer.is_linear: 
+                elif (
+                    isinstance(backward_layer, BackwardModel)
+                    and not backward_layer.is_linear
+                ):
                     dico_input_layer[id(backward_layer)] = output
                 output = layer(output)
 
@@ -110,20 +113,25 @@ def get_backward_sequential(
             if isinstance(backward_layer, BackwardLinearLayer):
                 # no need for forward input
                 output_backward = backward_layer(input_backward[0])
-            elif hasattr(backward_layer, 'is_linear') and backward_layer.is_linear:
+            elif (
+                hasattr(backward_layer, "is_linear")
+                and backward_layer.is_linear
+            ):
                 # no need for forward input
                 output_backward = backward_layer(input_backward[0])
-            elif (isinstance(backward_layer, BackwardModel) or isinstance(backward_layer, BackwardSequential)):
+            elif isinstance(backward_layer, BackwardModel) or isinstance(
+                backward_layer, BackwardSequential
+            ):
                 input_forward = dico_input_layer[id(backward_layer)]
-                input_backward = [input_forward]+input_backward
+                input_backward = [input_forward] + input_backward
                 output_backward = backward_layer(input_backward)
             else:
                 input_forward = dico_input_layer[id(backward_layer)]
-                #input_backward = [input_forward]+input_backward
+                # input_backward = [input_forward]+input_backward
                 input_backward.append(input_forward)
                 output_backward = backward_layer(input_backward)
 
-        inputs = [input_tensor]+extra_inputs
+        inputs = [input_tensor] + extra_inputs
         if grad_input:
             inputs.append(gradient)
 

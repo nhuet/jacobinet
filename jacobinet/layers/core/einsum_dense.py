@@ -34,7 +34,7 @@ class BackwardEinsumDense(BackwardLinearLayer):
     ):
 
         output = ops.einsum(
-                self.layer.equation, gradient, K.transpose(self.layer.kernel)
+            self.layer.equation, gradient, K.transpose(self.layer.kernel)
         )
 
         return output

@@ -24,7 +24,9 @@ class BackwardMinimum(BackwardMergeNonLinearLayer):
         self, gradient, input=None, training=None, mask=None
     ):
         output_layer = self.layer(input)
-        return [gradient*(K.sign(output_layer-input_i) + 1) for input_i in input]
+        return [
+            gradient * (K.sign(output_layer - input_i) + 1) for input_i in input
+        ]
 
 
 def get_backward_Minimum(layer: Minimum) -> Layer:

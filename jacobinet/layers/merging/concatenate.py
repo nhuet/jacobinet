@@ -35,7 +35,11 @@ class BackwardConcatenate(BackwardMergeLinearLayer):
     def call_on_reshaped_gradient(
         self, gradient, input=None, training=None, mask=None
     ):
-        return K.split(gradient, indices_or_sections=K.cumsum(self.dims[:-1]), axis=self.layer.axis)
+        return K.split(
+            gradient,
+            indices_or_sections=K.cumsum(self.dims[:-1]),
+            axis=self.layer.axis,
+        )
 
 
 def get_backward_Concatenate(layer: Concatenate) -> Layer:

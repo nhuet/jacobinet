@@ -11,6 +11,7 @@ from jacobinet import get_backward_layer
 
 import numpy as np
 
+
 def get_backward_node(
     node: None,
     gradient: Tensor,
@@ -18,7 +19,7 @@ def get_backward_node(
         dict[type[Layer], type[BackwardLayer]]
     ] = None,
     input_name=None,
-    get_backward:Callable=get_backward_layer,
+    get_backward: Callable = get_backward_layer,
 ):
     # step 1: get parents
     parent_nodes: List[None] = node.parent_nodes
@@ -32,7 +33,7 @@ def get_backward_node(
         if input_name is None:
             return gradient, True, True
         else:
-            return gradient, True, layer_node.output.name==input_name
+            return gradient, True, layer_node.output.name == input_name
 
     # step 4: get backward layer
     backward_layer_node: BackwardLayer = get_backward(
@@ -49,7 +50,7 @@ def get_backward_node(
         else:
             is_linear = False
             layer_node_inputs = to_list(layer_node.input)
-            gradients = backward_layer_node(layer_node_inputs+[gradient])
+            gradients = backward_layer_node(layer_node_inputs + [gradient])
     elif isinstance(layer_node, Model):
         if backward_layer_node.is_linear:
             gradients = backward_layer_node(gradient)
@@ -60,7 +61,7 @@ def get_backward_node(
             layer_node_inputs = []
             for parent_node in parent_nodes:
                 layer_node_inputs = to_list(parent_node.operation.output)
-            gradients = backward_layer_node(layer_node_inputs+[gradient])
+            gradients = backward_layer_node(layer_node_inputs + [gradient])
     else:
         layer_node_inputs = to_list(layer_node.input)
         gradients = backward_layer_node([gradient] + layer_node_inputs)
@@ -69,11 +70,19 @@ def get_backward_node(
     keep_output = True
     if backward_layer_node.n_input != 1:
         results = [
-            get_backward_node(p_node, p_grad, mapping_keras2backward_classes, input_name, get_backward=get_backward)
+            get_backward_node(
+                p_node,
+                p_grad,
+                mapping_keras2backward_classes,
+                input_name,
+                get_backward=get_backward,
+            )
             for (p_node, p_grad) in zip(parent_nodes, gradients)
         ]
 
-        results = [r for r in results if r[-1]] # keep the parents whom is connected to the right input
+        results = [
+            r for r in results if r[-1]
+        ]  # keep the parents whom is connected to the right input
 
         if len(results):
             outputs = [
@@ -86,11 +95,17 @@ def get_backward_node(
             fuse_layer = FuseGradients()
             output = fuse_layer(outputs)
         else:
-            output= None
+            output = None
             is_linear = False
             keep_output = False
     else:
-        result = get_backward_node(parent_nodes[0], gradients, mapping_keras2backward_classes, input_name, get_backward=get_backward)
+        result = get_backward_node(
+            parent_nodes[0],
+            gradients,
+            mapping_keras2backward_classes,
+            input_name,
+            get_backward=get_backward,
+        )
         output = result[0]
         keep_output = result[-1]
         if is_linear:

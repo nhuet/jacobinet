@@ -8,6 +8,7 @@ from jacobinet.layers.core.activations import BackwardActivation
 
 from keras import KerasTensor as Tensor
 
+
 class BackwardConv2D(BackwardLinearLayer):
     """
     This class implements a custom layer for backward pass of a `Conv2D` layer in Keras.
@@ -85,12 +86,18 @@ class BackwardConv2DWithActivation(BackwardWithActivation):
     backward_layer = BackwardConv2DWithActivation(conv_layer)
     output = backward_layer(input_tensor)
     """
+
     def __init__(
         self,
         layer: Conv2D,
         **kwargs,
     ):
-        super().__init__(layer=layer, backward_linear=BackwardConv2D, backward_activation=BackwardActivation,**kwargs)
+        super().__init__(
+            layer=layer,
+            backward_linear=BackwardConv2D,
+            backward_activation=BackwardActivation,
+            **kwargs,
+        )
 
 
 def get_backward_Conv2D(layer: Conv2D) -> Layer:
@@ -114,7 +121,7 @@ def get_backward_Conv2D(layer: Conv2D) -> Layer:
     backward_layer = get_backward_Conv2D(conv_layer)
     output = backward_layer(input_tensor)
     """
-    if layer.get_config()['activation']=='linear':
+    if layer.get_config()["activation"] == "linear":
         return BackwardConv2D(layer)
     else:
         return BackwardConv2DWithActivation(layer)
