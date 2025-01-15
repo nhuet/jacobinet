@@ -7,6 +7,7 @@ from keras.layers import (
     ReLU,
     Conv2D,
     DepthwiseConv2D,
+    AveragePooling2D,
     Input,
 )
 from keras.models import Sequential, Model
@@ -16,6 +17,7 @@ from jacobinet.models import clone_to_backward
 from .conftest import compute_backward_model, serialize_model, compute_output
 import numpy as np
 import torch
+import pytest
 
 # preliminary tests: gradient is derived automatically by considering single output model
 
@@ -50,6 +52,19 @@ def test_sequential_multiD():
 
     input_dim = 36
     layers = [Reshape((1, 6, 6)), Conv2D(2, (3, 3)), ReLU(), Reshape((-1,)), Dense(1)]
+    model = Sequential(layers)
+    _ = model(torch.ones((1, input_dim)))
+    backward_model = clone_to_backward(model)
+    # model is not linear
+    _ = backward_model([torch.ones((1, input_dim)), torch.ones((1,1))])
+    compute_backward_model((input_dim,), model, backward_model)
+    serialize_model([input_dim, 1], backward_model)
+
+@pytest.mark.parametrize("padding", ["valid", "same"])
+def test_sequential_multiD_pooling(padding):
+
+    input_dim = 36
+    layers = [Reshape((1, 6, 6)), AveragePooling2D((2, 2), (1, 1), padding=padding), ReLU(), Reshape((-1,)), Dense(1)]
     model = Sequential(layers)
     _ = model(torch.ones((1, input_dim)))
     backward_model = clone_to_backward(model)
