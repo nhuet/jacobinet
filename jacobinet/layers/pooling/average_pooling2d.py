@@ -27,7 +27,7 @@ ArrayLike = numpy.typing.ArrayLike
 Tensor = keras.KerasTensor
 
 
-class CroppingReflect(keras.layers.Layer):
+class CroppingReflect2D(keras.layers.Layer):
     """Custom Keras Layer that applies the backward pass for the padding of AveragePooling2D with padding same
     This operation operates a non standard pooling function (not ZeroPadding), but duplicate the last lines and cols to get the right shape
     """
@@ -36,7 +36,7 @@ class CroppingReflect(keras.layers.Layer):
         """
         
         """
-        super(CroppingReflect, self).__init__(**kwargs)
+        super(CroppingReflect2D, self).__init__(**kwargs)
         
         self.pad_top = pad_top
         self.pad_bottom = pad_bottom
@@ -228,7 +228,7 @@ class BackwardAveragePooling2D(BackwardLinearLayer):
                 inner_input_dim_wo_batch= inner_input_dim_wo_batch+[self.input_dim_wo_batch[0]]
 
 
-            pad_layer= CroppingReflect(input_dim_wo_batch= inner_input_dim_wo_batch,
+            pad_layer= CroppingReflect2D(input_dim_wo_batch= inner_input_dim_wo_batch,
                              pad_top=pad_top, pad_bottom=pad_bottom, pad_left=pad_left, pad_right=pad_right, data_format='channels_first')
             pad_layers = [pad_layer]
 

@@ -125,9 +125,18 @@ def compute_backward_layer(
 
 
 def compute_backward_model(
-    input_shape, model, backward_model, index_output=0, grad_value=None
+    input_shape, model, backward_model, index_output=0, grad_value=None, value="rand"
 ):
-    input_ = torch.randn(np.prod(input_shape), requires_grad=True)
+    if value =="rand":
+        input_np = np.asarray(100.*np.random.rand(np.prod(input_shape)) - 50., dtype='float32')
+    elif value== "zeros":
+        input_np = np.asarray(0.*np.random.rand(np.prod(input_shape)) - 0., dtype='float32')
+    elif value=="ones":
+        input_np = np.asarray(0.*np.random.rand(np.prod(input_shape)) + 1., dtype='float32')
+    else:
+        raise ValueError('unknown value {}'.format(value))
+    #input_ = torch.randn(np.prod(input_shape), requires_grad=True)
+    input_ = torch.tensor(input_np, requires_grad=True)
     input_reshape = torch.reshape(input_, [1] + list(input_shape))
     output = model(input_reshape)
     select_output = output[0, index_output]

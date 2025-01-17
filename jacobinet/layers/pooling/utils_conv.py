@@ -4,15 +4,30 @@ import keras.ops as K
 
 import numpy as np
 
-from typing import Dict
+from typing import Dict, List
 
 
-def get_in_channels(layer) -> int:
+def get_in_channels(data_format, input_dim_wo_shape) -> int:
     in_channels: int
+    """
+    try:
+        layer.input
+    except AttributeError:
+        import pdb; pdb.set_trace()
+    """
+
+    """
     if layer.data_format == "channels_last":
         in_channels = layer.input.shape[-1]
     else:
         in_channels = layer.input.shape[1]
+
+    return in_channels
+    """
+    if data_format == "channels_last":
+        in_channels = input_dim_wo_shape.shape[-1]
+    else:
+        in_channels = input_dim_wo_shape[0]
 
     return in_channels
 
@@ -48,17 +63,19 @@ def get_conv_op_config(config: Dict, in_channels: int) -> keras.Variable:
     return keras.Variable(kernel_pool, trainable=False)
 
 
-def get_conv_op(layer: MaxPooling2D) -> DepthwiseConv2D:
+def get_conv_op(layer: MaxPooling2D, input_dim_wo_batch:List[int]) -> DepthwiseConv2D:
 
     config: Dict = layer.get_config()
-    in_channels = get_in_channels(layer)
+    #in_channels = get_in_channels(layer)
+    in_channels:int = get_in_channels(data_format=layer.data_format, input_dim_wo_shape=input_dim_wo_batch)
     kernel: keras.Variable = get_conv_op_config(config, in_channels)
 
     # define convolution
     filters: int = np.prod(config["pool_size"])
     pool_size: tuple[int] = config["pool_size"]
     strides: tuple[int] = config["strides"]
-    padding: str = config["padding"]
+    #padding: str = config["padding"]
+    padding:str = "valid"
     data_format: str = config["data_format"]
 
     layer_conv: DepthwiseConv2D = DepthwiseConv2D(

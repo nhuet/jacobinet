@@ -8,6 +8,7 @@ from keras.layers import (
     Conv2D,
     DepthwiseConv2D,
     AveragePooling2D,
+    MaxPooling2D, 
     Input,
 )
 from keras.models import Sequential, Model
@@ -60,17 +61,27 @@ def test_sequential_multiD():
     compute_backward_model((input_dim,), model, backward_model)
     serialize_model([input_dim, 1], backward_model)
 
-@pytest.mark.parametrize("padding", ["valid", "same"])
-def test_sequential_multiD_pooling(padding):
 
-    input_dim = 36
-    layers = [Reshape((1, 6, 6)), AveragePooling2D((2, 2), (1, 1), padding=padding), ReLU(), Reshape((-1,)), Dense(1)]
+@pytest.mark.parametrize("padding, layer_name", [("valid", "average"), ("same","average"), ("valid", "max"), ("same","max") ])
+def test_sequential_multiD_pooling(padding, layer_name):
+
+    input_shape = (1, 3, 6)
+    input_dim = np.prod(input_shape)
+    layer_ = None
+    if layer_name=="average":
+        layer_ = AveragePooling2D((2, 2), (1, 1), padding=padding)
+    if layer_name =="max":
+        layer_ = MaxPooling2D((2, 2), (1, 2), padding=padding)
+    layers = [Reshape(input_shape), layer_, ReLU(), Reshape((-1,)), Dense(1)]
     model = Sequential(layers)
     _ = model(torch.ones((1, input_dim)))
+
     backward_model = clone_to_backward(model)
     # model is not linear
     _ = backward_model([torch.ones((1, input_dim)), torch.ones((1,1))])
-    compute_backward_model((input_dim,), model, backward_model)
+    compute_backward_model((input_dim,), model, backward_model, value="rand")
+    compute_backward_model((input_dim,), model, backward_model, value="zeros")
+    compute_backward_model((input_dim,), model, backward_model, value="ones")
     serialize_model([input_dim, 1], backward_model)
 
 
