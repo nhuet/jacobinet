@@ -6,14 +6,17 @@ from keras.layers import (
     GlobalAveragePooling2D,
     GlobalAveragePooling1D,
     MaxPooling2D,
+    GlobalMaxPooling2D,
 )
 
 # comparison with depthwiseConv for AveragePooling
 from keras.layers import DepthwiseConv2D, DepthwiseConv1D
-from keras.layers import Dense, Reshape, Flatten
-from keras.models import Sequential
+from keras.layers import Dense, Reshape, Flatten, ReLU, Input
+from keras.models import Sequential, Model
 from jacobinet import get_backward_layer as get_backward
 from jacobinet.models import get_backward_sequential
+from jacobinet.models import clone_to_backward
+
 import numpy as np
 from .conftest import (
     linear_mapping,
@@ -25,7 +28,7 @@ import pytest
 
 import torch
 
-"""
+
 ####### AveragePooling2D #######
 # pool_size, strides=None, padding="valid", data_format=None
 def _test_backward_AveragePooling2D(input_shape, pool_size, strides, padding):
@@ -344,44 +347,28 @@ def test_backward_GlobalAveragePooling1D():
     input_shape = (2, 31)
     _test_backward_GlobalAveragePooling1D(input_shape, keepdims=True)
     _test_backward_GlobalAveragePooling1D(input_shape, keepdims=False)
-"""
+
 
 ###### MaxPooling2D ######
 def _test_backward_MaxPooling2D(input_shape, pool_size, strides, padding):
-    """
-    input_shape = [3, 2, 2]
-    layer = MaxPooling2D(pool_size=pool_size, strides=strides, padding=padding, data_format="channels_first")
-    #layers = [Reshape((2, 2, 2)), layer, Reshape((-1,)), Dense(1, use_bias=False)]
-    layers = [layer, Reshape((-1,)), Dense(1, use_bias=False)]
-    model = Sequential(layers)
-    _ = model(torch.ones([1]+input_shape))
-    #_ = model(torch.ones((1, input_dim)))
-    backward_model = get_backward_sequential(model)
-    # model is not linear
-    _ = backward_model([np.ones([1]+input_shape), np.ones((1,1))])
-    compute_backward_model(input_shape, model, backward_model)
-    """
 
     # data_format == 'channels_last'
-    input_dim = 4 * 2
-    input_shape = (20, 20, 3)
+    input_dim = np.prod(input_shape)
     layer = MaxPooling2D(
         pool_size=pool_size,
         strides=strides,
         padding=padding,
-        data_format="channels_last",
+        data_format="channels_first",
     )
-    # layers = [Reshape((2, 2, 2)), layer, Reshape((-1,)), Dense(1, use_bias=False)]
-    layers = [layer, Reshape((-1,)), Dense(1, use_bias=False)]
+    layers = [Reshape(input_shape), layer, Reshape((-1,)), Dense(1, use_bias=False)]
     model = Sequential(layers)
-    _ = model(torch.ones((1, 20, 20, 3)))
-    # _ = model(torch.ones((1, input_dim)))
-    backward_model = get_backward_sequential(model)
+
+    _ = model(torch.ones((1, input_dim)))
+    backward_model = clone_to_backward(model)
     # model is not linear
-    _ = backward_model([np.ones((1, 20, 20, 3)), np.ones((1, 1))])
-    # compute_backward_model((input_dim,), model, backward_model)
-    compute_backward_model(input_shape, model, backward_model)
-    # serialize_model([input_dim], model)
+    _ = backward_model([torch.ones((1, input_dim)), torch.ones((1,1))])
+    compute_backward_model((input_dim,), model, backward_model)
+    serialize_model([input_dim, 1], backward_model)
 
 
 def test_backward_MaxPooling2D():
@@ -391,7 +378,7 @@ def test_backward_MaxPooling2D():
     padding = "valid"
     input_shape = (1, 32, 32)
     _test_backward_MaxPooling2D(input_shape, pool_size, strides, padding)
-
+    
     pool_size = (3, 3)
     strides = (2, 1)
     padding = "valid"
@@ -404,3 +391,41 @@ def test_backward_MaxPooling2D():
     padding = "valid"
     input_shape = (1, 31, 32)
     _test_backward_MaxPooling2D(input_shape, pool_size, strides, padding)
+    
+
+####### GlobalAveragePooling2D #######
+# pool_size, strides=None, padding="valid", data_format=None
+def _test_backward_GlobalMaxPooling2D(input_shape, keepdims):
+
+    # data_format == 'channels_first'
+    layer = GlobalMaxPooling2D(
+        keepdims=keepdims, data_format="channels_first"
+    )
+
+    # build a model
+    input_dim = np.prod(input_shape)
+    layers = [Reshape(input_shape), layer, Reshape((-1,)), Dense(1)]
+    input_ = Input((input_dim,))
+    output=None
+    for layer in layers:
+        if output is None:
+            output = layer(input_)
+        else:
+            output = layer(output)
+    model = Model(input_, output)
+    _ = model(torch.ones((1, input_dim)))
+    backward_model = clone_to_backward(model)
+    # model is not linear
+    _ = backward_model([torch.ones((1, input_dim)), torch.ones((1,1))])
+    compute_backward_model((input_dim,), model, backward_model)
+    serialize_model([input_dim, 1], backward_model)
+
+def test_backward_GlobalMaxPooling2D():
+
+    input_shape = (1, 5, 5)
+    _test_backward_GlobalMaxPooling2D(input_shape, keepdims=True)
+    _test_backward_GlobalMaxPooling2D(input_shape, keepdims=False)
+
+    input_shape = (2, 31, 32)
+    _test_backward_GlobalMaxPooling2D(input_shape, keepdims=True)
+    _test_backward_GlobalMaxPooling2D(input_shape, keepdims=False)

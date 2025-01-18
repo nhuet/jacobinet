@@ -8,3 +8,6 @@ from .flatten import get_backward_Flatten
 from .reshape import get_backward_Reshape, BackwardReshape
 from .permute import get_backward_Permute
 from .repeat_vector import get_backward_RepeatVector
+from .upsampling2D import get_backward_UpSampling2D
+from .upsampling1d import get_backward_UpSampling1D
+from .upsampling3d import get_backward_UpSampling3D

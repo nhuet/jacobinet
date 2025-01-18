@@ -203,28 +203,6 @@ class BackwardMaxPooling2D(BackwardNonLinearLayer):
                 )
 
         return output
-"""
-    def call_on_reshaped_gradient(
-        self, gradient, input=None, training=None, mask=None
-    ):
-        if self.layer.padding=='same':
-            const = 0.
-            input =  K.pad(input, self.pad_width, mode="constant", constant_values=const)
-
-        inner_input = self.reshape_op(self.conv_op(input))
-
-        backward_max = max_prime(inner_input, axis=self.axis) #torch.Size([83, 1, 2, 3]) torch.Size([83, 1, 4, 2, 3])
-        backward_max_fuse = backward_max * K.expand_dims(
-            gradient, axis=self.axis
-        )
-
-        if self.layer.data_format == "channels_last":
-            backward_max_fuse = K.transpose(backward_max_fuse, (0, 1, 2, 4, 3))
-        backward_reshape = self.backward_reshape_op(backward_max_fuse)
-        output = self.backward_conv2d(backward_reshape)
-
-        return output
-"""
 
 
 def get_backward_MaxPooling2D(layer: MaxPooling2D) -> Layer:

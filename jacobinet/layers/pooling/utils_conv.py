@@ -25,7 +25,7 @@ def get_in_channels(data_format, input_dim_wo_shape) -> int:
     return in_channels
     """
     if data_format == "channels_last":
-        in_channels = input_dim_wo_shape.shape[-1]
+        in_channels = input_dim_wo_shape[-1]
     else:
         in_channels = input_dim_wo_shape[0]
 
@@ -75,7 +75,7 @@ def get_conv_op(layer: MaxPooling2D, input_dim_wo_batch:List[int]) -> DepthwiseC
     pool_size: tuple[int] = config["pool_size"]
     strides: tuple[int] = config["strides"]
     #padding: str = config["padding"]
-    padding:str = "valid"
+    padding = "valid"
     data_format: str = config["data_format"]
 
     layer_conv: DepthwiseConv2D = DepthwiseConv2D(

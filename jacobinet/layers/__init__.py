@@ -18,6 +18,9 @@ from .reshaping import (
     get_backward_Flatten,
     get_backward_Permute,
     get_backward_RepeatVector,
+    get_backward_UpSampling2D,
+    get_backward_UpSampling1D,
+    get_backward_UpSampling3D
 )
 from .pooling import (
     get_backward_AveragePooling2D,
@@ -27,6 +30,7 @@ from .pooling import (
     get_backward_GlobalAveragePooling1D,
     get_backward_GlobalAveragePooling3D,
     get_backward_MaxPooling2D,
+    get_backward_GlobalMaxPooling2D,
 )
 
 from .core import (

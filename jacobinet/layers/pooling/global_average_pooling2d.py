@@ -20,6 +20,7 @@ class BackwardGlobalAveragePooling2D(BackwardLinearLayer):
     backward_layer = BackwardGlobalAveragePooling2D(average_pooling_layer)
     output = backward_layer(input_tensor)
     """
+    layer:GlobalAveragePooling2D
 
     def call_on_reshaped_gradient(
         self, gradient, input=None, training=None, mask=None
