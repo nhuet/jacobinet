@@ -56,7 +56,7 @@ def get_conv_op_config(config: Dict, in_channels: int) -> keras.Variable:
         -2,
     )
     # repeat along in_channels axis for compatibility with DepthwiseConv2D
-    kernel_pool = np.repeat(kernel_pool, in_channels, 2)
+    kernel_pool = np.astype(np.repeat(kernel_pool, in_channels, 2), 'float32')
 
     # warning data_format (channel_last or channel_first)
 

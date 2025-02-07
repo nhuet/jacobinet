@@ -122,7 +122,7 @@ class BackwardMaxPooling2D(BackwardNonLinearLayer):
         x_2 = self.reshape_op(x_1)
 
         # init input/output of every layer by creating a model
-        self.inner_model = Model(x, x_2)
+        self.linear_block = Model(x, x_2)
         self.backward_reshape_op = BackwardReshape(layer=self.reshape_op)
 
         backward_conv2d = BackwardDepthwiseConv2D(layer=self.conv_op)
@@ -164,7 +164,7 @@ class BackwardMaxPooling2D(BackwardNonLinearLayer):
         )
         # gradient_ (batch*prod(n_out), output_dim_wo_batch...)= (batch*prod(n_out), C, W_out, H_out) if channel_first
 
-        input_max = self.inner_model(layer_input) # (batch, C, pool_size, W_out, H_out)
+        input_max = self.linear_block(layer_input) # (batch, C, pool_size, W_out, H_out)
         backward_max = max_prime(input_max, axis=self.axis) # (batch, C, pool_size, W_out, H_out)
         # combine backward_max with gradient, we first need to reshape gradient_
         inner_input_dim_wo_batch = list(backward_max.shape[1:4]) # =(C, pool_size, W_out, H_out)
