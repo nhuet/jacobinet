@@ -177,7 +177,7 @@ class BackwardAveragePooling2D(BackwardLinearLayer):
             use_bias=False,
             trainable=False,
         )
-        kernel_ = np.ones(pool_size + [1, 1]) / np.prod(pool_size)
+        kernel_ = np.ones(pool_size + [1, 1], dtype="float32") / np.prod(pool_size)
         layer_t.kernel = keras.Variable(kernel_)
         layer_t.built = True
 

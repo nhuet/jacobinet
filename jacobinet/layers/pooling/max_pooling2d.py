@@ -152,6 +152,8 @@ class BackwardMaxPooling2D(BackwardNonLinearLayer):
                 # init
                 self.backward_conv2d(Input(self.output_dim_wo_batch))
 
+        self.linear_block_backward = Sequential([self.backward_reshape_op, backward_conv2d])
+
     def call(self, inputs, training=None, mask=None):
 
         layer_input = None
@@ -193,8 +195,9 @@ class BackwardMaxPooling2D(BackwardNonLinearLayer):
             gradient_ = K.reshape(gradient_, [-1]+inner_input_dim_wo_batch) # (batch*N_out, C, pool_size, W_out, H_out)
 
         # backward_reshape
-        backward_reshape = self.backward_reshape_op(gradient_) # (batch*N_out, C*pool_size, W_out, H_out)
-        output = self.backward_conv2d(backward_reshape) #(batch*N_out, C, W_in, H_in)
+        #backward_reshape = self.backward_reshape_op(gradient_) # (batch*N_out, C*pool_size, W_out, H_out)
+        #output = self.backward_conv2d(backward_reshape) #(batch*N_out, C, W_in, H_in)
+        output = self.linear_block_backward(gradient_) #(batch*N_out, C, W_in, H_in)
 
         # reshape_tag
         if reshape_tag:
