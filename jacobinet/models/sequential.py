@@ -1,5 +1,5 @@
-from keras.layers import Input, Layer, InputLayer
-from keras.models import Sequential, Model
+from keras.layers import Input, Layer, InputLayer  # type:ignore
+from keras.models import Sequential  # type:ignore
 from .base_model import BackwardModel, BackwardSequential
 
 from jacobinet import get_backward_layer
@@ -9,8 +9,8 @@ from jacobinet.layers.layer import (
     BackwardNonLinearLayer,
 )
 from .utils import get_gradient, is_linear_layer
-from keras import KerasTensor as Tensor
-from typing import Union, Optional, Tuple, Any, List, Callable
+from keras import KerasTensor as Tensor  # type:ignore
+from typing import Union, Optional, List, Callable
 
 
 def get_backward_sequential(
@@ -21,7 +21,35 @@ def get_backward_sequential(
     ] = None,
     extra_inputs: List[Input] = [],
     get_backward: Callable = get_backward_layer,
-):
+) -> Union[BackwardSequential, BackwardModel]:
+    """
+    Computes the backward propagation of gradients through a Sequential Keras model.
+
+    This function constructs a backward model for a given Keras `Sequential` model. It supports both linear and non-linear layers,
+    and handles the gradient computation accordingly. If the model is linear, it computes the gradients directly through the layers.
+    If the model is non-linear, it adjusts the computation by considering the individual layer's backward operations and chaining them.
+
+    Args:
+        model: The Keras Sequential model for which the backward propagation is to be computed.
+        gradient: The gradient tensor to be propagated backward through the model.
+            If `None`, a placeholder for the gradient is created, and it will be computed automatically.
+        mapping_keras2backward_classes: A dictionary that maps Keras layer types to their corresponding
+            backward layer classes. This is used to obtain the backward-compatible version of the layers.
+        extra_inputs: A list of extra inputs that may need to be added to the backward model.
+        get_backward: A callable that returns the backward version of a given Keras layer. Defaults to `get_backward_layer`.
+
+    Returns:
+        BackwardModel: The backward model constructed from the input Keras `Sequential` model. This model includes all layers in reverse order,
+        and supports backward propagation of gradients.
+
+    Raises:
+        NotImplementedError: If certain conditions arise that the function cannot handle, such as non-linear models with unsupported configurations.
+
+    Example:
+        ```python
+        backward_model = get_backward_sequential(model, gradient)
+        ```
+    """
     # get input_dim without batch
     input_dim_wo_batch = list(model.inputs[0].shape[1:])
     # for output_tensor in model.outputs:

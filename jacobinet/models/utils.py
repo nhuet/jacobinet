@@ -1,30 +1,84 @@
 import keras
-import keras.ops as K
-from keras.layers import Layer, Input
-from keras.models import Model, Sequential
+import keras.ops as K  # type:ignore
+from keras.layers import Layer  # type:ignore
+from keras.models import Model  # type:ignore
 from jacobinet.layers.layer import (
     BackwardLayer,
     BackwardLinearLayer,
-    BackwardNonLinearLayer,
 )
 from jacobinet.layers.convert import get_backward as get_backward_layer
-from keras.layers import Layer, InputLayer
+from keras.layers import Layer, InputLayer  # type:ignore
 
 from keras import KerasTensor as Tensor
 from typing import Union, Optional, Tuple, Any, List, Callable
 
 
 def to_list(tensor: Union[Tensor, List[Tensor]]) -> List[Tensor]:
+    """
+    Converts a single tensor or a list of tensors to a list of tensors.
+
+    If the input is already a list of tensors, it returns the list unchanged.
+    If the input is a single tensor, it wraps it in a list.
+
+    Args:
+        tensor: A single tensor or a list of tensors.
+
+    Returns:
+        List[Tensor]: A list containing the input tensor(s).
+
+    Example:
+        # Single tensor
+        tensor = tf.constant([1, 2, 3])
+        tensor_list = to_list(tensor)
+        print(tensor_list)  # Output: [tensor]
+
+        # List of tensors
+        tensor_list = to_list([tensor, tensor])
+        print(tensor_list)  # Output: [tensor, tensor]
+    """
     if isinstance(tensor, list):
         return tensor
     return [tensor]
 
 
 def is_linear(model_backward: keras.models.Model) -> bool:
+    """
+    Checks if a given Keras model is a linear model.
+
+    A model is considered linear if it has an attribute `is_linear` set to `True`.
+
+    Args:
+        model_backward: The Keras model to check.
+
+    Returns:
+        True if the model is linear, False otherwise.
+
+    Example:
+        model = SomeKerasModel()  # Assuming this is a model with the attribute `is_linear`
+        print(is_linear(model))  # Output: True or False depending on the model's attributes
+    """
     return hasattr(model_backward, "is_linear") and model_backward.is_linear
 
 
 def is_linear_layer(layer):
+    """
+    Determines if a given layer is considered a linear layer.
+
+    A layer is considered linear if:
+    - It is an instance of `BackwardLinearLayer`, or
+    - It has an attribute `is_linear` set to `True`, or
+    - It is a layer that is not a `BackwardLayer` and does not explicitly define the `is_linear` attribute (in which case it is treated as linear).
+
+    Args:
+        layer: The layer to check.
+
+    Returns:
+        `True` if the layer is linear, `False` otherwise.
+
+    Example:
+        layer = SomeKerasLayer()  # Assume this layer is linear
+        print(is_linear_layer(layer))  # Output: True or False based on the layer's properties
+    """
     if not (isinstance(layer, BackwardLayer) or (hasattr(layer, "is_linear"))):
         return True
     return isinstance(layer, BackwardLinearLayer) or (
@@ -38,8 +92,35 @@ def get_backward(
     mapping_keras2backward_classes: Optional[
         dict[type[Layer], type[BackwardLayer]]
     ] = None,
-    get_backward_model: Callable = None,
+    get_backward_layer: Callable = None,
 ):
+    """
+    Retrieves the backward computation for a given layer or model.
+
+    This function handles the backward pass for a Keras layer or model. It identifies the type of the input `layer`
+    and calls the appropriate function to compute the backward operation for that layer. It is designed to extend
+    backward functionality to custom layers or models, leveraging the provided mapping to link Keras layers to their
+    backward equivalents.
+
+    Args:
+        layer: The Keras layer or model for which to compute the backward pass.
+        gradient_shape: The shape of the gradients.
+            This is used in certain cases to specify the expected shape of the gradients. Defaults to None.
+        mapping_keras2backward_classes: A mapping from Keras layer types
+            to their corresponding `BackwardLayer` types. This helps identify the backward operation for custom layers.
+            Defaults to None.
+        get_backward_layer: A callable that retrieves the backward layer. Defaults to None.
+
+    Returns:
+        BackwardLayer or BackwardModel: A backward equivalent of the input layer or model.
+
+    Raises:
+        NotImplementedError: If the layer type is not supported and no backward model function is provided.
+
+    Example:
+        layer = SomeKerasLayer()
+        backward_layer = get_backward(layer)  # Retrieves the corresponding backward layer
+    """
     if isinstance(layer, Layer):
         return get_backward_layer(layer, mapping_keras2backward_classes)
     else:
@@ -48,11 +129,18 @@ def get_backward(
 
 
 class GradConstant(Layer):
+    """
+    A custom Keras layer that outputs a constant gradient.
+
+    This layer is intended to be used in scenarios where a fixed gradient
+    needs to be applied during the backward pass. The provided `gradient`
+    is stored as a constant tensor and returned during the backward computation.
+
+    Attributes:
+        grad_const (Tensor): The constant gradient tensor to be returned.
+    """
 
     def __init__(self, gradient, **kwargs):
-        """
-        to fill
-        """
         super(GradConstant, self).__init__(**kwargs)
         self.grad_const = keras.ops.convert_to_tensor(gradient)
 
@@ -82,6 +170,19 @@ class GradConstant(Layer):
 
 
 def get_gradient(grad: Tensor, input) -> Tuple[Any, bool]:
+    """
+    Given a gradient tensor, this function checks if the gradient is an InputLayer
+    or KerasTensor. If it is, it returns the gradient as is. Otherwise, it creates a
+    constant gradient using the `GradConstant` layer and returns it.
+
+    Args:
+        grad: The gradient tensor, which could either be an InputLayer, KerasTensor, or a custom gradient.
+        input: The input tensor, passed to `GradConstant` if grad is not a KerasTensor or InputLayer.
+
+    Returns:
+            - The gradient or constant gradient layer (which is a `KerasTensor`).
+            - A boolean indicating whether the gradient is directly an input (True if it's an input, False otherwise).
+    """
     # if grad is an InputLayer return grad
     if isinstance(grad, InputLayer) or isinstance(grad, keras.KerasTensor):
         return grad  # grad is a KerasTensor that come from input or extra_inputs or is an Input Tensor
@@ -91,6 +192,15 @@ def get_gradient(grad: Tensor, input) -> Tuple[Any, bool]:
 
 
 class FuseGradients(Layer):
+    """
+    A custom Keras layer that takes a list of input tensors, expands each tensor
+    along a new axis, concatenates them along the last axis, and then sums
+    the resulting tensor along the same axis.
+
+    This layer is useful for combining gradients or other tensors into a single
+    tensor by first expanding them, stacking them side by side, and then
+    summing them together.
+    """
 
     def call(self, inputs, training=None, mask=None):
         # expand

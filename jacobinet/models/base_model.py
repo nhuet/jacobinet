@@ -4,7 +4,7 @@ from jacobinet.layers.layer import (
 )
 
 from .utils import is_linear_layer
-from typing import Any, Union, List
+from typing import Any
 
 
 class BackwardModel(keras.Model):
@@ -13,6 +13,20 @@ class BackwardModel(keras.Model):
         *args,
         **kwargs: Any,
     ):
+        """
+        A custom Keras model that supports backward computation for layers and models.
+
+        This class extends the Keras `Model` class and is designed to perform backward computations
+        for a given set of layers or sub-models. It includes an `n_input` attribute, which determines
+        the number of inputs to the model, and checks whether the model consists of linear layers
+        based on its layers.
+
+        Example:
+            ```python
+            model = BackwardModel(n_input=3, layers=[...])
+            print(model.n_input)  # Prints 3
+            ```
+        """
         if "n_input" in kwargs:
             self.n_input = kwargs.pop("n_input")
         else:
@@ -34,18 +48,23 @@ class BackwardModel(keras.Model):
 
         return config
 
-    """
-    @classmethod
-    def from_config(cls, config):
-        backward_model = super().from_config(config)
-        n_input = config.pop('n_input')
-        model = keras.Model.from_config(config)
-        instance = BackwardModel(model.inputs, model.outputs)
-        return instance
-    """
-
 
 class BackwardSequential(keras.Sequential):
+    """
+    A custom Keras Sequential model that supports backward computations and checks for linear layers.
+
+    This class extends Keras' `Sequential` model to support backward computations for layers in the model.
+    It tracks whether the model contains any linear layers through the `is_linear` attribute and allows adding
+    and removing layers while automatically updating this attribute. The model also supports configuring the
+    number of inputs (`n_input`), which is set to 1 by default.
+
+    Example:
+        ```python
+        model = BackwardSequential(layers=[...])
+        model.add(new_layer)
+        model.pop()
+        ```
+    """
 
     def __init__(self, layers=None, trainable=True, name=None):
         self.is_linear = True

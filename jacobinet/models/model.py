@@ -1,17 +1,14 @@
-import keras
-from keras.layers import Layer, Input, InputLayer
-from keras.models import Model, Sequential
+from keras.layers import Layer, Input, InputLayer  # type:ignore
+from keras.models import Model  # type:ignore
 from .node import get_backward_node
 from .base_model import BackwardModel
 from jacobinet.layers.layer import BackwardLayer
-from .utils import get_gradient, FuseGradients, to_list
+from .utils import get_gradient, to_list
 from jacobinet import get_backward_layer
 
 
-import numpy as np
-
 from keras import KerasTensor as Tensor
-from typing import Union, Optional, Tuple, Any, List
+from typing import Union, Optional, List
 
 
 def get_backward_functional(
@@ -24,7 +21,37 @@ def get_backward_functional(
     input_mask=None,
     target_inputs=None,
     get_backward: callable = get_backward_layer,
-):
+) -> BackwardModel:
+    """
+    Converts a Keras functional model into a backward-compatible model, supporting gradient-based backward computations.
+
+    This function generates a backward-compatible model by tracing the backward gradients through each layer of the model.
+    It supports both functional and sequential Keras models, and maps the output gradients to the corresponding backward layers.
+
+    Args:
+        model: The original Keras model to convert to a backward-compatible model.
+        gradient: The gradient tensor(s) used for backward computations.
+            If `None`, new gradient tensors will be created for each output node.
+        mapping_keras2backward_classes: A mapping from Keras layer types to their corresponding
+            backward layer classes (e.g., `dict[type[Layer], type[BackwardLayer]]`).
+        extra_inputs: Additional inputs to the backward model.
+        input_mask: A mask for input layers to apply in backward computation, determining which inputs to include.
+        target_inputs: The target input layers for backward computations. Defaults to the model's original inputs.
+        get_backward: A function used to get the backward representation of a given layer.
+            Defaults to `get_backward_layer`.
+
+    Returns:
+        BackwardModel: A backward-compatible version of the original Keras model, with gradients and backward layers.
+
+    Raises:
+        ValueError: If there is a mismatch between the gradient and output nodes, or unsupported layer types are encountered.
+        NotImplementedError: If certain input or target input masking is not implemented.
+
+    Example:
+        ```python
+        backward_model = get_backward_functional(model, gradient=some_gradient)
+        ```
+    """
     # find output_nodes
     grad_input = (
         []
@@ -65,14 +92,24 @@ def get_backward_functional(
         node_index = model_output._keras_history.node_index
         nodes = model._nodes_by_depth[node_index]
         try:
-            nodes_ = [node for node in nodes if node.operation.output.name == model_output.name]
+            nodes_ = [
+                node
+                for node in nodes
+                if node.operation.output.name == model_output.name
+            ]
             node = nodes_[0]
             output_nodes.append(node)
         except IndexError:
             model_output_bis = model_output._keras_history.operation.output
-            node_index_bis = model_output._keras_history.operation.output._keras_history.node_index
+            node_index_bis = (
+                model_output._keras_history.operation.output._keras_history.node_index
+            )
             nodes_bis = model._nodes_by_depth[node_index_bis]
-            nodes_bis_ = [node for node in nodes_bis if node.operation.output.name == model_output_bis.name]
+            nodes_bis_ = [
+                node
+                for node in nodes_bis
+                if node.operation.output.name == model_output_bis.name
+            ]
             node = nodes_bis_[0]
             output_nodes.append(node)
 
@@ -99,7 +136,7 @@ def get_backward_functional(
     outputs = []
     is_linear = True
 
-    #for input_ in model_inputs:
+    # for input_ in model_inputs:
     for input_ in target_inputs:
         input_name = input_.name
         if not input_name in input_mask:

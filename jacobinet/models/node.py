@@ -1,19 +1,17 @@
-from keras import KerasTensor as Tensor
-from keras.layers import Layer, InputLayer, Input
-from keras.models import Model, Sequential
-from .base_model import BackwardModel, BackwardSequential
+from keras import KerasTensor as Tensor  # type:ignore
+from keras.layers import Layer, InputLayer  # type:ignore
+from keras.models import Model, Sequential  # type:ignore
 from keras.src.ops.node import Node
-import keras.ops as K
 from typing import List, Union, Optional, Callable
 from jacobinet.layers.layer import BackwardLayer, BackwardLinearLayer
-from jacobinet.models.utils import get_backward, FuseGradients, to_list
+from jacobinet.models.utils import FuseGradients, to_list
 from jacobinet import get_backward_layer
 
 import numpy as np
 
 
 def get_backward_node(
-    node: None,
+    node: Node,
     gradient: Tensor,
     mapping_keras2backward_classes: Optional[
         dict[type[Layer], type[BackwardLayer]]
@@ -21,6 +19,38 @@ def get_backward_node(
     input_name=None,
     get_backward: Callable = get_backward_layer,
 ):
+    """
+    Recursively computes the backward gradients for a given node in a computational graph.
+
+    This function is responsible for traversing the computational graph starting from a specific node and calculating
+    the gradients for that node. It considers both the structure of the model (layer-wise) and the operations performed
+    by each layer. Depending on the layer type, it computes the gradients and returns them in the correct format.
+    The function supports layers like `InputLayer`, `Sequential`, `Model`, and custom layers defined as `BackwardLayer`.
+
+    Args:
+        node: The current node in the computational graph whose gradients need to be computed.
+        gradient: The gradient to be propagated backward through the network, starting from this node.
+        mapping_keras2backward_classes: A dictionary that maps Keras layer types to their corresponding
+            backward layer classes. This is used to obtain the backward-compatible version of the layer for gradient propagation.
+        input_name: The name of the input layer to track. If provided, the function will ensure that gradients
+            are computed for the corresponding input layer.
+        get_backward: A function to get the backward version of the layer. Defaults to `get_backward_layer`.
+
+    Returns:
+        tuple: A tuple containing:
+            - `output`: The computed backward gradients for the current node.
+            - `is_linear`: Indicates whether the backward computation is linear (can be represented by a simple chain of operations).
+            - `keep_output`: Indicates whether the computed gradients should be propagated further.
+
+    Raises:
+        ValueError: If unsupported layer types are encountered.
+        NotImplementedError: If certain layer types or operations are not implemented for backward computation.
+
+    Example:
+        ```python
+        output, is_linear, keep_output = get_backward_node(node, gradient, mapping_keras2backward_classes)
+        ```
+    """
     # step 1: get parents
     parent_nodes: List[None] = node.parent_nodes
 
@@ -34,8 +64,6 @@ def get_backward_node(
             return gradient, True, True
         else:
             return gradient, True, layer_node.output.name == input_name
-        
-    
 
     # step 4: get backward layer
     backward_layer_node: BackwardLayer = get_backward(
@@ -70,12 +98,14 @@ def get_backward_node(
         is_linear = False
 
     keep_output = True
-     # get input_name of the layer
+    # get input_name of the layer
     layer_inputs = to_list(layer_node.input)
     if input_name in [e.name for e in layer_inputs]:
         if isinstance(gradients, list):
             # do something
-            index_grad = np.where([e.name==input_name for e in layer_inputs])[0]
+            index_grad = np.where(
+                [e.name == input_name for e in layer_inputs]
+            )[0]
             return gradients[index_grad], is_linear, keep_output
         else:
             return gradients, is_linear, keep_output
