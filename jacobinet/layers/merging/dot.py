@@ -1,8 +1,6 @@
-from keras.layers import Layer, Dot
-import keras.ops as K
+from keras.layers import Layer, Dot  # type: ignore
+import keras.ops as K  # type: ignore
 from jacobinet.layers.merging import BackwardMergeNonLinearLayer
-
-from keras import KerasTensor as Tensor
 
 
 class BackwardDot(BackwardMergeNonLinearLayer):
@@ -31,18 +29,9 @@ class BackwardDot(BackwardMergeNonLinearLayer):
             inputs, list(self.layer.output.shape)
         )
 
-        raise NotImplementedError()
-        output = [layer_output * layer_input_1, layer_output * layer_input_0]
-
-        if reshape_tag:
-            output = [
-                K.reshape(
-                    output[i], [-1] + n_out + list(self.input_dim_wo_batch[i])
-                )
-                for i in range(self.n_input)
-            ]
-
-        return output
+        raise NotImplementedError(
+            "Backward pass for the custom 'Dot' layer is not implemented. Please create a dedicated pull request (PR) to implement this feature."
+        )
 
 
 def get_backward_Dot(layer: Dot) -> Layer:

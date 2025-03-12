@@ -1,8 +1,6 @@
-from keras.layers import Layer, Minimum
-import keras.ops as K
+from keras.layers import Layer, Minimum  # type: ignore
+import keras.ops as K  # type: ignore
 from jacobinet.layers.merging import BackwardMergeNonLinearLayer
-
-from keras import KerasTensor as Tensor
 
 
 class BackwardMinimum(BackwardMergeNonLinearLayer):
@@ -25,7 +23,8 @@ class BackwardMinimum(BackwardMergeNonLinearLayer):
     ):
         output_layer = self.layer(input)
         return [
-            gradient * (K.sign(output_layer - input_i) + 1) for input_i in input
+            gradient * (K.sign(output_layer - input_i) + 1)
+            for input_i in input
         ]
 
 

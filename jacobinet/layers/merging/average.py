@@ -1,7 +1,7 @@
-from keras.layers import Layer, Average
+from keras.layers import Layer, Average  # type: ignore
 from jacobinet.layers.merging import BackwardMergeLinearLayer
 
-from keras import KerasTensor as Tensor
+from keras import KerasTensor as Tensor  # type: ignore
 
 
 class BackwardAverage(BackwardMergeLinearLayer):

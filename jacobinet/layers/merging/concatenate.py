@@ -1,9 +1,7 @@
-from keras.layers import Layer, Concatenate
-import keras.ops as K
+from keras.layers import Layer, Concatenate  # type: ignore
+import keras.ops as K  # type: ignore
 
 from jacobinet.layers.merging import BackwardMergeLinearLayer
-
-from keras import KerasTensor as Tensor
 
 
 class BackwardConcatenate(BackwardMergeLinearLayer):

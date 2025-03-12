@@ -1,8 +1,5 @@
-from keras.layers import Layer, Subtract
+from keras.layers import Layer, Subtract  # type: ignore
 from jacobinet.layers.merging import BackwardMergeLinearLayer
-
-
-from keras import KerasTensor as Tensor
 
 
 class BackwardSubtract(BackwardMergeLinearLayer):

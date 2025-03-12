@@ -1,8 +1,6 @@
-from keras.layers import Layer, Maximum
-import keras.ops as K
+from keras.layers import Layer, Maximum  # type: ignore
+import keras.ops as K  # type: ignore
 from jacobinet.layers.merging import BackwardMergeNonLinearLayer
-
-from keras import KerasTensor as Tensor
 
 
 class BackwardMaximum(BackwardMergeNonLinearLayer):
@@ -26,7 +24,8 @@ class BackwardMaximum(BackwardMergeNonLinearLayer):
 
         output_layer = self.layer(input)
         return [
-            gradient * (K.sign(input_i - output_layer) + 1) for input_i in input
+            gradient * (K.sign(input_i - output_layer) + 1)
+            for input_i in input
         ]
 
 

@@ -1,7 +1,5 @@
-import keras
 from keras.src.layers.merging.base_merge import Merge
 from jacobinet.layers.layer import BackwardLinearLayer, BackwardNonLinearLayer
-from typing import Union, List
 
 
 class BackwardMergeLinearLayer(BackwardLinearLayer):

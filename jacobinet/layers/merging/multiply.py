@@ -1,8 +1,6 @@
-from keras.layers import Layer, Multiply
-import keras.ops as K
+from keras.layers import Layer, Multiply  # type: ignore
+import keras.ops as K  # type: ignore
 from jacobinet.layers.merging import BackwardMergeNonLinearLayer
-
-from keras import KerasTensor as Tensor
 
 
 class BackwardMultiply(BackwardMergeNonLinearLayer):
