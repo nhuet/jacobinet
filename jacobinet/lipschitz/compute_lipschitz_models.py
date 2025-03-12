@@ -9,6 +9,28 @@ from typing import Union
 def get_lipschitz_model(
     backward_model: Union[BackwardModel, BackwardSequential], p: float
 ):
+    """
+    Creates a `LipschitzModel` that computes the Lipschitz constant for the given backward model.
+
+    This function wraps the provided `backward_model` with a `LipschitzModel`, where the output of
+    the model is processed using the specified Lipschitz norm (`p`). It supports both single-output
+    models and models with multiple outputs.
+
+    Args:
+        backward_model: The model or sequence of operations whose Lipschitz constant should be computed.
+        p: The norm to be used for the Lipschitz constant computation. Should be one of [1, 2, np.inf].
+
+    Returns:
+        A `LipschitzModel` that computes the Lipschitz constant for the given `backward_model`.
+
+    Raises:
+        ValueError: If `backward_model` is neither an instance of `BackwardModel` nor `BackwardSequential`.
+
+    Example:
+        ```python
+        my_lipschitz_model = get_lipschitz_model(my_backward_model, p=2)
+        ```
+    """
     if not (
         isinstance(backward_model, BackwardModel)
         or isinstance(backward_model, BackwardSequential)
