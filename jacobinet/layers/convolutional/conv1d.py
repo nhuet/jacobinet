@@ -1,15 +1,13 @@
-from keras.layers import Conv1D, Conv1DTranspose, Input, Layer, Activation
-from keras.layers import Layer
-from keras.models import Sequential
-import keras.ops as K
+from keras.layers import Conv1D, Conv1DTranspose, Input, Layer  # type: ignore
+from keras.layers import Layer  # type: ignore
+from keras.models import Sequential  # type: ignore
+import keras.ops as K  # type: ignore
 
 from jacobinet.layers.utils import pooling_layer1D
 from jacobinet.layers.layer import BackwardLinearLayer, BackwardWithActivation
 from jacobinet.layers.core.activations import BackwardActivation
-from jacobinet.layers.activations.prime import deserialize
-from jacobinet.utils import to_list
 
-from keras import KerasTensor as Tensor
+from keras import KerasTensor as Tensor  # type: ignore
 
 
 def init_backward_conv1D(layer, input_dim_wo_batch, output_dim_wo_batch):
@@ -19,7 +17,9 @@ def init_backward_conv1D(layer, input_dim_wo_batch, output_dim_wo_batch):
     # input_shape = list(layer.input.shape[1:])
     input_shape = input_dim_wo_batch
     # update filters to match input, pay attention to data_format
-    if layer.data_format == "channels_first":  # better to use enum than raw str
+    if (
+        layer.data_format == "channels_first"
+    ):  # better to use enum than raw str
         dico_conv["filters"] = input_shape[0]
     else:
         dico_conv["filters"] = input_shape[-1]

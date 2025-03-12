@@ -1,12 +1,12 @@
-from keras.layers import Conv2D, Conv2DTranspose, Input, Activation
-from keras.layers import Layer
-from keras.models import Sequential
-import keras.ops as K
+from keras.layers import Conv2D, Conv2DTranspose, Input  # type: ignore
+from keras.layers import Layer  # type: ignore
+from keras.models import Sequential  # type: ignore
+import keras.ops as K  # type: ignore
 from jacobinet.layers.utils import pooling_layer2D
 from jacobinet.layers.layer import BackwardLinearLayer, BackwardWithActivation
 from jacobinet.layers.core.activations import BackwardActivation
 
-from keras import KerasTensor as Tensor
+from keras import KerasTensor as Tensor  # type: ignore
 
 
 class BackwardConv2D(BackwardLinearLayer):

@@ -1,12 +1,11 @@
-from keras.layers import (
+from keras.layers import (  # type: ignore
     Layer,
     DepthwiseConv2D,
     Conv2DTranspose,
     Reshape,
-    Activation,
 )
-from keras.models import Sequential
-import keras.ops as K
+from keras.models import Sequential  # type: ignore
+import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer, BackwardWithActivation
 from jacobinet.layers.core.activations import BackwardActivation
 from jacobinet.layers.utils import pooling_layer2D, call_backward_depthwise2d

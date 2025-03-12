@@ -1,6 +1,6 @@
-from keras.layers import Layer, DepthwiseConv3D, Conv3DTranspose, Reshape
-from keras.models import Sequential
-import keras.ops as K
+from keras.layers import Layer, DepthwiseConv3D, Conv3DTranspose, Reshape  # type: ignore
+from keras.models import Sequential  # type: ignore
+import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
 from jacobinet.layers.utils import pooling_layer3D
 
