@@ -1,6 +1,6 @@
 import keras  # type: ignore
-from keras import KerasTensor as Tensor  # type: ignore
 import keras.ops as K  # type: ignore
+from keras import KerasTensor as Tensor  # type: ignore
 from typing import Union, Callable
 
 RELU = "relu"
