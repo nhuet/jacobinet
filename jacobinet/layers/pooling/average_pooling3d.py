@@ -1,13 +1,13 @@
 import numpy as np
 import keras
-from keras.layers import (
+from keras.layers import (  # type: ignore
     AveragePooling3D,
     Conv3DTranspose,
     ZeroPadding3D,
     Layer,
 )
-from keras.models import Sequential
-import keras.ops as K
+from keras.models import Sequential  # type: ignore
+import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
 
 
@@ -59,8 +59,6 @@ class BackwardAveragePooling3D(BackwardLinearLayer):
         layer_t.built = True
 
         # shape of transposed input
-        # input_shape_t = list(layer_t(self.layer.output).shape[1:])
-        # input_shape = list(self.layer.input.shape[1:])
         input_shape_t = list(
             layer_t(K.ones([1] + self.output_dim_wo_batch)).shape[1:]
         )
@@ -106,27 +104,6 @@ class BackwardAveragePooling3D(BackwardLinearLayer):
             [self.model(input_i) for input_i in split_inputs], axis
         )
         return outputs
-
-    """
-    def call(self, inputs, training=None, mask=None):
-
-        reshape_tag, inputs, n_out = reshape_to_batch(inputs, list(self.layer.output.shape))
-        # inputs (batch, channel_out, w_out, h_out)
-        if self.layer.data_format == "channels_first":
-            channel_out = inputs.shape[1]
-            axis = 1
-        else:
-            channel_out = inputs.shape[-1]
-            axis = -1
-
-        split_inputs = K.split(inputs, channel_out, axis)
-        # apply conv transpose on every of them
-        outputs = K.concatenate([self.model(input_i) for input_i in split_inputs], axis)
-        if reshape_tag:
-            outputs = K.reshape(outputs, [-1]+n_out+list(self.layer.input.shape[1:]))
-
-        return outputs
-    """
 
 
 def get_backward_AveragePooling3D(layer: AveragePooling3D) -> Layer:

@@ -1,11 +1,6 @@
-from keras.src import backend
-from keras.src import ops
-from keras.src.api_export import keras_export
-from keras.src.layers.input_spec import InputSpec
-from keras.src.layers.layer import Layer
-from keras.src.utils import argument_validation
+from keras.src import ops  # type: ignore
 
-from keras.layers import ZeroPadding2D
+from keras.layers import ZeroPadding2D  # type: ignore
 
 
 class ConstantPadding2D(ZeroPadding2D):
@@ -69,19 +64,20 @@ class ConstantPadding2D(ZeroPadding2D):
           `(batch_size, channels, padded_height, padded_width)`
     """
 
-    def __init__(self, const=0., padding=(1, 1), data_format=None, **kwargs):
+    def __init__(self, const=0.0, padding=(1, 1), data_format=None, **kwargs):
         super().__init__(padding=padding, data_format=data_format, **kwargs)
         self.const = const
-
 
     def call(self, inputs):
         if self.data_format == "channels_first":
             all_dims_padding = ((0, 0), (0, 0), *self.padding)
         else:
             all_dims_padding = ((0, 0), *self.padding, (0, 0))
-        return ops.pad(inputs, all_dims_padding, constant_values=self.const)#, mode="constant", constant_values=self.const)
-    
+        return ops.pad(
+            inputs, all_dims_padding, constant_values=self.const
+        )  # , mode="constant", constant_values=self.const)
+
     def get_config(self):
-        config = {"const":self.const}
+        config = {"const": self.const}
         base_config = super().get_config()
         return {**base_config, **config}

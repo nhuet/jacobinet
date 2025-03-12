@@ -1,29 +1,23 @@
 import numpy as np
 import math
 import keras
-from keras.layers import (
+from keras.layers import (  # type: ignore
     AveragePooling2D,
     Conv2DTranspose,
-    ZeroPadding2D,
-    Cropping2D,
     Layer,
     Input,
 )
-from keras.models import Sequential
-import keras.ops as K
+from keras.models import Sequential  # type: ignore
+import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
 from jacobinet.layers.utils import pooling_layer2D
 import warnings
 
-# custom layers used during onnx export: onnx2keras3
-import keras
-import numpy as np
 
 # typing
-from typing import Union, List
-import numpy
+from typing import List
 
-ArrayLike = numpy.typing.ArrayLike
+ArrayLike = np.typing.ArrayLike
 Tensor = keras.KerasTensor
 
 
@@ -32,12 +26,19 @@ class CroppingReflect2D(keras.layers.Layer):
     This operation operates a non standard pooling function (not ZeroPadding), but duplicate the last lines and cols to get the right shape
     """
 
-    def __init__(self, input_dim_wo_batch: List[int], pad_top:int, pad_bottom:int, pad_left=int, pad_right=int, data_format:str=keras.backend.image_data_format(), **kwargs):
-        """
-        
-        """
+    def __init__(
+        self,
+        input_dim_wo_batch: List[int],
+        pad_top: int,
+        pad_bottom: int,
+        pad_left=int,
+        pad_right=int,
+        data_format: str = keras.backend.image_data_format(),
+        **kwargs,
+    ):
+        """ """
         super(CroppingReflect2D, self).__init__(**kwargs)
-        
+
         self.pad_top = pad_top
         self.pad_bottom = pad_bottom
         self.pad_left = pad_left
@@ -45,67 +46,89 @@ class CroppingReflect2D(keras.layers.Layer):
         self.input_dim_wo_batch = input_dim_wo_batch
         self.data_format = data_format
 
-
     def call(self, inputs, training=None, mask=None):
-        if self.data_format=="channels_last":
+        if self.data_format == "channels_last":
             axis_w = 1
             axis_h = 2
         else:
             axis_w = 2
             axis_h = 3
         # input (batch, C, H+pad_top+pad_bottom, W + pad_left+pad_right)
-        W_pad, H_pad = self.input_dim_wo_batch[axis_w-1],  self.input_dim_wo_batch[axis_h-1]
+        W_pad, H_pad = (
+            self.input_dim_wo_batch[axis_w - 1],
+            self.input_dim_wo_batch[axis_h - 1],
+        )
 
         W = W_pad - self.pad_top - self.pad_bottom
         H = H_pad - self.pad_left - self.pad_right
-    
-        if self.pad_top:
-            #[(batch, C, pad_top, H_pad), (batch, C, 1, H_pad), (batch, C, W - 1 + pad_bottom, H_pad]
-            input_top, input_first_row, inputs = K.split(inputs, [self.pad_top, 1+self.pad_top], axis=axis_w) 
-            input_first_row =  input_first_row + K.sum(input_top, axis=axis_w, keepdims=True)
-            # then concat
-            inputs = K.concatenate([input_first_row, inputs], axis=axis_w) #(batch, C, W+pad_bottom, H_pad)
 
+        if self.pad_top:
+            # [(batch, C, pad_top, H_pad), (batch, C, 1, H_pad), (batch, C, W - 1 + pad_bottom, H_pad]
+            input_top, input_first_row, inputs = K.split(
+                inputs, [self.pad_top, 1 + self.pad_top], axis=axis_w
+            )
+            input_first_row = input_first_row + K.sum(
+                input_top, axis=axis_w, keepdims=True
+            )
+            # then concat
+            inputs = K.concatenate(
+                [input_first_row, inputs], axis=axis_w
+            )  # (batch, C, W+pad_bottom, H_pad)
 
         if self.pad_bottom:
-            #[(batch, C, W, H_pad), (batch, C, 1, H_pad), (batch, C, pad_bottom, H_pad]
-            inputs, input_last_row, input_bottom = K.split(inputs, [W-1, W], axis=axis_w) 
-            input_last_row =  input_last_row + K.sum(input_bottom, axis=axis_w, keepdims=True)
+            # [(batch, C, W, H_pad), (batch, C, 1, H_pad), (batch, C, pad_bottom, H_pad]
+            inputs, input_last_row, input_bottom = K.split(
+                inputs, [W - 1, W], axis=axis_w
+            )
+            input_last_row = input_last_row + K.sum(
+                input_bottom, axis=axis_w, keepdims=True
+            )
             # then concat
-            inputs = K.concatenate([inputs, input_last_row], axis=axis_w) #(batch, C, W, H_pad)
-
+            inputs = K.concatenate(
+                [inputs, input_last_row], axis=axis_w
+            )  # (batch, C, W, H_pad)
 
         if self.pad_left:
-            #[(batch, C, W, pad_left), (batch, C, W, 1), (batch, C, W, H-1)]
-            input_left, input_first_col, inputs = K.split(inputs, [self.pad_left, 1+self.pad_left], axis=axis_h) 
-            input_first_col =  input_first_col + K.sum(input_left, axis=axis_h, keepdims=True)
+            # [(batch, C, W, pad_left), (batch, C, W, 1), (batch, C, W, H-1)]
+            input_left, input_first_col, inputs = K.split(
+                inputs, [self.pad_left, 1 + self.pad_left], axis=axis_h
+            )
+            input_first_col = input_first_col + K.sum(
+                input_left, axis=axis_h, keepdims=True
+            )
             # then concat
-            inputs = K.concatenate([input_first_col, inputs], axis=axis_h) #(batch, C, W, H+pad_right)
+            inputs = K.concatenate(
+                [input_first_col, inputs], axis=axis_h
+            )  # (batch, C, W, H+pad_right)
 
         if self.pad_right:
-            #[(batch, C, W, H_pad), (batch, C, 1, H_pad), (batch, C, pad_bottom, H_pad]
-            inputs, input_last_col, input_right = K.split(inputs, [H-1, H], axis=axis_h) 
-            input_last_col =  input_last_col + K.sum(input_right, axis=axis_h, keepdims=True)
+            # [(batch, C, W, H_pad), (batch, C, 1, H_pad), (batch, C, pad_bottom, H_pad]
+            inputs, input_last_col, input_right = K.split(
+                inputs, [H - 1, H], axis=axis_h
+            )
+            input_last_col = input_last_col + K.sum(
+                input_right, axis=axis_h, keepdims=True
+            )
             # then concat
-            inputs = K.concatenate([inputs, input_last_col], axis=axis_h) #(batch, C, W, H)
+            inputs = K.concatenate(
+                [inputs, input_last_col], axis=axis_h
+            )  # (batch, C, W, H)
 
-        return inputs #(batch, C, W, H)
+        return inputs  # (batch, C, W, H)
 
     def compute_output_shape(self, input_shape):
-        output_shape= [1]+ self.input_dim_wo_batch
+        output_shape = [1] + self.input_dim_wo_batch
         return output_shape
 
     def get_config(self):
         config = super().get_config()
-        config['pad_top']= self.pad_top
-        config['pad_bottom']= self.pad_bottom
-        config['pad_left']= self.pad_left
-        config['pad_right']= self.pad_right
-        config['input_dim_wo_batch'] = self.input_dim_wo_batch
-        config['data_format'] = self.data_format
+        config["pad_top"] = self.pad_top
+        config["pad_bottom"] = self.pad_bottom
+        config["pad_left"] = self.pad_left
+        config["pad_right"] = self.pad_right
+        config["input_dim_wo_batch"] = self.input_dim_wo_batch
+        config["data_format"] = self.data_format
         return config
-
-
 
     @classmethod
     def from_config(cls, config):
@@ -122,16 +145,23 @@ class CroppingReflect2D(keras.layers.Layer):
         pad_right_config = config.pop("pad_right")
         pad_right = keras.saving.deserialize_keras_object(pad_right_config)
 
-        data_format_config = config.pop('data_format')
+        data_format_config = config.pop("data_format")
         data_format = keras.saving.deserialize_keras_object(data_format_config)
 
-        input_dim_wo_batch_config = config.pop('input_dim_wo_batch')
-        input_dim_wo_batch = keras.saving.deserialize_keras_object(input_dim_wo_batch_config)
-        
-        return cls(input_dim_wo_batch=input_dim_wo_batch, data_format=data_format,
-                   pad_top=pad_top, pad_bottom=pad_bottom, pad_left=pad_left, pad_right=pad_right,
-                   **config)
+        input_dim_wo_batch_config = config.pop("input_dim_wo_batch")
+        input_dim_wo_batch = keras.saving.deserialize_keras_object(
+            input_dim_wo_batch_config
+        )
 
+        return cls(
+            input_dim_wo_batch=input_dim_wo_batch,
+            data_format=data_format,
+            pad_top=pad_top,
+            pad_bottom=pad_bottom,
+            pad_left=pad_left,
+            pad_right=pad_right,
+            **config,
+        )
 
 
 class BackwardAveragePooling2D(BackwardLinearLayer):
@@ -177,22 +207,23 @@ class BackwardAveragePooling2D(BackwardLinearLayer):
             use_bias=False,
             trainable=False,
         )
-        kernel_ = np.ones(pool_size + [1, 1], dtype="float32") / np.prod(pool_size)
+        kernel_ = np.ones(pool_size + [1, 1], dtype="float32") / np.prod(
+            pool_size
+        )
         layer_t.kernel = keras.Variable(kernel_)
         layer_t.built = True
 
-        if self.layer.data_format=="channels_last":
-            output_dim_wo_batch_c_1 = self.output_dim_wo_batch[:-1]+[1]
+        if self.layer.data_format == "channels_last":
+            output_dim_wo_batch_c_1 = self.output_dim_wo_batch[:-1] + [1]
         else:
-            output_dim_wo_batch_c_1 = [1]+self.output_dim_wo_batch[1:]
+            output_dim_wo_batch_c_1 = [1] + self.output_dim_wo_batch[1:]
 
         # shape of transposed input
         input_shape_t = list(
-                layer_t(K.ones([1] + output_dim_wo_batch_c_1)).shape[1:]
+            layer_t(K.ones([1] + output_dim_wo_batch_c_1)).shape[1:]
         )
-        
 
-        if self.layer.padding=="valid":
+        if self.layer.padding == "valid":
             input_shape = self.input_dim_wo_batch
             if layer.data_format == "channels_first":
                 w_pad = input_shape[-2] - input_shape_t[-2]
@@ -204,37 +235,65 @@ class BackwardAveragePooling2D(BackwardLinearLayer):
             pad_layers = pooling_layer2D(w_pad, h_pad, self.layer.data_format)
 
         else:
-            if self.layer.data_format=="channels_first":
+            if self.layer.data_format == "channels_first":
                 input_shape_wh = list(self.input_dim_wo_batch[1:])
             else:
                 input_shape_wh = list(self.input_dim_wo_batch[:2])
             # width
             # shape with valid
-            output_shape_w_valid = math.floor((input_shape_wh[0] - self.layer.pool_size[0]) / self.layer.strides[0]) + 1 
+            output_shape_w_valid = (
+                math.floor(
+                    (input_shape_wh[0] - self.layer.pool_size[0])
+                    / self.layer.strides[0]
+                )
+                + 1
+            )
             # shape with same
-            output_shape_w_same = math.floor((input_shape_wh[0] - 1) / self.layer.strides[0]) + 1
+            output_shape_w_same = (
+                math.floor((input_shape_wh[0] - 1) / self.layer.strides[0]) + 1
+            )
 
-            output_shape_h_valid = math.floor((input_shape_wh[1] - self.layer.pool_size[1]) / self.layer.strides[1]) + 1 
+            output_shape_h_valid = (
+                math.floor(
+                    (input_shape_wh[1] - self.layer.pool_size[1])
+                    / self.layer.strides[1]
+                )
+                + 1
+            )
             # shape with same
-            output_shape_h_same = math.floor((input_shape_wh[1] - 1) / self.layer.strides[1]) + 1
+            output_shape_h_same = (
+                math.floor((input_shape_wh[1] - 1) / self.layer.strides[1]) + 1
+            )
 
-            w_pad:int = output_shape_w_same - output_shape_w_valid
-            h_pad:int = output_shape_h_same - output_shape_h_valid
+            w_pad: int = output_shape_w_same - output_shape_w_valid
+            h_pad: int = output_shape_h_same - output_shape_h_valid
             # split in top, bottom, left, right
-            pad_top:int = w_pad//2
-            pad_bottom:int = pad_top + w_pad%2
-            pad_left:int = h_pad//2
-            pad_right:int = pad_left + h_pad%2
+            pad_top: int = w_pad // 2
+            pad_bottom: int = pad_top + w_pad % 2
+            pad_left: int = h_pad // 2
+            pad_right: int = pad_left + h_pad % 2
 
-            inner_input_dim_wo_batch = [input_shape_wh[0]+pad_top+pad_bottom, input_shape_wh[1]+pad_left+pad_right]
-            if self.layer.data_format=="channels_first":
-                inner_input_dim_wo_batch= [self.input_dim_wo_batch[0]]+inner_input_dim_wo_batch
+            inner_input_dim_wo_batch = [
+                input_shape_wh[0] + pad_top + pad_bottom,
+                input_shape_wh[1] + pad_left + pad_right,
+            ]
+            if self.layer.data_format == "channels_first":
+                inner_input_dim_wo_batch = [
+                    self.input_dim_wo_batch[0]
+                ] + inner_input_dim_wo_batch
             else:
-                inner_input_dim_wo_batch= inner_input_dim_wo_batch+[self.input_dim_wo_batch[0]]
+                inner_input_dim_wo_batch = inner_input_dim_wo_batch + [
+                    self.input_dim_wo_batch[0]
+                ]
 
-
-            pad_layer= CroppingReflect2D(input_dim_wo_batch= inner_input_dim_wo_batch,
-                             pad_top=pad_top, pad_bottom=pad_bottom, pad_left=pad_left, pad_right=pad_right, data_format='channels_first')
+            pad_layer = CroppingReflect2D(
+                input_dim_wo_batch=inner_input_dim_wo_batch,
+                pad_top=pad_top,
+                pad_bottom=pad_bottom,
+                pad_left=pad_left,
+                pad_right=pad_right,
+                data_format="channels_first",
+            )
             pad_layers = [pad_layer]
 
         if len(pad_layers):
@@ -242,7 +301,6 @@ class BackwardAveragePooling2D(BackwardLinearLayer):
         else:
             self.model = layer_t
         # self.model(self.layer.output)
-
 
         self.model(Input(output_dim_wo_batch_c_1))
         self.model.trainable = False

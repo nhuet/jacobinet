@@ -1,7 +1,6 @@
 import numpy as np
-import keras
-from keras.layers import Layer, GlobalMaxPooling2D
-import keras.ops as K
+from keras.layers import Layer, GlobalMaxPooling2D  # type: ignore
+import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardNonLinearLayer
 from jacobinet.layers.custom.prime import max_prime
 from jacobinet.layers.utils import reshape_to_batch
@@ -22,55 +21,64 @@ class BackwardGlobalMaxPooling2D(BackwardNonLinearLayer):
     backward_layer = BackwardGlobalMaxPooling2D(average_pooling_layer)
     output = backward_layer(input_tensor)
     """
+
     layer: GlobalMaxPooling2D
 
     def call(self, inputs, training=None, mask=None):
 
-        gradient = inputs[0] # (batch, n_out..., C_W_out, H_out)
+        gradient = inputs[0]  # (batch, n_out..., C_W_out, H_out)
 
-        layer_input = inputs[1] # (batch, C, W_in, H_in)
+        layer_input = inputs[1]  # (batch, C, W_in, H_in)
 
         reshape_tag, gradient_, n_out = reshape_to_batch(
             gradient, [1] + self.output_dim_wo_batch
         )
         if not self.layer.keepdims:
-            if self.layer.data_format=="channels_first":
+            if self.layer.data_format == "channels_first":
                 gradient_ = K.expand_dims(K.expand_dims(gradient, -1), -1)
             else:
                 gradient_ = K.expand_dims(K.expand_dims(gradient, 1), 1)
         # gradient_ (batch*prod(n_out), output_dim_wo_batch...)= (batch*prod(n_out), C, W_out, H_out) if channel_first
 
-        if self.layer.data_format=="channels_first":
+        if self.layer.data_format == "channels_first":
             axis = -1
             C, W, H = self.input_dim_wo_batch
-            layer_input_ = K.reshape(layer_input, [-1, C, W*H])
-            backward_max = K.reshape(max_prime(layer_input_, axis=axis), [-1, C, W, H]) # (batch, C, W_in*H_in)
+            layer_input_ = K.reshape(layer_input, [-1, C, W * H])
+            backward_max = K.reshape(
+                max_prime(layer_input_, axis=axis), [-1, C, W, H]
+            )  # (batch, C, W_in*H_in)
         else:
             axis = 1
             C, W, H = self.input_dim_wo_batch
-            layer_input_ = K.reshape(layer_input, [-1, W*H, C])
-            backward_max = K.reshape(max_prime(layer_input_, axis=axis), [-1, W, H, C])
+            layer_input_ = K.reshape(layer_input, [-1, W * H, C])
+            backward_max = K.reshape(
+                max_prime(layer_input_, axis=axis), [-1, W, H, C]
+            )
 
         # combine backward_max with gradient, we first need to reshape gradient_
         if len(n_out):
-            gradient_ = K.reshape(gradient_, [-1, np.prod(n_out)]+self.output_dim_wo_batch) #(batch, N_out, C, W_out, H_out)
+            gradient_ = K.reshape(
+                gradient_, [-1, np.prod(n_out)] + self.output_dim_wo_batch
+            )  # (batch, N_out, C, W_out, H_out)
 
         # n_out=[] gradient_.shape = (batch, N_out, C, W_out, H_out) else (batch, C, W_out, H_out)
         if len(n_out):
-            backward_max = K.expand_dims(backward_max, 1) # (batch, 1, C,W_out, H_out)
-
+            backward_max = K.expand_dims(
+                backward_max, 1
+            )  # (batch, 1, C,W_out, H_out)
 
         # element wise product to apply chain rule
-        output = gradient_*backward_max # (batch, N_out, C, W_out, H_out) or (batch, C, W_out, H_out)
+        output = (
+            gradient_ * backward_max
+        )  # (batch, N_out, C, W_out, H_out) or (batch, C, W_out, H_out)
 
         # reshape_tag
         if reshape_tag:
-            output = K.reshape(
-                    output, [-1] + n_out + self.input_dim_wo_batch
-                )
+            output = K.reshape(output, [-1] + n_out + self.input_dim_wo_batch)
 
         return output
-    
+
+
 def get_backward_GlobalMaxPooling2D(layer: GlobalMaxPooling2D) -> Layer:
     """
     This function creates a `BackwardGlobalMaxPooling2D` layer based on a given `GlobalMaxPooling2D` layer. It provides

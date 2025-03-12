@@ -1,13 +1,13 @@
 import numpy as np
 import keras
-from keras.layers import (
+from keras.layers import (  # type: ignore
     AveragePooling1D,
     Conv1DTranspose,
     ZeroPadding1D,
     Layer,
 )
-from keras.models import Sequential
-import keras.ops as K
+from keras.models import Sequential  # type: ignore
+import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
 
 
@@ -54,7 +54,9 @@ class BackwardAveragePooling1D(BackwardLinearLayer):
             use_bias=False,
             trainable=False,
         )
-        kernel_ = np.ones(pool_size + [1, 1], dtype='float32') / np.prod(pool_size)
+        kernel_ = np.ones(pool_size + [1, 1], dtype="float32") / np.prod(
+            pool_size
+        )
         layer_t.kernel = keras.Variable(kernel_)
         layer_t.built = True
 

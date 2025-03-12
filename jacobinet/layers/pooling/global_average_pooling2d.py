@@ -1,7 +1,5 @@
-import numpy as np
-import keras
-from keras.layers import Layer, GlobalAveragePooling2D
-import keras.ops as K
+from keras.layers import Layer, GlobalAveragePooling2D  # type: ignore
+import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
 
 
@@ -20,7 +18,8 @@ class BackwardGlobalAveragePooling2D(BackwardLinearLayer):
     backward_layer = BackwardGlobalAveragePooling2D(average_pooling_layer)
     output = backward_layer(input_tensor)
     """
-    layer:GlobalAveragePooling2D
+
+    layer: GlobalAveragePooling2D
 
     def call_on_reshaped_gradient(
         self, gradient, input=None, training=None, mask=None
