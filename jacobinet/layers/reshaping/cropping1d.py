@@ -1,6 +1,5 @@
-from keras.layers import ZeroPadding1D, Cropping1D
-from keras.layers import Layer
-import keras.ops as K
+from keras.layers import ZeroPadding1D, Cropping1D  # type: ignore
+from keras.layers import Layer  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
 
 

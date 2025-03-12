@@ -1,7 +1,6 @@
-from keras.layers import ZeroPadding1D, Cropping1D, Cropping2D, Reshape, Input
-from keras.layers import Layer
-from keras.models import Sequential
-import keras.ops as K
+from keras.layers import ZeroPadding1D, Cropping1D, Cropping2D, Reshape, Input  # type: ignore
+from keras.layers import Layer  # type: ignore
+from keras.models import Sequential  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
 
 

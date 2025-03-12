@@ -1,6 +1,6 @@
-from keras.layers import UpSampling2D
-from keras.layers import Layer
-import keras.ops as K
+from keras.layers import UpSampling2D  # type: ignore
+from keras.layers import Layer  # type: ignore
+import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
 
 
@@ -19,19 +19,36 @@ class BackwardUpSampling2D(BackwardLinearLayer):
     backward_layer = BackwardUpSampling2D(upsampling_layer)
     output = backward_layer(input_tensor)
     """
+
     layer: UpSampling2D
-    
-    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
-        #If data_format is "channels_last": (batch_size, rows, cols, channels)
-        if self.layer.interpolation!="nearest":
-            raise NotImplementedError("actually not working wih interpolation in {'bicubic', 'bilinear', 'lanczos3', 'lanczos5'}. Raise a dedicated PR if needed")
-        if self.layer.data_format=="channels_last":
-            #(batch_size, W, H, C)
+
+    def call_on_reshaped_gradient(
+        self, gradient, input=None, training=None, mask=None
+    ):
+        # If data_format is "channels_last": (batch_size, rows, cols, channels)
+        if self.layer.interpolation != "nearest":
+            raise NotImplementedError(
+                "actually not working wih interpolation in {'bicubic', 'bilinear', 'lanczos3', 'lanczos5'}. Raise a dedicated PR if needed"
+            )
+        if self.layer.data_format == "channels_last":
+            # (batch_size, W, H, C)
             W, H, C = self.input_dim_wo_batch
-            gradient = K.sum(K.reshape(gradient, [-1, W, self.layer.size[0], H, self.layer.size[1], C]), (2, 4))
+            gradient = K.sum(
+                K.reshape(
+                    gradient,
+                    [-1, W, self.layer.size[0], H, self.layer.size[1], C],
+                ),
+                (2, 4),
+            )
         else:
             C, W, H = self.input_dim_wo_batch
-            gradient = K.sum(K.reshape(gradient, [-1, C, W, self.layer.size[0], H, self.layer.size[1]]), (3, 5))
+            gradient = K.sum(
+                K.reshape(
+                    gradient,
+                    [-1, C, W, self.layer.size[0], H, self.layer.size[1]],
+                ),
+                (3, 5),
+            )
 
         return gradient
 

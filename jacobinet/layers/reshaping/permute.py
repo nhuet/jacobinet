@@ -1,6 +1,5 @@
-from keras.layers import Permute
-from keras.layers import Layer
-import keras.ops as K
+from keras.layers import Permute  # type: ignore
+from keras.layers import Layer  # type: ignore
 import numpy as np
 from jacobinet.layers.layer import BackwardLinearLayer
 

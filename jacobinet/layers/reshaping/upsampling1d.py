@@ -1,6 +1,6 @@
-from keras.layers import UpSampling1D
-from keras.layers import Layer
-import keras.ops as K
+from keras.layers import UpSampling1D  # type: ignore
+from keras.layers import Layer  # type: ignore
+import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
 
 
@@ -19,12 +19,17 @@ class BackwardUpSampling1D(BackwardLinearLayer):
     backward_layer = BackwardUpSampling1D(upsampling_layer)
     output = backward_layer(input_tensor)
     """
+
     layer: UpSampling1D
-    
-    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
-        #(batch_size, steps, feature)
+
+    def call_on_reshaped_gradient(
+        self, gradient, input=None, training=None, mask=None
+    ):
+        # (batch_size, steps, feature)
         steps, features = self.input_dim_wo_batch
-        gradient = K.sum(K.reshape(gradient, [-1, steps, self.layer.size, features]), 2)
+        gradient = K.sum(
+            K.reshape(gradient, [-1, steps, self.layer.size, features]), 2
+        )
         return gradient
 
 

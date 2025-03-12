@@ -1,5 +1,5 @@
-from keras.layers import RepeatVector, Layer
-import keras.ops as K
+from keras.layers import RepeatVector, Layer  # type: ignore
+import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
 
 

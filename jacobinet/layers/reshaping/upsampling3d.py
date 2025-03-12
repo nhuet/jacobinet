@@ -1,6 +1,6 @@
-from keras.layers import UpSampling3D
-from keras.layers import Layer
-import keras.ops as K
+from keras.layers import UpSampling3D  # type: ignore
+from keras.layers import Layer  # type: ignore
+import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
 
 
@@ -19,17 +19,50 @@ class BackwardUpSampling3D(BackwardLinearLayer):
     backward_layer = BackwardUpSampling3D(upsampling_layer)
     output = backward_layer(input_tensor)
     """
+
     layer: UpSampling3D
-    
-    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
-        #If data_format is "channels_last": (batch_size, rows, cols, channels)
-        if self.layer.data_format=="channels_last":
-            #(batch_size, W, H, D, C)
+
+    def call_on_reshaped_gradient(
+        self, gradient, input=None, training=None, mask=None
+    ):
+        # If data_format is "channels_last": (batch_size, rows, cols, channels)
+        if self.layer.data_format == "channels_last":
+            # (batch_size, W, H, D, C)
             W, H, D, C = self.input_dim_wo_batch
-            gradient = K.sum(K.reshape(gradient, [-1, W, self.layer.size[0], H, self.layer.size[1], D, self.layer.size[2], C]), (2, 4, 6))
+            gradient = K.sum(
+                K.reshape(
+                    gradient,
+                    [
+                        -1,
+                        W,
+                        self.layer.size[0],
+                        H,
+                        self.layer.size[1],
+                        D,
+                        self.layer.size[2],
+                        C,
+                    ],
+                ),
+                (2, 4, 6),
+            )
         else:
             C, W, H, D = self.input_dim_wo_batch
-            gradient = K.sum(K.reshape(gradient, [-1, C, W, self.layer.size[0], H, self.layer.size[1], D, self.layer.size[2]]), (3, 5, 7))
+            gradient = K.sum(
+                K.reshape(
+                    gradient,
+                    [
+                        -1,
+                        C,
+                        W,
+                        self.layer.size[0],
+                        H,
+                        self.layer.size[1],
+                        D,
+                        self.layer.size[2],
+                    ],
+                ),
+                (3, 5, 7),
+            )
 
         return gradient
 

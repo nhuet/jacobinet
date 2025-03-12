@@ -1,6 +1,5 @@
-from keras.layers import Reshape
-from keras.layers import Layer
-import keras.ops as K
+from keras.layers import Reshape  # type: ignore
+from keras.layers import Layer  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
 
 
