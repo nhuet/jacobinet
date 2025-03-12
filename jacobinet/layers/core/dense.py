@@ -1,12 +1,10 @@
 from jacobinet.layers.layer import (
     BackwardLinearLayer,
-    BackwardNonLinearLayer,
     BackwardWithActivation,
 )
 from jacobinet.layers.core.activations import BackwardActivation
-from jacobinet.layers.utils import share_weights_and_build
-from keras.layers import Layer, Dense, Activation, Input
-import keras.ops as K
+from keras.layers import Layer, Dense  # type: ignore
+import keras.ops as K  # type: ignore
 
 from keras import KerasTensor as Tensor
 

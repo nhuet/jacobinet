@@ -1,7 +1,7 @@
 from jacobinet.layers.layer import BackwardLinearLayer
-from keras.layers import Layer, EinsumDense
+from keras.layers import Layer, EinsumDense  # type: ignore
 from keras.src import ops
-import keras.ops as K
+import keras.ops as K  # type: ignore
 
 
 class BackwardEinsumDense(BackwardLinearLayer):
