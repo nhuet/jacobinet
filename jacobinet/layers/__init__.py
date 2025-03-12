@@ -20,7 +20,7 @@ from .reshaping import (
     get_backward_RepeatVector,
     get_backward_UpSampling2D,
     get_backward_UpSampling1D,
-    get_backward_UpSampling3D
+    get_backward_UpSampling3D,
 )
 from .pooling import (
     get_backward_AveragePooling2D,
@@ -59,7 +59,12 @@ from .merging import (
     get_backward_Multiply,
 )
 
-from .layer import BackwardLayer, BackwardLinearLayer, BackwardNonLinearLayer, BackwardBoundedLinearizedLayer
+from .layer import (
+    BackwardLayer,
+    BackwardLinearLayer,
+    BackwardNonLinearLayer,
+    BackwardBoundedLinearizedLayer,
+)
 
 from jacobinet.layers.convolutional import (
     BackwardConv3D,
@@ -69,10 +74,7 @@ from jacobinet.layers.convolutional import (
     BackwardDepthwiseConv1D,
 )
 
-from jacobinet.layers.core import (
-    BackwardDense,
-    BackwardEinsumDense
-)
+from jacobinet.layers.core import BackwardDense, BackwardEinsumDense
 
 from jacobinet.layers.normalization import BackwardBatchNormalization
 
@@ -82,7 +84,7 @@ from jacobinet.layers.pooling import (
     BackwardAveragePooling3D,
     BackwardGlobalAveragePooling1D,
     BackwardGlobalAveragePooling2D,
-    BackwardGlobalAveragePooling3D
+    BackwardGlobalAveragePooling3D,
 )
 
 from jacobinet.layers.reshaping import (

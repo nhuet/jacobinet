@@ -1,8 +1,8 @@
 # abstract class for BackwardLayer
-from keras.layers import Layer, Input, Activation
+from keras.layers import Layer, Input, Activation  # type:ignore
 import keras
 from typing import Union, List
-import keras.ops as K
+import keras.ops as K  # type:ignore
 from jacobinet.layers.utils import share_weights_and_build, reshape_to_batch
 
 from keras import KerasTensor as Tensor
@@ -74,8 +74,8 @@ class BackwardLayer(Layer):
         dico_params = {}
         dico_params["layer"] = layer_config
         # save input shape
-        dico_params["input_dim_wo_batch"] = keras.saving.serialize_keras_object(
-            self.input_dim_wo_batch
+        dico_params["input_dim_wo_batch"] = (
+            keras.saving.serialize_keras_object(self.input_dim_wo_batch)
         )
         dico_params["output_dim_wo_batch"] = (
             keras.saving.serialize_keras_object(self.output_dim_wo_batch)
@@ -91,7 +91,7 @@ class BackwardLayer(Layer):
         if self.layer_backward:
             return self.layer_backward(gradient)
         raise NotImplementedError()
-    
+
     def build(input_shape):
         super().build(input_shape)
 
@@ -109,7 +109,6 @@ class BackwardLayer(Layer):
         reshape_tag, gradient_, n_out = reshape_to_batch(
             gradient, [1] + self.output_dim_wo_batch
         )
-        batch_size = gradient_.shape[0]
         output = self.call_on_reshaped_gradient(
             gradient_, input=layer_input, training=training, mask=mask
         )
@@ -213,6 +212,7 @@ class BackwardNonLinearLayer(BackwardLayer):
       reverses the application of operations as defined by the wrapped layer.
     - It requires the wrapped layer to have compatible reverse operations.
     """
+
 
 class BackwardBoundedLinearizedLayer(BackwardLinearLayer):
     """

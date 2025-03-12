@@ -1,5 +1,5 @@
 from typing import List, Union
-from keras.layers import (
+from keras.layers import (  # type:ignore
     Layer,
     ZeroPadding2D,
     Cropping2D,
@@ -10,13 +10,38 @@ from keras.layers import (
     Permute,
     Input,
 )
-import keras.ops as K
+import keras.ops as K  # type:ignore
+from typing import Union, List, Tuple, Callable
+from keras import KerasTensor as Tensor
 
 
 # compute output shape post convolution
 def compute_output_pad(
-    input_shape_wo_batch, kernel_size, strides, padding, data_format
-):
+    input_shape_wo_batch: Tuple[int, int, int],
+    kernel_size: Tuple[int, int],
+    strides: Tuple[int, int],
+    padding: str,
+    data_format: str,
+) -> Tuple[int, int]:
+    """
+    Computes the padding required for the output shape after applying a convolution operation.
+
+    Args:
+        input_shape_wo_batch: The shape of the input (excluding batch size),
+                                      in the form (channel, width, height) or (width, height, channel)
+                                      depending on the data format.
+        kernel_size: The size of the convolutional kernel (k_w, k_h).
+        strides: The strides for the convolution (s_w, s_h).
+        padding: Type of padding ("same" or "valid").
+        data_format: Data format of the input, either "channels_first" or "channels_last".
+
+    Returns:
+        tuple: (w_pad, h_pad), representing the padding required for width and height.
+
+    Notes:
+        - If padding is "same", the function assumes no additional padding is needed (p = 0).
+        - The function calculates the padding based on the kernel size, stride, and input shape.
+    """
     if data_format == "channels_first":
         w, h = input_shape_wo_batch[1:]
     else:
@@ -32,8 +57,33 @@ def compute_output_pad(
 
 
 def pooling_layer2D(
-    w_pad, h_pad, data_format
+    w_pad: int, h_pad: int, data_format: str
 ) -> List[Union[ZeroPadding2D, Cropping2D]]:
+    """
+    Determines the padding and cropping layers to apply based on the width and height padding.
+
+    This function will return a list of 2D padding or cropping layers (e.g., `ZeroPadding2D`, `Cropping2D`)
+    based on the given padding values for width and height. It handles different cases based on whether
+    the padding values are positive or negative, and adjusts the layers accordingly.
+
+    Args:
+        w_pad: The width padding to apply. A positive value indicates padding,
+                     and a negative value indicates cropping.
+        h_pad: The height padding to apply. A positive value indicates padding,
+                     and a negative value indicates cropping.
+        data_format: The data format to use, either 'channels_first' or 'channels_last'.
+
+    Returns:
+        List[Union[ZeroPadding2D, Cropping2D]]: A list containing either `ZeroPadding2D` or `Cropping2D`
+                                                layers depending on the padding and cropping requirements.
+                                                If no padding or cropping is needed, an empty list is returned.
+
+    Notes:
+        - If both `w_pad` and `h_pad` are positive, `ZeroPadding2D` is used.
+        - If both `w_pad` and `h_pad` are negative, `Cropping2D` is used.
+        - If one of the dimensions is positive and the other is negative, both `ZeroPadding2D` and `Cropping2D`
+          layers are applied to handle padding and cropping accordingly.
+    """
     if w_pad or h_pad:
         # add padding
         if w_pad >= 0 and h_pad >= 0:
@@ -72,8 +122,26 @@ def pooling_layer2D(
 
 
 def pooling_layer1D(
-    w_pad, data_format
+    w_pad: int, data_format: str
 ) -> List[Union[ZeroPadding1D, Cropping1D]]:
+    """
+    Determines the padding and cropping layers to apply based on the width padding.
+
+    This function will return a list of 1D padding or cropping layers (e.g., `ZeroPadding1D`, `Cropping1D`)
+    based on the given padding values for width. It handles different cases based on whether
+    the padding values are positive or negative, and adjusts the layers accordingly.
+
+    Args:
+        w_pad: The width padding to apply. A positive value indicates padding,
+                     and a negative value indicates cropping.
+        data_format: The data format to use, either 'channels_first' or 'channels_last'.
+
+    Returns:
+        List[Union[ZeroPadding1D, Cropping1D]]: A list containing either `ZeroPadding1D` or `Cropping1D`
+                                                layers depending on the padding and cropping requirements.
+                                                If no padding or cropping is needed, an empty list is returned.
+
+    """
     if w_pad:
         # add padding
         if w_pad >= 0:
@@ -94,8 +162,30 @@ def pooling_layer1D(
 
 
 def pooling_layer3D(
-    d_pad, w_pad, h_pad, data_format
+    d_pad: int, w_pad: int, h_pad: int, data_format: str
 ) -> List[Union[ZeroPadding3D, Cropping3D]]:
+    """
+    Determines the padding and cropping layers to apply based on the width, height and depth padding.
+
+    This function will return a list of 3D padding or cropping layers (e.g., `ZeroPadding3D`, `Cropping3D`)
+    based on the given padding values for width and height. It handles different cases based on whether
+    the padding values are positive or negative, and adjusts the layers accordingly.
+
+    Args:
+        d_pad: The depth padding to apply. A positive value indicates padding,
+                     and a negative value indicates cropping.
+        w_pad: The width padding to apply. A positive value indicates padding,
+                     and a negative value indicates cropping.
+        h_pad: The height padding to apply. A positive value indicates padding,
+                     and a negative value indicates cropping.
+        data_format: The data format to use, either 'channels_first' or 'channels_last'.
+
+    Returns:
+        List[Union[ZeroPadding3D, Cropping3D]]: A list containing either `ZeroPadding3D` or `Cropping3D`
+                                                layers depending on the padding and cropping requirements.
+                                                If no padding or cropping is needed, an empty list is returned.
+
+    """
     if d_pad or w_pad or h_pad:
         # add padding
         if d_pad >= 0 and w_pad >= 0 and h_pad >= 0:
@@ -138,16 +228,51 @@ def pooling_layer3D(
 
 
 def call_backward_depthwise2d(
-    inputs,
-    layer,
-    op_reshape,
-    op_split,
-    inner_models,
-    axis,
-    axis_c,
-    c_in,
-    use_bias,
-):
+    inputs: Tensor,
+    layer: Layer,
+    op_reshape: Callable,
+    op_split: Callable,
+    inner_models: List[Callable],
+    axis: int,
+    axis_c: int,
+    c_in: int,
+    use_bias: bool,
+) -> Tensor:
+    """
+    Performs the backward pass for a depthwise 2D convolution layer.
+
+    This function handles the removal of bias (if necessary), reshapes the input tensor,
+    splits it along the specified axis, applies individual convolution operations to
+    each split, and finally concatenates the results along the specified axis.
+
+    Args:
+        inputs: The input tensor to the layer. It is expected to have the shape
+                          (batch, height, width, channels) or (batch, channels, height, width)
+                          depending on the data format.
+        layer: The layer object that provides the bias (if applicable) and other
+                       configurations like data format.
+        op_reshape: A function used to reshape the input tensor before processing.
+        op_split: A function used to split the reshaped tensor along the specified axis.
+        inner_models: A list of functions or models that process each split of the tensor.
+        axis: The axis along which the results of the depthwise convolutions are concatenated.
+        axis_c: The axis along which the input tensor is split.
+        c_in: The number of input channels.
+        use_bias: A flag indicating whether to use bias in the layer computation.
+
+    Returns:
+        The concatenated result of the processed splits after applying the inner models
+                (depthwise convolutions).
+
+    Notes:
+        - If `use_bias` is true and the layer has a bias, it is subtracted from the input tensor
+          before any further operations.
+        - The function expects the data format to be either "channels_first" or "channels_last"
+          and handles reshaping and splitting accordingly.
+        - The depthwise convolutions are applied separately to each split of the input, and
+          the results are concatenated along the specified axis.
+
+    """
+
     # remove bias if needed
     if hasattr(layer, "use_bias") and layer.use_bias and use_bias:
         if layer.data_format == "channels_first":
@@ -180,7 +305,35 @@ def call_backward_depthwise2d(
     )  # (batch_size, c_in, w_in, h_in)
 
 
-def reshape_to_batch(input_tensor, layer_output_shape):
+def reshape_to_batch(
+    input_tensor: Tensor, layer_output_shape: List[int]
+) -> Tuple[bool, Tensor, List[int]]:
+    """
+    Reshapes the input tensor to batch format if its shape does not match the expected layer output shape.
+
+    If the shape of the input tensor is not compatible with the expected output shape (i.e.,
+    the tensor's shape includes additional dimensions before the batch dimension), the function
+    reshapes the tensor such that all non-batch dimensions are merged into one batch dimension.
+    The function also returns the original dimensions that were merged.
+
+    Args:
+        input_tensor: The input tensor to reshape.
+        layer_output_shape: The expected shape of the output from the layer,
+                                        including the batch size as the first dimension.
+
+    Returns:
+        Tuple[bool, Tensor, List[int]]:
+            - bool: Indicates if the reshaping occurred (`True` if reshaped, `False` otherwise).
+            - Tensor: The reshaped input tensor if reshaping occurred, otherwise the original tensor.
+            - List[int]: The original dimensions (excluding the batch dimension) that were merged.
+
+    Notes:
+        - This function is useful for handling cases where the input tensor's shape includes
+          additional dimensions before the batch dimension, and reshaping is necessary to
+          maintain compatibility with the expected output shape.
+        - The reshaped tensor will have the batch size combined with the rest of the dimensions
+          into one dimension, followed by the layer's output shape.
+    """
     if len(input_tensor.shape) != len(layer_output_shape):
         # backward is not in a diagonal format, current shape is [batch_size]+n_out+layer_output_shape
         # we reshape it to [batch_size*np.prod(n_out_)]+layer_output_shape

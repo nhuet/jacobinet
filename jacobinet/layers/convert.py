@@ -1,8 +1,8 @@
 import logging
-from typing import Any, Optional
+from typing import Optional
 
-from jacobinet.layers.layer import BackwardLinearLayer, BackwardLayer
-from keras.layers import (
+from jacobinet.layers.layer import BackwardLayer
+from keras.layers import (  # type:ignore
     Activation,
     Add,
     Average,
@@ -32,10 +32,6 @@ from keras.layers import (
     UpSampling1D,
     UpSampling3D,
     BatchNormalization,
-    GroupNormalization,
-    UnitNormalization,
-    LayerNormalization,
-    SpectralNormalization,
     LeakyReLU,
     AveragePooling1D,
     AveragePooling2D,
@@ -45,7 +41,6 @@ from keras.layers import (
     GlobalAveragePooling3D,
     MaxPooling2D,
     GlobalMaxPooling2D,
-    Dropout,
     ReLU,
     LeakyReLU,
     PReLU,
@@ -167,21 +162,6 @@ def get_backward(
     **kwargs,
 ):
     keras_class = type(layer)
-    """
-    if isinstance(layer, BackwardLinearLayer):
-        if use_bias:
-            return layer.layer
-        elif not hasattr(layer.layer, "use_bias"):
-            return layer.layer
-        else:
-            # copy layer
-            config = layer.layer.get_config()
-            config["use_bias"] = False
-            layer_ = layer.layer.__class__.from_config(config)
-            layer_.weights = layer.layer.weights[:1]
-            layer_.built = True
-            return layer_
-    """
 
     if mapping_keras2backward_classes is not None:
         default_mapping_keras2backward_layer.update(
