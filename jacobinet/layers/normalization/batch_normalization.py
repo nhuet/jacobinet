@@ -1,9 +1,9 @@
-from keras.layers import BatchNormalization, Layer
+from keras.layers import BatchNormalization, Layer  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
 from keras.src import backend
 from keras.src import ops
 import keras
-import keras.ops as K
+import keras.ops as K  # type: ignore
 
 
 class BackwardBatchNormalization(BackwardLinearLayer):
@@ -62,14 +62,18 @@ class BackwardBatchNormalization(BackwardLinearLayer):
         input_dim_batch = [-1] + [1] * (len(gradient.shape) - 1)
         input_dim_batch[self.layer.axis] = gradient.shape[self.layer.axis]
 
-        #mean_ = ops.reshape(mean, input_dim_batch)
+        # mean_ = ops.reshape(mean, input_dim_batch)
         variance_ = ops.reshape(variance, input_dim_batch)
         gamma_ = ops.reshape(gamma, input_dim_batch)
-        #beta_ = ops.reshape(beta, input_dim_batch)
+        # beta_ = ops.reshape(beta, input_dim_batch)
 
-        mask = K.where(K.abs(gamma_) < keras.config.epsilon(), K.ones_like(gamma_), K.zeros_like(gamma_))
-        w = ops.sqrt(variance_ + self.layer.epsilon) / (gamma_+mask)
-        w = w*(1-mask)
+        mask = K.where(
+            K.abs(gamma_) < keras.config.epsilon(),
+            K.ones_like(gamma_),
+            K.zeros_like(gamma_),
+        )
+        w = ops.sqrt(variance_ + self.layer.epsilon) / (gamma_ + mask)
+        w = w * (1 - mask)
         outputs = w * gradient
 
         return outputs
