@@ -20,13 +20,17 @@ def clone_to_backward(
     ] = None,
     extra_inputs: Union[List[Input]] = [],
     input_mask=None,
+    target_inputs=None
 ):
+    
     def get_backward(layer, mapping_keras2backward_classes, **kwargs):
         if isinstance(layer, Sequential):
             if not input_mask is None:
                 input_mask_ = to_list(input_mask)
                 if layer.input.name in input_mask_:
                     raise NotImplementedError()
+            if not(target_inputs is None):
+                raise  NotImplementedError() # to do
             return get_backward_sequential(
                 model=layer,
                 mapping_keras2backward_classes=mapping_keras2backward_classes,
@@ -38,6 +42,7 @@ def clone_to_backward(
                 mapping_keras2backward_classes=mapping_keras2backward_classes,
                 input_mask=input_mask,
                 get_backward=get_backward,
+                target_inputs=target_inputs
             )
         elif isinstance(layer, Loss_Layer):
             # keras losses automatically cast as Loss_Layer
@@ -66,5 +71,6 @@ def clone_to_backward(
             extra_inputs,
             input_mask,
             get_backward=get_backward,
+            target_inputs=target_inputs
         )
     return backward_model

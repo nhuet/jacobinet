@@ -22,6 +22,7 @@ def get_backward_functional(
     ] = None,
     extra_inputs: Union[List[Input]] = [],
     input_mask=None,
+    target_inputs=None,
     get_backward: callable = get_backward_layer,
 ):
     # find output_nodes
@@ -48,6 +49,10 @@ def get_backward_functional(
 
     # convert model inputs and outputs as list
     model_inputs = to_list(model.input)
+    if target_inputs is None:
+        target_inputs = model_inputs
+    else:
+        target_inputs = to_list(target_inputs)
     model_outputs = to_list(model.output)
 
     if input_mask is None:
@@ -59,12 +64,17 @@ def get_backward_functional(
     for model_output in model_outputs:
         node_index = model_output._keras_history.node_index
         nodes = model._nodes_by_depth[node_index]
-        node = [
-            node
-            for node in nodes
-            if node.operation.output.name == model_output.name
-        ][0]
-        output_nodes.append(node)
+        try:
+            nodes_ = [node for node in nodes if node.operation.output.name == model_output.name]
+            node = nodes_[0]
+            output_nodes.append(node)
+        except IndexError:
+            model_output_bis = model_output._keras_history.operation.output
+            node_index_bis = model_output._keras_history.operation.output._keras_history.node_index
+            nodes_bis = model._nodes_by_depth[node_index_bis]
+            nodes_bis_ = [node for node in nodes_bis if node.operation.output.name == model_output_bis.name]
+            node = nodes_bis_[0]
+            output_nodes.append(node)
 
     # if gradient is None: create inputs for backward mask
     if gradient is None:
@@ -89,7 +99,8 @@ def get_backward_functional(
     outputs = []
     is_linear = True
 
-    for input_ in model_inputs:
+    #for input_ in model_inputs:
+    for input_ in target_inputs:
         input_name = input_.name
         if not input_name in input_mask:
 

@@ -49,6 +49,7 @@ from .activations import (
 
 from .merging import (
     BackwardMergeNonLinearLayer,
+    BackwardAdd,
     get_backward_Add,
     get_backward_Average,
     get_backward_Concatenate,
@@ -58,4 +59,44 @@ from .merging import (
     get_backward_Multiply,
 )
 
-from .layer import BackwardLayer, BackwardLinearLayer, BackwardNonLinearLayer
+from .layer import BackwardLayer, BackwardLinearLayer, BackwardNonLinearLayer, BackwardBoundedLinearizedLayer
+
+from jacobinet.layers.convolutional import (
+    BackwardConv3D,
+    BackwardConv2D,
+    BackwardConv1D,
+    BackwardDepthwiseConv2D,
+    BackwardDepthwiseConv1D,
+)
+
+from jacobinet.layers.core import (
+    BackwardDense,
+    BackwardEinsumDense
+)
+
+from jacobinet.layers.normalization import BackwardBatchNormalization
+
+from jacobinet.layers.pooling import (
+    BackwardAveragePooling1D,
+    BackwardAveragePooling2D,
+    BackwardAveragePooling3D,
+    BackwardGlobalAveragePooling1D,
+    BackwardGlobalAveragePooling2D,
+    BackwardGlobalAveragePooling3D
+)
+
+from jacobinet.layers.reshaping import (
+    BackwardZeroPadding1D,
+    BackwardZeroPadding2D,
+    BackwardZeroPadding3D,
+    BackwardCropping1D,
+    BackwardCropping2D,
+    BackwardCropping3D,
+    BackwardFlatten,
+    BackwardRepeatVector,
+    BackwardReshape,
+    BackwardPermute,
+    BackwardUpSampling1D,
+    BackwardUpSampling2D,
+    BackwardUpSampling3D,
+)

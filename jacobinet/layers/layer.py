@@ -91,6 +91,9 @@ class BackwardLayer(Layer):
         if self.layer_backward:
             return self.layer_backward(gradient)
         raise NotImplementedError()
+    
+    def build(input_shape):
+        super().build(input_shape)
 
     def call(self, inputs, training=None, mask=None):
         layer_input = None
@@ -188,6 +191,34 @@ class BackwardLinearLayer(BackwardLayer):
 class BackwardNonLinearLayer(BackwardLayer):
     """
     A custom Keras wrapper layer that reverses the operations of a given layer.
+
+    `BackwardNonLinearLayer` is designed to perform the reverse operation of a wrapped Keras
+    layer during the backward pass, which can be useful for certain architectures
+    requiring layer operations to be undone or applied in reverse.
+
+    Usage:
+    ------
+    ```python
+    from keras.layers import Dense
+    backward_layer = BackwardLayer(layer=Dense(32))
+    ```
+
+    This layer can be useful in advanced neural network architectures that
+    need custom layer reversals, such as autoencoders, invertible networks,
+    or specialized backpropagation mechanisms.
+
+    Notes:
+    ------
+    - The `BackwardLayer` does not automatically compute a true inverse; it only
+      reverses the application of operations as defined by the wrapped layer.
+    - It requires the wrapped layer to have compatible reverse operations.
+    """
+
+class BackwardBoundedLinearizedLayer(BackwardLinearLayer):
+    """
+    A custom Keras wrapper layer to linearize operators with bounded derivatives.
+
+    TO DO
 
     `BackwardNonLinearLayer` is designed to perform the reverse operation of a wrapped Keras
     layer during the backward pass, which can be useful for certain architectures

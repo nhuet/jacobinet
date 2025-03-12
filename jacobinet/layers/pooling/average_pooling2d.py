@@ -181,9 +181,14 @@ class BackwardAveragePooling2D(BackwardLinearLayer):
         layer_t.kernel = keras.Variable(kernel_)
         layer_t.built = True
 
+        if self.layer.data_format=="channels_last":
+            output_dim_wo_batch_c_1 = self.output_dim_wo_batch[:-1]+[1]
+        else:
+            output_dim_wo_batch_c_1 = [1]+self.output_dim_wo_batch[1:]
+
         # shape of transposed input
         input_shape_t = list(
-            layer_t(K.ones([1] + self.output_dim_wo_batch)).shape[1:]
+                layer_t(K.ones([1] + output_dim_wo_batch_c_1)).shape[1:]
         )
         
 
@@ -237,7 +242,9 @@ class BackwardAveragePooling2D(BackwardLinearLayer):
         else:
             self.model = layer_t
         # self.model(self.layer.output)
-        self.model(Input(self.output_dim_wo_batch))
+
+
+        self.model(Input(output_dim_wo_batch_c_1))
         self.model.trainable = False
         self.model.built = True
 

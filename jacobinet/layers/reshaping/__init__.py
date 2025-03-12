@@ -1,13 +1,13 @@
-from .zero_padding2d import get_backward_ZeroPadding2D
-from .zero_padding1d import get_backward_ZeroPadding1D
-from .zero_padding3d import get_backward_ZeroPadding3D
-from .cropping1d import get_backward_Cropping1D
-from .cropping2d import get_backward_Cropping2D
-from .cropping3d import get_backward_Cropping3D
-from .flatten import get_backward_Flatten
+from .zero_padding2d import get_backward_ZeroPadding2D, BackwardZeroPadding2D
+from .zero_padding1d import get_backward_ZeroPadding1D, BackwardZeroPadding1D
+from .zero_padding3d import get_backward_ZeroPadding3D, BackwardZeroPadding3D
+from .cropping1d import get_backward_Cropping1D, BackwardCropping1D
+from .cropping2d import get_backward_Cropping2D, BackwardCropping2D
+from .cropping3d import get_backward_Cropping3D, BackwardCropping3D
+from .flatten import get_backward_Flatten, BackwardFlatten
 from .reshape import get_backward_Reshape, BackwardReshape
-from .permute import get_backward_Permute
-from .repeat_vector import get_backward_RepeatVector
-from .upsampling2D import get_backward_UpSampling2D
-from .upsampling1d import get_backward_UpSampling1D
-from .upsampling3d import get_backward_UpSampling3D
+from .permute import get_backward_Permute, BackwardPermute
+from .repeat_vector import get_backward_RepeatVector, BackwardRepeatVector
+from .upsampling2D import get_backward_UpSampling2D, BackwardUpSampling2D
+from .upsampling1d import get_backward_UpSampling1D, BackwardUpSampling1D
+from .upsampling3d import get_backward_UpSampling3D, BackwardUpSampling3D

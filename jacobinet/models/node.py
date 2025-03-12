@@ -34,6 +34,8 @@ def get_backward_node(
             return gradient, True, True
         else:
             return gradient, True, layer_node.output.name == input_name
+        
+    
 
     # step 4: get backward layer
     backward_layer_node: BackwardLayer = get_backward(
@@ -68,6 +70,16 @@ def get_backward_node(
         is_linear = False
 
     keep_output = True
+     # get input_name of the layer
+    layer_inputs = to_list(layer_node.input)
+    if input_name in [e.name for e in layer_inputs]:
+        if isinstance(gradients, list):
+            # do something
+            index_grad = np.where([e.name==input_name for e in layer_inputs])[0]
+            return gradients[index_grad], is_linear, keep_output
+        else:
+            return gradients, is_linear, keep_output
+
     if backward_layer_node.n_input != 1:
         results = [
             get_backward_node(

@@ -1,5 +1,5 @@
 from .base_merge import BackwardMergeLinearLayer, BackwardMergeNonLinearLayer
-from .add import get_backward_Add
+from .add import get_backward_Add, BackwardAdd
 from .average import get_backward_Average
 from .concatenate import get_backward_Concatenate
 from .maximum import get_backward_Maximum
