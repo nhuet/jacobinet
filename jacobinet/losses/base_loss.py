@@ -15,6 +15,7 @@ from .loss import Loss_Layer
 # BinaryCrossentropy
 # CategoricalCrossentropy categorical_crossentropy
 
+
 class BackwardLoss(BackwardMergeNonLinearLayer):
 
     loss: Loss_Layer
