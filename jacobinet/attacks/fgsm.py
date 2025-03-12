@@ -1,23 +1,17 @@
-# from backward
+import numpy as np
+from typing import Union, List, Dict
+
+import keras
+from keras import KerasTensor as Tensor  # type:ignore
 from keras.layers import Layer  # type:ignore
 from keras.losses import Loss  # type:ignore
-import numpy as np
+
 from jacobinet.models import BackwardModel
 from jacobinet.layers.layer import BackwardLayer
 from jacobinet.losses import BackwardLoss
-
-
 from jacobinet.attacks import get_adv_model_base, AdvLayer, AdvModel
 from jacobinet.utils import to_list
 from .utils import FGSM
-
-
-import keras
-from keras import KerasTensor as Tensor
-from typing import Union, List
-
-
-from typing import Union, List, Dict
 
 
 class FastGradientSign(AdvLayer):

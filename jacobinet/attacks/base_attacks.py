@@ -1,18 +1,18 @@
+import numpy as np
+from typing import Union, List, Any, Tuple
+
 import keras  # type:ignore
+from keras import KerasTensor as Tensor  # type:ignore
 from keras.layers import Input, Layer  # type:ignore
 from keras.losses import Loss  # type:ignore
 from keras.models import Model, Sequential  # type:ignore
 import keras.ops as K  # type:ignore
 
-from .utils import FGSM
 from jacobinet import clone_to_backward
-from jacobinet.utils import to_list
-from jacobinet.losses import deserialize, get_loss_as_layer
 from jacobinet.models import BackwardModel
-import numpy as np
-
-from typing import Union, List, Any, Tuple
-from keras import KerasTensor as Tensor
+from jacobinet.losses import deserialize, get_loss_as_layer
+from jacobinet.utils import to_list
+from .utils import FGSM
 
 
 def get_model_with_loss(

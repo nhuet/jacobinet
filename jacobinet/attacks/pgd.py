@@ -1,26 +1,18 @@
-# from backward
-import keras.ops as K
-from keras.layers import Layer  # type:ignore
-from keras.losses import Loss  # type:ignore
-from keras.layers import RNN  # type:ignore
-import numpy as np
-from jacobinet.models import BackwardModel
-
-from jacobinet.attacks import get_adv_model_base, AdvLayer, AdvModel
-from jacobinet.attacks.fgsm import get_fgsm_model
-from jacobinet.utils import to_list
-from .utils import PGD, FGSM
-
-
 import keras
-from keras import KerasTensor as Tensor
-from typing import Any, Union, List
-
+from keras import KerasTensor as Tensor  # type:ignore
+import keras.ops as K  # type:ignore
+from keras.layers import Layer, RNN  # type:ignore
+from keras.losses import Loss  # type:ignore
 
 from typing import Union, List
 
+from jacobinet.attacks import AdvLayer, AdvModel
+from jacobinet.attacks.fgsm import get_fgsm_model
+from jacobinet.utils import to_list
+from .utils import PGD
 
-# First, let's define a RNN Cell, as a layer subclass.
+
+# define a RNN Cell, as a layer subclass.
 class PGD_Cell(keras.Layer):
     """
     A custom RNN cell that applies the Projected Gradient Descent (PGD) attack as part of the recurrent computation.
