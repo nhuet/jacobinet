@@ -20,10 +20,10 @@ def test_backward_BatchNormalization():
     serialize(layer, backward_layer)
 
     layer = BatchNormalization()
-    layer.trainable=False
+    layer.trainable = False
     model_layer = Sequential([layer])
-    model_layer.trainable=False
-    input_shape = (1,32)
+    model_layer.trainable = False
+    input_shape = (1, 32)
     _ = model_layer(np.ones(input_shape)[None])
     backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
@@ -31,10 +31,10 @@ def test_backward_BatchNormalization():
     serialize(layer, backward_layer)
 
     layer = BatchNormalization()
-    layer.trainable=False
+    layer.trainable = False
     model_layer = Sequential([layer])
-    model_layer.trainable=False
-    input_shape = (1,32,32)
+    model_layer.trainable = False
+    input_shape = (1, 32, 32)
     _ = model_layer(np.ones(input_shape)[None])
     # use_bias should have an impact
     backward_layer = get_backward(layer)

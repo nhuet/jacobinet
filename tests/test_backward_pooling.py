@@ -360,13 +360,18 @@ def _test_backward_MaxPooling2D(input_shape, pool_size, strides, padding):
         padding=padding,
         data_format="channels_first",
     )
-    layers = [Reshape(input_shape), layer, Reshape((-1,)), Dense(1, use_bias=False)]
+    layers = [
+        Reshape(input_shape),
+        layer,
+        Reshape((-1,)),
+        Dense(1, use_bias=False),
+    ]
     model = Sequential(layers)
 
     _ = model(torch.ones((1, input_dim)))
     backward_model = clone_to_backward(model)
     # model is not linear
-    _ = backward_model([torch.ones((1, input_dim)), torch.ones((1,1))])
+    _ = backward_model([torch.ones((1, input_dim)), torch.ones((1, 1))])
     compute_backward_model((input_dim,), model, backward_model)
     serialize_model([input_dim, 1], backward_model)
 
@@ -378,7 +383,7 @@ def test_backward_MaxPooling2D():
     padding = "valid"
     input_shape = (1, 32, 32)
     _test_backward_MaxPooling2D(input_shape, pool_size, strides, padding)
-    
+
     pool_size = (3, 3)
     strides = (2, 1)
     padding = "valid"
@@ -391,22 +396,20 @@ def test_backward_MaxPooling2D():
     padding = "valid"
     input_shape = (1, 31, 32)
     _test_backward_MaxPooling2D(input_shape, pool_size, strides, padding)
-    
+
 
 ####### GlobalAveragePooling2D #######
 # pool_size, strides=None, padding="valid", data_format=None
 def _test_backward_GlobalMaxPooling2D(input_shape, keepdims):
 
     # data_format == 'channels_first'
-    layer = GlobalMaxPooling2D(
-        keepdims=keepdims, data_format="channels_first"
-    )
+    layer = GlobalMaxPooling2D(keepdims=keepdims, data_format="channels_first")
 
     # build a model
     input_dim = np.prod(input_shape)
     layers = [Reshape(input_shape), layer, Reshape((-1,)), Dense(1)]
     input_ = Input((input_dim,))
-    output=None
+    output = None
     for layer in layers:
         if output is None:
             output = layer(input_)
@@ -416,9 +419,10 @@ def _test_backward_GlobalMaxPooling2D(input_shape, keepdims):
     _ = model(torch.ones((1, input_dim)))
     backward_model = clone_to_backward(model)
     # model is not linear
-    _ = backward_model([torch.ones((1, input_dim)), torch.ones((1,1))])
+    _ = backward_model([torch.ones((1, input_dim)), torch.ones((1, 1))])
     compute_backward_model((input_dim,), model, backward_model)
     serialize_model([input_dim, 1], backward_model)
+
 
 def test_backward_GlobalMaxPooling2D():
 

@@ -2,8 +2,8 @@ import os
 import numpy as np
 from numpy.testing import assert_almost_equal
 import keras
-from keras.models import Sequential
-import torch
+from keras.models import Sequential # type: ignore
+import torch # type: ignore
 
 from jacobinet.models import is_linear
 
@@ -125,17 +125,29 @@ def compute_backward_layer(
 
 
 def compute_backward_model(
-    input_shape, model, backward_model, index_output=0, grad_value=None, value="rand"
+    input_shape,
+    model,
+    backward_model,
+    index_output=0,
+    grad_value=None,
+    value="rand",
 ):
-    if value =="rand":
-        input_np = np.asarray(100.*np.random.rand(np.prod(input_shape)) - 50., dtype='float32')
-    elif value== "zeros":
-        input_np = np.asarray(0.*np.random.rand(np.prod(input_shape)) - 0., dtype='float32')
-    elif value=="ones":
-        input_np = np.asarray(0.*np.random.rand(np.prod(input_shape)) + 1., dtype='float32')
+    if value == "rand":
+        input_np = np.asarray(
+            100.0 * np.random.rand(np.prod(input_shape)) - 50.0,
+            dtype="float32",
+        )
+    elif value == "zeros":
+        input_np = np.asarray(
+            0.0 * np.random.rand(np.prod(input_shape)) - 0.0, dtype="float32"
+        )
+    elif value == "ones":
+        input_np = np.asarray(
+            0.0 * np.random.rand(np.prod(input_shape)) + 1.0, dtype="float32"
+        )
     else:
-        raise ValueError('unknown value {}'.format(value))
-    #input_ = torch.randn(np.prod(input_shape), requires_grad=True)
+        raise ValueError("unknown value {}".format(value))
+    # input_ = torch.randn(np.prod(input_shape), requires_grad=True)
     input_ = torch.tensor(input_np, requires_grad=True)
     input_reshape = torch.reshape(input_, [1] + list(input_shape))
     output = model(input_reshape)
@@ -168,7 +180,9 @@ def compute_backward_model(
     try:
         assert_almost_equal(gradient, gradient_[0])
     except:
-        import pdb; pdb.set_trace()
+        import pdb
+
+        pdb.set_trace()
 
 
 def compute_output(input_, layers):

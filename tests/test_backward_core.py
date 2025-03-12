@@ -7,12 +7,15 @@ from .conftest import linear_mapping, serialize, compute_backward_layer
 
 import pytest
 
-@pytest.mark.parametrize("activation", ['relu', 'sigmoid', 'tanh'])
+
+@pytest.mark.parametrize("activation", ["relu", "sigmoid", "tanh"])
 def test_backward_Dense(activation):
 
     layer = Dense(units=3, activation=activation)
     model_layer = Sequential([layer, Dense(1)])
-    model_layer_split = Sequential([Dense(units=3), Activation(activation), Dense(1)])
+    model_layer_split = Sequential(
+        [Dense(units=3), Activation(activation), Dense(1)]
+    )
     input_dim = 2
     _ = model_layer(np.ones((input_dim,))[None])
     _ = model_layer_split(np.ones((input_dim,))[None])
@@ -20,21 +23,26 @@ def test_backward_Dense(activation):
     model_layer_split.set_weights(model_layer.get_weights())
 
     batch = 32
-    input = np.reshape(100*(np.random.rand(batch*input_dim)-0.5), (batch, input_dim))
+    input = np.reshape(
+        100 * (np.random.rand(batch * input_dim) - 0.5), (batch, input_dim)
+    )
 
     backward_model = clone_to_backward(model_layer)
     backward_model_split = clone_to_backward(model_layer_split)
 
     output_model = backward_model.predict([input, np.ones((batch, 1))])
-    output_model_split = backward_model_split.predict([input, np.ones((batch, 1))])
+    output_model_split = backward_model_split.predict(
+        [input, np.ones((batch, 1))]
+    )
 
     np.testing.assert_almost_equal(
         output_model, output_model_split, err_msg="corrupted weights"
     )
 
+
 def test_backward_Dense_wo_activation():
 
-    activation='linear'
+    activation = "linear"
     layer = Dense(units=3, use_bias=False, activation=activation)
     model_layer = Sequential([layer])
     input_shape = (2,)

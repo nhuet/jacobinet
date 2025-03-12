@@ -10,7 +10,7 @@ from keras.layers import (
     Cropping3D,
     UpSampling2D,
     UpSampling1D,
-    UpSampling3D
+    UpSampling3D,
 )
 from keras.models import Sequential
 from jacobinet import get_backward_layer as get_backward
@@ -187,6 +187,7 @@ def test_backward_Cropping3D():
     backward_layer = get_backward(layer, use_bias=True)
     serialize(layer, backward_layer)
 
+
 def test_backward_UpSampling2D():
 
     input_shape = (2, 12, 11)
@@ -209,6 +210,7 @@ def test_backward_UpSampling2D():
     # use_bias should have an impact
     backward_layer = get_backward(layer, use_bias=True)
     serialize(layer, backward_layer)
+
 
 def test_backward_UpSampling1D():
 
@@ -234,17 +236,18 @@ def test_backward_UpSampling1D():
     backward_layer = get_backward(layer, use_bias=True)
     serialize(layer, backward_layer)
 
+
 def test_backward_UpSampling3D():
 
     input_shape = (2, 12, 11, 10)
-    
+
     # data_format == 'channels_first'
     layer = UpSampling3D(size=(3, 3, 2), data_format="channels_first")
     model_layer = Sequential([layer])
     _ = model_layer(np.ones(input_shape)[None])
-    
+
     backward_layer = get_backward(layer, use_bias=False)
-    
+
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
     backward_layer = get_backward(layer, use_bias=True)
