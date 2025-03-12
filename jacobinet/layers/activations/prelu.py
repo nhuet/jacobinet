@@ -1,5 +1,5 @@
-from keras.layers import Layer, PReLU
-import keras.ops as K
+from keras.layers import Layer, PReLU  # type: ignore
+import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardNonLinearLayer
 
 from keras import KerasTensor as Tensor

@@ -1,5 +1,5 @@
-from keras.layers import Layer, LeakyReLU
-import keras.ops as K
+from keras.layers import Layer, LeakyReLU  # type: ignore
+import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardNonLinearLayer
 
 from keras import KerasTensor as Tensor

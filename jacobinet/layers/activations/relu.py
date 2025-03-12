@@ -1,8 +1,8 @@
-from keras.layers import Layer, ReLU
-import keras.ops as K
+from keras.layers import Layer, ReLU  # type: ignore
+import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardNonLinearLayer
 
-from keras import KerasTensor as Tensor
+from keras import KerasTensor as Tensor  # type: ignore
 from .prime import relu_prime
 
 

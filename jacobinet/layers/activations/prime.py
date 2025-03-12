@@ -1,6 +1,6 @@
-import keras
-from keras import KerasTensor as Tensor
-import keras.ops as K
+import keras  # type: ignore
+from keras import KerasTensor as Tensor  # type: ignore
+import keras.ops as K  # type: ignore
 from typing import Union, Callable
 
 RELU = "relu"
@@ -337,7 +337,9 @@ def hard_sigmoid_prime(inputs: Tensor) -> Tensor:
         K.sign(inputs + 3)
     )  # 1 if inputs >-3
 
-    return mask_strictly_greater_than_minus_3 * mask_strictly_lower_than_3 / 6.0
+    return (
+        mask_strictly_greater_than_minus_3 * mask_strictly_lower_than_3 / 6.0
+    )
 
 
 def hard_silu_prime(inputs: Tensor) -> Tensor:
