@@ -28,7 +28,7 @@
         <img src="https://img.shields.io/badge/License-MIT-efefef">
     </a>
     <br>
-    <a href="https://deel-ai.github.io/deel-lip/"><strong>Explore DEEL-LIP docs »</strong></a>
+    <a href="https://deel-ai.github.io/deel-lip/"><strong>Explore Jacobinet docs »</strong></a>
 </div>
 <br>
 
@@ -52,7 +52,7 @@ It enables researchers and developers to efficiently analyze, manipulate, and ut
 You can install ``jacobinet`` directly from pypi:
 
 ```python
-pip install deel-lip
+pip install jacobinet
 ```
 
 In order to use ``jacobinet``, you also need a [valid Keras
@@ -63,12 +63,12 @@ supports Keras versions 3.x.
 
 | **Tutorial Name**           | Notebook                                                                                                                                                           |
 | :-------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| Getting Started 1 - Creating a Backward neural network | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/deel-ai/deel-lip/blob/master/docs/notebooks/Getting_started_1.ipynb)            |
-| Getting Started 2 - Training an adversarially robust 1-Lipschitz neural network | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/deel-ai/deel-lip/blob/master/docs/notebooks/Getting_started_2.ipynb)            |
-| Wasserstein distance estimation on toy example | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/deel-ai/deel-lip/blob/master/docs/notebooks/demo1.ipynb) |
-| HKR Classifier on toy dataset | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/deel-ai/deel-lip/blob/master/docs/notebooks/demo2.ipynb) |
-| HKR classifier on MNIST dataset | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/deel-ai/deel-lip/blob/master/docs/notebooks/demo3.ipynb) |
-| HKR multiclass and fooling | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/deel-ai/deel-lip/blob/master/docs/notebooks/demo4.ipynb) |
+| Getting Started 1 - Computing and Visualizing Gradients Using Backward Models in Keras | [![Open In Colab](https://colab.research.google.com/github/ducoffeM/jacobinet/blob/main/tutorials/PlottingBackward.ipynb)            |
+| Getting Started 2 - Implementing Custom Backward Pass for Non-Native Keras Operators with Jacobinet | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ducoffeM/jacobinet/blob/main/tutorials/CustomOp.ipynb)            |
+| Estimating the Local Lipschitz Constant of a Neural Network Using Jacobinet | [![Open In Colab](https://colab.research.google.com/github/ducoffeM/jacobinet/blob/main/tutorials/LipschitzConstant.ipynb) |
+| Training Neural Networks with Sparse Input Decision Using Jacobinet | [![Open In Colab](https://colab.research.google.com/github/ducoffeM/jacobinet/blob/main/tutorials/TrainWithSparsity.ipynb) |
+| Robust Training with Jacobinet and Adversarial Attacks | [![Open In Colab](https://colab.research.google.com/github/ducoffeM/jacobinet/blob/main/tutorials/AdversarialTraining.ipynb) |
+| A Complete Guide to Jacobinet Backward Model Serialization | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ducoffeM/jacobinet/blob/main/tutorials/Serialization_Export.ipynb) |
 
 
 ## 📦 What's Included
@@ -117,9 +117,8 @@ pip install tox
     <img alt="DEEL Logo" src="https://www.deel.ai/wp-content/uploads/2021/05/logo-DEEL.png" width="25%" align="right">
   </picture>
 </div>
-This project received funding from the French program within the Artificial and Natural Intelligence Toulouse Institute (ANITI). The authors gratefully acknowledge the support of the <a href="https://www.deel.ai/"> DEEL </a> project.
+This project received funding from the French program within the <a href="https://aniti.univ-toulouse.fr/">Artificial and Natural Intelligence Toulouse Institute (ANITI)</a>. The authors gratefully acknowledge the support of the <a href="https://www.deel.ai/"> DEEL </a> project.
 
-ADD ANITI + Airbus
 
 ## 🗞️ Citation
 
@@ -129,10 +128,5 @@ ADD ANITI + Airbus
 
 The package is released under <a href="https://choosealicense.com/licenses/mit"> MIT license</a>.
 
-
-
-
-
-**Features**
 
 
