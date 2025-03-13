@@ -63,11 +63,11 @@ supports Keras versions 3.x.
 
 | **Tutorial Name**           | Notebook                                                                                                                                                           |
 | :-------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| Getting Started 1 - Computing and Visualizing Gradients Using Backward Models in Keras | [![Open In Colab](https://colab.research.google.com/github/ducoffeM/jacobinet/blob/main/tutorials/PlottingBackward.ipynb)            |
+| Getting Started 1 - Computing and Visualizing Gradients Using Backward Models in Keras | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ducoffeM/jacobinet/blob/main/tutorials/PlottingBackward.ipynb)            |
 | Getting Started 2 - Implementing Custom Backward Pass for Non-Native Keras Operators with Jacobinet | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ducoffeM/jacobinet/blob/main/tutorials/CustomOp.ipynb)            |
-| Estimating the Local Lipschitz Constant of a Neural Network Using Jacobinet | [![Open In Colab](https://colab.research.google.com/github/ducoffeM/jacobinet/blob/main/tutorials/LipschitzConstant.ipynb) |
-| Training Neural Networks with Sparse Input Decision Using Jacobinet | [![Open In Colab](https://colab.research.google.com/github/ducoffeM/jacobinet/blob/main/tutorials/TrainWithSparsity.ipynb) |
-| Robust Training with Jacobinet and Adversarial Attacks | [![Open In Colab](https://colab.research.google.com/github/ducoffeM/jacobinet/blob/main/tutorials/AdversarialTraining.ipynb) |
+| Estimating the Local Lipschitz Constant of a Neural Network Using Jacobinet | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ducoffeM/jacobinet/blob/main/tutorials/LipschitzConstant.ipynb) |
+| Training Neural Networks with Sparse Input Decision Using Jacobinet | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ducoffeM/jacobinet/blob/main/tutorials/TrainWithSparsity.ipynb) |
+| Robust Training with Jacobinet and Adversarial Attacks | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ducoffeM/jacobinet/blob/main/tutorials/AdversarialTraining.ipynb) |
 | A Complete Guide to Jacobinet Backward Model Serialization | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ducoffeM/jacobinet/blob/main/tutorials/Serialization_Export.ipynb) |
 
 
