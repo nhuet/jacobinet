@@ -6,17 +6,18 @@
                 <img alt="Library Banner" src="./docs/assets/logo.svg">
         </picture>
 </div>
+
 <br>
 
 <div align="center">
-    <a href="https://github.com/deel-ai/deel-lip/actions/workflows/python-tests.yml">
-        <img alt="Tox" src="https://github.com/deel-ai/deel-lip/actions/workflows/python-linters.yml/badge.svg?branch=master">
+  <a href="#">
+        <img src="https://img.shields.io/badge/Python-%E2%89%A53.9-efefef">
     </a>
-    <a href="https://pypi.org/project/deel-lip">
-        <img alt="Pypi" src="https://img.shields.io/pypi/v/deel-lip.svg">
+    <a href="https://github.com/ducoffeM/jacobinet/actions/workflows/python-tests.yml">
+        <img alt="Tox" src="https://github.com/ducoffeM/jacobinet/actions/workflows/python-tests.yml/badge.svg">
     </a>
-    <a href="https://pepy.tech/project/deel-lip">
-        <img alt="Pepy" src="https://pepy.tech/badge/deel-lip">
+    <a href="https://github.com/ducoffeM/jacobinet/actions/workflows/python-linters.yml">
+        <img alt="Lint" src="https://github.com/ducoffeM/jacobinet/actions/workflows/python-linters.yml/badge.svg">
     </a>
     <a href="#">
         <img src="https://img.shields.io/badge/License-MIT-efefef">
@@ -25,6 +26,7 @@
     <a href="https://ducoffeM.github.io/jacobinet/"><strong>Explore Jacobinet docs »</strong></a>
 </div>
 <br>
+
 
 ## 👋 Welcome to jacobinet documentation!
 ***JacobiNet*** is a Python library built on Keras that constructs the backward pass as a Keras model using the chain rule to compute Jacobians. It provides a clear, modular framework for understanding and analyzing gradient propagation, making it a valuable tool for researchers and educators in deep learning.
