@@ -1,3 +1,4 @@
+import keras
 from keras.layers import (  # type: ignore
     Layer,
     DepthwiseConv1D,
@@ -16,7 +17,7 @@ import keras.ops as K  # type: ignore
 from typing import List
 from keras import KerasTensor as Tensor  # type: ignore
 
-
+@keras.saving.register_keras_serializable()
 class BackwardDepthwiseConv1D(BackwardLinearLayer):
     """
     This class implements a custom layer for backward pass of a `DepthwiseConv1D` layer in Keras.

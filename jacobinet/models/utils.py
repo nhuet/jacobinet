@@ -127,7 +127,7 @@ def get_backward(
 
         raise NotImplementedError()
 
-
+@keras.saving.register_keras_serializable()
 class GradConstant(Layer):
     """
     A custom Keras layer that outputs a constant gradient.
@@ -190,7 +190,7 @@ def get_gradient(grad: Tensor, input) -> Tuple[Any, bool]:
     constant = GradConstant(gradient=grad)(input)
     return constant
 
-
+@keras.saving.register_keras_serializable()
 class FuseGradients(Layer):
     """
     A custom Keras layer that takes a list of input tensors, expands each tensor

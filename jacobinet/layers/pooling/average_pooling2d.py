@@ -20,7 +20,7 @@ from typing import List
 ArrayLike = np.typing.ArrayLike
 Tensor = keras.KerasTensor
 
-
+@keras.saving.register_keras_serializable()
 class CroppingReflect2D(keras.layers.Layer):
     """Custom Keras Layer that applies the backward pass for the padding of AveragePooling2D with padding same
     This operation operates a non standard pooling function (not ZeroPadding), but duplicate the last lines and cols to get the right shape
@@ -163,7 +163,7 @@ class CroppingReflect2D(keras.layers.Layer):
             **config,
         )
 
-
+@keras.saving.register_keras_serializable()
 class BackwardAveragePooling2D(BackwardLinearLayer):
     """
     This class implements a custom layer for backward pass of a `AveragePooling2D` layer in Keras.

@@ -1,8 +1,9 @@
+import keras
 from keras.layers import ZeroPadding3D, Cropping3D  # type: ignore
 from keras.layers import Layer  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
 
-
+@keras.saving.register_keras_serializable()
 class BackwardCropping3D(BackwardLinearLayer):
     """
     This class implements a custom layer for backward pass of a `Cropping3D` layer in Keras.

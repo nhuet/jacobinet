@@ -1,8 +1,9 @@
+import keras
 import keras.ops as K  # type:ignore
 from .base_loss import BackwardLoss
 from .loss import CategoricalCrossentropy_Layer
 
-
+@keras.saving.register_keras_serializable()
 class BackwardCrossentropy(BackwardLoss):
     """
     A custom backward loss layer for computing gradients in cross-entropy loss functions,

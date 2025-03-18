@@ -1,9 +1,10 @@
+import keras
 from keras.layers import Layer, Concatenate  # type: ignore
 import keras.ops as K  # type: ignore
 
 from jacobinet.layers.merging import BackwardMergeLinearLayer
 
-
+@keras.saving.register_keras_serializable()
 class BackwardConcatenate(BackwardMergeLinearLayer):
     """
     This class implements a custom layer for backward pass of a `Concatenate` layer in Keras.

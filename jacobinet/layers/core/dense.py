@@ -5,10 +5,10 @@ from jacobinet.layers.layer import (
 from jacobinet.layers.core.activations import BackwardActivation
 from keras.layers import Layer, Dense  # type: ignore
 import keras.ops as K  # type: ignore
-
+import keras
 from keras import KerasTensor as Tensor
 
-
+@keras.saving.register_keras_serializable()
 class BackwardDense(BackwardLinearLayer):
     """
     This class implements a custom layer for backward pass of a `Dense` layer in Keras.
@@ -39,7 +39,7 @@ class BackwardDense(BackwardLinearLayer):
     ):
         return K.matmul(gradient, K.transpose(self.layer.kernel))
 
-
+@keras.saving.register_keras_serializable()
 class BackwardDenseWithActivation(BackwardWithActivation):
     """ "
     This class implements a custom layer for backward pass of a `DepthwiseConv1D` layer in Keras with a non linear activation function.

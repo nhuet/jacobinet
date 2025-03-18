@@ -1,3 +1,4 @@
+import keras
 from keras.layers import Layer, ELU  # type: ignore
 import keras.ops as K  # type: ignore
 from keras import KerasTensor as Tensor
@@ -6,7 +7,7 @@ from jacobinet.layers.layer import BackwardNonLinearLayer
 
 from .prime import elu_prime
 
-
+@keras.saving.register_keras_serializable()
 class BackwardELU(BackwardNonLinearLayer):
     """
     This class implements a custom layer for backward pass of a `ELU` layer in Keras.

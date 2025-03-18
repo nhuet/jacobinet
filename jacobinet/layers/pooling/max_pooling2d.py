@@ -1,5 +1,6 @@
 import numpy as np
 import math
+import keras
 from keras.layers import Layer, Input, MaxPooling2D, Reshape  # type: ignore
 from keras.models import Sequential, Model  # type: ignore
 import keras.ops as K  # type: ignore
@@ -67,7 +68,7 @@ def get_pad_width(
 
     return pad_width, padding
 
-
+@keras.saving.register_keras_serializable()
 class BackwardMaxPooling2D(BackwardNonLinearLayer):
     """
     This class implements a custom layer for backward pass of a `MaxPooling2D` layer in Keras.

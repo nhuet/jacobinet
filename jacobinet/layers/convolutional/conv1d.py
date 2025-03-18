@@ -1,3 +1,4 @@
+import keras
 from keras.layers import Conv1D, Conv1DTranspose, Input, Layer  # type: ignore
 from keras.layers import Layer  # type: ignore
 from keras.models import Sequential  # type: ignore
@@ -49,7 +50,7 @@ def init_backward_conv1D(layer, input_dim_wo_batch, output_dim_wo_batch):
 
     return layer_backward
 
-
+@keras.saving.register_keras_serializable()
 class BackwardConv1D(BackwardLinearLayer):
     """
     This class implements a custom layer for backward pass of a `Conv1D` layer in Keras.

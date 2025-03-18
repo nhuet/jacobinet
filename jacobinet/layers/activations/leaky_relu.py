@@ -1,3 +1,4 @@
+import keras
 from keras.layers import Layer, LeakyReLU  # type: ignore
 import keras.ops as K  # type: ignore
 from keras import KerasTensor as Tensor
@@ -6,7 +7,7 @@ from jacobinet.layers.layer import BackwardNonLinearLayer
 
 from .prime import leaky_relu_prime
 
-
+@keras.saving.register_keras_serializable()
 class BackwardLeakyReLU(BackwardNonLinearLayer):
     """
     This class implements a custom layer for backward pass of a `LeakyReLU` layer in Keras.

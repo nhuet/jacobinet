@@ -1,8 +1,9 @@
+import keras
 from keras.layers import Layer, Dot  # type: ignore
 import keras.ops as K  # type: ignore
 from jacobinet.layers.merging import BackwardMergeNonLinearLayer
 
-
+@keras.saving.register_keras_serializable()
 class BackwardDot(BackwardMergeNonLinearLayer):
     """
     This class implements a custom layer for backward pass of a `Dot` layer in Keras.

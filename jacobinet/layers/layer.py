@@ -8,7 +8,7 @@ from jacobinet.layers.utils import share_weights_and_build, reshape_to_batch
 from keras import KerasTensor as Tensor
 from typing import Type
 
-
+@keras.saving.register_keras_serializable()
 class BackwardLayer(Layer):
     """
     A custom Keras wrapper layer that reverses the operations of a given layer.
@@ -159,7 +159,7 @@ class BackwardLayer(Layer):
             ]
         return [1] + self.input_dim_wo_batch
 
-
+@keras.saving.register_keras_serializable()
 class BackwardLinearLayer(BackwardLayer):
     """
     A custom Keras wrapper layer that reverses the operations of a given layer.
@@ -186,7 +186,7 @@ class BackwardLinearLayer(BackwardLayer):
     - It requires the wrapped layer to have compatible reverse operations.
     """
 
-
+@keras.saving.register_keras_serializable()
 class BackwardNonLinearLayer(BackwardLayer):
     """
     A custom Keras wrapper layer that reverses the operations of a given layer.
@@ -213,7 +213,7 @@ class BackwardNonLinearLayer(BackwardLayer):
     - It requires the wrapped layer to have compatible reverse operations.
     """
 
-
+@keras.saving.register_keras_serializable()
 class BackwardBoundedLinearizedLayer(BackwardLinearLayer):
     """
     A custom Keras wrapper layer to linearize operators with bounded derivatives.
@@ -242,7 +242,7 @@ class BackwardBoundedLinearizedLayer(BackwardLinearLayer):
     - It requires the wrapped layer to have compatible reverse operations.
     """
 
-
+@keras.saving.register_keras_serializable()
 class BackwardWithActivation(BackwardNonLinearLayer):
     """
     This class implements a custom layer for backward pass of a layer in Keras with a non linear activation function.

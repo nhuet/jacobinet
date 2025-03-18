@@ -6,7 +6,7 @@ from jacobinet.layers.layer import (
 from .utils import is_linear_layer
 from typing import Any
 
-
+@keras.saving.register_keras_serializable()
 class BackwardModel(keras.Model):
     def __init__(
         self,
@@ -48,7 +48,7 @@ class BackwardModel(keras.Model):
 
         return config
 
-
+@keras.saving.register_keras_serializable()
 class BackwardSequential(keras.Sequential):
     """
     A custom Keras Sequential model that supports backward computations and checks for linear layers.

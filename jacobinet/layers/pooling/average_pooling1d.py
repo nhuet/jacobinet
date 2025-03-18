@@ -10,7 +10,7 @@ from keras.models import Sequential  # type: ignore
 import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
 
-
+@keras.saving.register_keras_serializable()
 class BackwardAveragePooling1D(BackwardLinearLayer):
     """
     This class implements a custom layer for backward pass of a `AveragePooling1D` layer in Keras.

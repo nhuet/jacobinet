@@ -1,7 +1,8 @@
+import keras
 from keras.layers import Layer, Subtract  # type: ignore
 from jacobinet.layers.merging import BackwardMergeLinearLayer
 
-
+@keras.saving.register_keras_serializable()
 class BackwardSubtract(BackwardMergeLinearLayer):
     """
     This class implements a custom layer for backward pass of a `Subtract` layer in Keras.

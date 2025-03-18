@@ -1,8 +1,9 @@
+import keras
 from keras.layers import Reshape  # type: ignore
 from keras.layers import Layer  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
 
-
+@keras.saving.register_keras_serializable()
 class BackwardReshape(BackwardLinearLayer):
     """
     This class implements a custom layer for backward pass of a `Reshape` layer in Keras.

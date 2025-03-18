@@ -1,3 +1,4 @@
+import keras
 from keras.layers import Conv2D, Conv2DTranspose, Input  # type: ignore
 from keras.layers import Layer  # type: ignore
 from keras.models import Sequential  # type: ignore
@@ -8,7 +9,7 @@ from jacobinet.layers.core.activations import BackwardActivation
 
 from keras import KerasTensor as Tensor  # type: ignore
 
-
+@keras.saving.register_keras_serializable()
 class BackwardConv2D(BackwardLinearLayer):
     """
     This class implements a custom layer for backward pass of a `Conv2D` layer in Keras.

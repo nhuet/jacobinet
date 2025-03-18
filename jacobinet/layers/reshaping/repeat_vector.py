@@ -1,8 +1,10 @@
+import keras
 from keras.layers import RepeatVector, Layer  # type: ignore
 import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
 
 
+@keras.saving.register_keras_serializable()
 class BackwardRepeatVector(BackwardLinearLayer):
     """
     This class implements a custom layer for backward pass of a `RepeatVector` layer in Keras.

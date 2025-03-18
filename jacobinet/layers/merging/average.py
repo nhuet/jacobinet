@@ -1,9 +1,10 @@
+import keras
 from keras.layers import Layer, Average  # type: ignore
 from jacobinet.layers.merging import BackwardMergeLinearLayer
 
 from keras import KerasTensor as Tensor  # type: ignore
 
-
+@keras.saving.register_keras_serializable()
 class BackwardAverage(BackwardMergeLinearLayer):
     """
     This class implements a custom layer for backward pass of a `Average` layer in Keras.

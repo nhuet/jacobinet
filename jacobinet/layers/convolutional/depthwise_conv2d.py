@@ -1,3 +1,4 @@
+import keras
 from keras.layers import (  # type: ignore
     Layer,
     DepthwiseConv2D,
@@ -13,7 +14,7 @@ from jacobinet.layers.utils import pooling_layer2D, call_backward_depthwise2d
 from keras import KerasTensor as Tensor
 from typing import List
 
-
+@keras.saving.register_keras_serializable()
 class BackwardDepthwiseConv2D(BackwardLinearLayer):
     """
     This class implements a custom layer for backward pass of a `DepthwiseConv2D` layer in Keras.

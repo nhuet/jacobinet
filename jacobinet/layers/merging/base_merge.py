@@ -1,7 +1,8 @@
+import keras
 from keras.src.layers.merging.base_merge import Merge
 from jacobinet.layers.layer import BackwardLinearLayer, BackwardNonLinearLayer
 
-
+@keras.saving.register_keras_serializable()
 class BackwardMergeLinearLayer(BackwardLinearLayer):
     """
     A custom Keras wrapper layer that reverses the operations of a given layer.

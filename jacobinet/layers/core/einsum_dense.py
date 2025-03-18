@@ -1,9 +1,10 @@
+import keras
 from jacobinet.layers.layer import BackwardLinearLayer
 from keras.layers import Layer, EinsumDense  # type: ignore
 from keras.src import ops
 import keras.ops as K  # type: ignore
 
-
+@keras.saving.register_keras_serializable()
 class BackwardEinsumDense(BackwardLinearLayer):
     """
     This class implements a custom layer for backward pass of a `EinsumDense` layer in Keras.

@@ -1,3 +1,4 @@
+import keras
 from keras.layers import BatchNormalization, Layer  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
 from keras.src import backend
@@ -5,7 +6,7 @@ from keras.src import ops
 import keras
 import keras.ops as K  # type: ignore
 
-
+@keras.saving.register_keras_serializable()
 class BackwardBatchNormalization(BackwardLinearLayer):
     """
     This class implements a custom layer for backward pass of a `BatchNormalization` layer in Keras.

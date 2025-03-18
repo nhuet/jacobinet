@@ -1,3 +1,4 @@
+import keras
 from keras.layers import Layer, ReLU  # type: ignore
 import keras.ops as K  # type: ignore
 from keras import KerasTensor as Tensor  # type: ignore
@@ -6,7 +7,7 @@ from jacobinet.layers.layer import BackwardNonLinearLayer
 
 from .prime import relu_prime
 
-
+@keras.saving.register_keras_serializable()
 class BackwardReLU(BackwardNonLinearLayer):
     """
     This function creates a `BackwardReLU` layer based on a given `ReLU` layer. It provides

@@ -1,8 +1,9 @@
+import keras
 from keras.layers import Layer, Minimum  # type: ignore
 import keras.ops as K  # type: ignore
 from jacobinet.layers.merging import BackwardMergeNonLinearLayer
 
-
+@keras.saving.register_keras_serializable()
 class BackwardMinimum(BackwardMergeNonLinearLayer):
     """
     This class implements a custom layer for backward pass of a `Minimum` layer in Keras.

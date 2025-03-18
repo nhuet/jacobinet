@@ -1,3 +1,4 @@
+import keras
 from keras.layers import Layer, PReLU  # type: ignore
 import keras.ops as K  # type: ignore
 from keras import KerasTensor as Tensor
@@ -6,7 +7,7 @@ from jacobinet.layers.layer import BackwardNonLinearLayer
 
 from .prime import relu_prime
 
-
+@keras.saving.register_keras_serializable()
 class BackwardPReLU(BackwardNonLinearLayer):
     """
     This class implements a custom layer for backward pass of a `PReLU` layer in Keras.
@@ -47,10 +48,12 @@ def get_backward_PReLU(layer: PReLU) -> Layer:
     `BackwardPReLU`.
 
     ### Parameters:
-    - `layer`: A Keras `PReLU` layer instance. The function uses this layer's configurations to set up the `BackwardPReLU` layer.
+    - `layer`: A Keras `PReLU` layer instance. 
+    The function uses this layer's configurations to set up the `BackwardPReLU` layer.
 
     ### Returns:
-    - `layer_backward`: An instance of `BackwardPReLU`, which acts as the reverse layer for the given `PReLU`.
+    - `layer_backward`: An instance of `BackwardPReLU`, 
+    which acts as the reverse layer for the given `PReLU`.
 
     ### Example Usage:
     ```python

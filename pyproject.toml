@@ -1,4 +1,3 @@
-
 [build-system]
 requires = ["setuptools>=64", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
@@ -17,19 +16,6 @@ dependencies =[
 license = {text = "MIT"}
 dynamic = ["version"]
 
-classifiers = [
-    "Development Status :: 4 - Beta",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3 :: Only",
-    "Operating System :: Unix",
-    "Operating System :: MacOS",
-    "Intended Audience :: Science/Research",
-    "Topic :: Scientific/Engineering",
-    "Topic :: Software Development",
-]
 
 [project.urls]
 documentation = "https://ducoffeM.github.io/jacobinet"
@@ -44,6 +30,7 @@ include = ["jacobinet*"]
 
 [tool.setuptools_scm]
 
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = [
@@ -51,7 +38,7 @@ addopts = [
 ]
 
 [tool.black]
-line-length = 79
+line-length = 100
 target-version = ['py39']
 include = '\.pyi?$'
 exclude = '''
@@ -68,11 +55,24 @@ exclude = '''
     | buck-out
     | build
     | dist
-    | tests/.*/setup.py
   )/
   | foo.py           # also separately exclude a file named foo.py in
                      # the root of the project
 )
 '''
 
+[tool.mypy]
+files = "keras_custom"
+strict_optional = true
+implicit_optional = false
+check_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = [
+    "tensorflow.*",
+    "keras.*",
+    "torch.*"
+]
 ignore_missing_imports = true

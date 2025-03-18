@@ -1,3 +1,4 @@
+import keras
 from keras.layers import Layer, DepthwiseConv3D, Conv3DTranspose, Reshape  # type: ignore
 from keras.models import Sequential  # type: ignore
 import keras.ops as K  # type: ignore
@@ -6,7 +7,7 @@ from jacobinet.layers.utils import pooling_layer3D
 
 from typing import List
 
-
+@keras.saving.register_keras_serializable()
 class BackwardDepthwiseConv3D(BackwardLinearLayer):
     """
     This class implements a custom layer for backward pass of a `DepthwiseConv3D` layer in Keras.

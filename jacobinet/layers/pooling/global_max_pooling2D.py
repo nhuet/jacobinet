@@ -1,11 +1,12 @@
 import numpy as np
+import keras
 from keras.layers import Layer, GlobalMaxPooling2D  # type: ignore
 import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardNonLinearLayer
 from jacobinet.layers.custom.prime import max_prime
 from jacobinet.layers.utils import reshape_to_batch
 
-
+@keras.saving.register_keras_serializable()
 class BackwardGlobalMaxPooling2D(BackwardNonLinearLayer):
     """
     This class implements a custom layer for backward pass of a `GlobalMaxPooling2D` layer in Keras.

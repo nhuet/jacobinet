@@ -40,7 +40,7 @@ def deserialize(name: str) -> Loss:
         return keras.losses.CategoricalCrossentropy()
     raise ValueError("unknown loss")
 
-
+@keras.saving.register_keras_serializable()
 class Loss_Layer(Layer):
     """
     A custom Keras layer that computes a loss function between true labels and predicted values.
@@ -77,7 +77,7 @@ class Loss_Layer(Layer):
 
     # serialization to do
 
-
+@keras.saving.register_keras_serializable()
 class CategoricalCrossentropy_Layer(Loss_Layer):
     """
     A custom Keras layer for computing categorical cross-entropy loss between true labels and predictions.

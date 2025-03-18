@@ -1,4 +1,5 @@
 # from backward
+import keras
 import keras.ops as K  # type:ignore
 from keras.layers import Layer  # type:ignore
 import numpy as np
@@ -8,6 +9,7 @@ import keras  # type:ignore
 from typing import Any, Union
 
 
+@keras.saving.register_keras_serializable()
 class Lipschitz(Layer):
     """
     A custom Keras layer that computes the Lipschitz bound of the input tensor

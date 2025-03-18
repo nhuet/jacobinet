@@ -1,3 +1,4 @@
+import keras
 from keras.layers import Layer, Activation  # type: ignore
 import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardNonLinearLayer
@@ -5,7 +6,7 @@ from jacobinet.layers.layer import BackwardNonLinearLayer
 from keras import KerasTensor as Tensor  # type: ignore
 from jacobinet.layers.activations.prime import deserialize
 
-
+@keras.saving.register_keras_serializable()
 class BackwardActivation(BackwardNonLinearLayer):
     """
     This class implements a custom layer for backward pass of a `Activation` layer in Keras.

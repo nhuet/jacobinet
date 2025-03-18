@@ -1,9 +1,11 @@
+import keras
 from keras.layers import UpSampling2D  # type: ignore
 from keras.layers import Layer  # type: ignore
 import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
 
 
+@keras.saving.register_keras_serializable()
 class BackwardUpSampling2D(BackwardLinearLayer):
     """
     This class implements a custom layer for backward pass of a `UpSampling2D` layer in Keras.

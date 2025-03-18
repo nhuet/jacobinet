@@ -1,8 +1,9 @@
+import keras
 from keras.layers import Layer, GlobalAveragePooling3D  # type: ignore
 import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
 
-
+@keras.saving.register_keras_serializable()
 class BackwardGlobalAveragePooling3D(BackwardLinearLayer):
     """
     This class implements a custom layer for backward pass of a `GlobalAveragePooling3D` layer in Keras.

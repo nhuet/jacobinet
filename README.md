@@ -1,7 +1,7 @@
 
 <div align="center">
         <picture>
-                <source media="(prefers-color-scheme: dark)" srcset="./docs/assets/logo_white.svg">
+                <source media="(prefers-color-scheme: dark)" srcset="./docs/assets/logo.svg">
                 <source media="(prefers-color-scheme: light)" srcset="./docs/assets/logo.svg">
                 <img alt="Library Banner" src="./docs/assets/logo.svg">
         </picture>
@@ -9,12 +9,6 @@
 <br>
 
 <div align="center">
-    <a href="#">
-        <img src="https://img.shields.io/pypi/pyversions/deel-lip.svg">
-    </a>
-    <a href="https://github.com/deel-ai/deel-lip/actions/workflows/python-linters.yml">
-        <img alt="PyLint" src="https://github.com/deel-ai/deel-lip/actions/workflows/python-linters.yml/badge.svg?branch=master">
-    </a>
     <a href="https://github.com/deel-ai/deel-lip/actions/workflows/python-tests.yml">
         <img alt="Tox" src="https://github.com/deel-ai/deel-lip/actions/workflows/python-linters.yml/badge.svg?branch=master">
     </a>
@@ -28,7 +22,7 @@
         <img src="https://img.shields.io/badge/License-MIT-efefef">
     </a>
     <br>
-    <a href="https://deel-ai.github.io/deel-lip/"><strong>Explore Jacobinet docs »</strong></a>
+    <a href="https://ducoffeM.github.io/jacobinet/"><strong>Explore Jacobinet docs »</strong></a>
 </div>
 <br>
 

@@ -1,9 +1,11 @@
+import keras
 from keras.layers import ZeroPadding1D, Cropping1D, Cropping2D, Reshape, Input  # type: ignore
 from keras.layers import Layer  # type: ignore
 from keras.models import Sequential  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
 
 
+@keras.saving.register_keras_serializable()
 class BackwardZeroPadding1D(BackwardLinearLayer):
     """
     This class implements a custom layer for backward pass of a `ZeroPadding1D` layer in Keras.
