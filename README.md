@@ -1,8 +1,8 @@
 
 <div align="center">
         <picture>
-                <source media="(prefers-color-scheme: dark)" srcset="./docs/assets/logo.svg">
-                <source media="(prefers-color-scheme: light)" srcset="./docs/assets/logo.svg">
+                <source media="(prefers-color-scheme: dark)" srcset="./docs/assets/logo.png">
+                <source media="(prefers-color-scheme: light)" srcset="./docs/assets/logo.png">
                 <img alt="Library Banner" src="./docs/assets/logo.svg">
         </picture>
 </div>
