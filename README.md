@@ -3,7 +3,7 @@
         <picture>
                 <source media="(prefers-color-scheme: dark)" srcset="./docs/assets/logo.png">
                 <source media="(prefers-color-scheme: light)" srcset="./docs/assets/logo.png">
-                <img alt="Library Banner" src="./docs/assets/logo.svg">
+                <img alt="Library Banner" src="./docs/assets/logo.svg" width="300" height="300">
         </picture>
 </div>
 
@@ -111,6 +111,9 @@ pip install tox
     <source media="(prefers-color-scheme: dark)" srcset="https://share.deel.ai/apps/theming/image/logo?useSvg=1&v=10"  width="25%" align="right">
     <source media="(prefers-color-scheme: light)" srcset="https://www.deel.ai/wp-content/uploads/2021/05/logo-DEEL.png"  width="25%" align="right">
     <img alt="DEEL Logo" src="https://www.deel.ai/wp-content/uploads/2021/05/logo-DEEL.png" width="25%" align="right">
+  </picture>
+  <picture>
+    <img alt="ANITI Logo" src="https://aniti.univ-toulouse.fr/wp-content/uploads/2023/06/Capture-decran-2023-06-26-a-09.59.26-1.png" width="25%" align="right">
   </picture>
 </div>
 This project received funding from the French program within the <a href="https://aniti.univ-toulouse.fr/">Artificial and Natural Intelligence Toulouse Institute (ANITI)</a>. The authors gratefully acknowledge the support of the <a href="https://www.deel.ai/"> DEEL </a> project.
