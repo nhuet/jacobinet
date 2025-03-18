@@ -1,26 +1,30 @@
-from .conftest import compute_output
 import keras
+import numpy as np
+import pytest
+import torch
+from jacobinet.models.model import get_backward_model
+from jacobinet.models.sequential import get_backward_sequential
 from keras.layers import (
     Add,
-    Subtract,
     Average,
+    Concatenate,
+    Conv2D,
+    Dense,
+    Flatten,
+    Input,
     Maximum,
     Minimum,
     Multiply,
-    Concatenate,
+    ReLU,
+    Reshape,
+    Subtract,
 )
-from keras.layers import Dense, Reshape, ReLU, Conv2D, Input, Flatten
-from keras.models import Sequential, Model
-from jacobinet.models.sequential import get_backward_sequential
-from jacobinet.models.model import get_backward_model
-from .conftest import compute_backward_model, serialize_model
-import numpy as np
-import torch
-import pytest
+from keras.models import Model, Sequential
+
+from .conftest import compute_backward_model, compute_output, serialize_model
 
 
 def _test_model_multiD_multi_output(merge_layer, n_inputs):
-
     input_dim = 36
     input_ = Input((input_dim,))
     output_bones = []
@@ -53,7 +57,6 @@ def _test_model_multiD_multi_output(merge_layer, n_inputs):
 
 
 def _test_model_multiD_multi_output_concat(merge_layer, n_inputs, axis):
-
     input_dim = 36
     input_ = Input((input_dim,))
     output_bones = []

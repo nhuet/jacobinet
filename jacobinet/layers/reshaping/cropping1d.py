@@ -1,7 +1,7 @@
 import keras
-from keras.layers import ZeroPadding1D, Cropping1D  # type: ignore
-from keras.layers import Layer  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
+from keras.layers import Layer  # type: ignore
+from keras.layers import Cropping1D, ZeroPadding1D  # type: ignore
 
 
 @keras.saving.register_keras_serializable()
@@ -31,9 +31,7 @@ class BackwardCropping1D(BackwardLinearLayer):
         cropping = dico_cropping["cropping"]
         # axis = 1
         # warning of cropping1D: Input shape is a 3D tensor with shape (batch_size, axis_to_crop, features)
-        self.layer_backward = ZeroPadding1D(
-            padding=cropping, data_format="channels_last"
-        )
+        self.layer_backward = ZeroPadding1D(padding=cropping, data_format="channels_last")
         self.layer_backward.built = True
 
 

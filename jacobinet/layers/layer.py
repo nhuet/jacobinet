@@ -1,12 +1,12 @@
 # abstract class for BackwardLayer
-from keras.layers import Layer, Input, Activation  # type:ignore
-import keras
-from typing import Union, List
-import keras.ops as K  # type:ignore
-from jacobinet.layers.utils import share_weights_and_build, reshape_to_batch
+from typing import List, Type, Union
 
+import keras
+import keras.ops as K  # type:ignore
+from jacobinet.layers.utils import reshape_to_batch, share_weights_and_build
 from keras import KerasTensor as Tensor
-from typing import Type
+from keras.layers import Activation, Input, Layer  # type:ignore
+
 
 @keras.saving.register_keras_serializable()
 class BackwardLayer(Layer):
@@ -46,9 +46,7 @@ class BackwardLayer(Layer):
         self.layer = layer
         if input_dim_wo_batch is None:
             if isinstance(layer.input, list):
-                input_dim_wo_batch = [
-                    list(input_i.shape[1:]) for input_i in self.layer.input
-                ]
+                input_dim_wo_batch = [list(input_i.shape[1:]) for input_i in self.layer.input]
             else:
                 input_dim_wo_batch = list(self.layer.input.shape[1:])
 
@@ -74,20 +72,18 @@ class BackwardLayer(Layer):
         dico_params = {}
         dico_params["layer"] = layer_config
         # save input shape
-        dico_params["input_dim_wo_batch"] = (
-            keras.saving.serialize_keras_object(self.input_dim_wo_batch)
+        dico_params["input_dim_wo_batch"] = keras.saving.serialize_keras_object(
+            self.input_dim_wo_batch
         )
-        dico_params["output_dim_wo_batch"] = (
-            keras.saving.serialize_keras_object(self.output_dim_wo_batch)
+        dico_params["output_dim_wo_batch"] = keras.saving.serialize_keras_object(
+            self.output_dim_wo_batch
         )
 
         config.update(dico_params)
 
         return config
 
-    def call_on_reshaped_gradient(
-        self, gradient, input=None, training=None, mask=None
-    ):
+    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
         if self.layer_backward:
             return self.layer_backward(gradient)
         raise NotImplementedError()
@@ -106,9 +102,7 @@ class BackwardLayer(Layer):
                 layer_input = inputs[1]
             elif len(inputs) > 2:
                 layer_input = inputs[1:]
-        reshape_tag, gradient_, n_out = reshape_to_batch(
-            gradient, [1] + self.output_dim_wo_batch
-        )
+        reshape_tag, gradient_, n_out = reshape_to_batch(gradient, [1] + self.output_dim_wo_batch)
         output = self.call_on_reshaped_gradient(
             gradient_, input=layer_input, training=training, mask=mask
         )
@@ -123,26 +117,19 @@ class BackwardLayer(Layer):
                     for i in range(self.n_input)
                 ]
             else:
-                output = K.reshape(
-                    output, [-1] + n_out + self.input_dim_wo_batch
-                )
+                output = K.reshape(output, [-1] + n_out + self.input_dim_wo_batch)
 
         return output
 
     @classmethod
     def from_config(cls, config):
-
         layer_config = config.pop("layer")
         layer = keras.saving.deserialize_keras_object(layer_config)
 
         input_dim_wo_batch_config = config.pop("input_dim_wo_batch")
-        input_dim_wo_batch = keras.saving.deserialize_keras_object(
-            input_dim_wo_batch_config
-        )
+        input_dim_wo_batch = keras.saving.deserialize_keras_object(input_dim_wo_batch_config)
         output_dim_wo_batch_config = config.pop("output_dim_wo_batch")
-        output_dim_wo_batch = keras.saving.deserialize_keras_object(
-            output_dim_wo_batch_config
-        )
+        output_dim_wo_batch = keras.saving.deserialize_keras_object(output_dim_wo_batch_config)
 
         return cls(
             layer=layer,
@@ -153,11 +140,9 @@ class BackwardLayer(Layer):
 
     def compute_output_shape(self, input_shape):
         if isinstance(self.input_dim_wo_batch[0], list):
-            return [
-                [1] + input_dim_wo_batch_i
-                for input_dim_wo_batch_i in self.input_dim_wo_batch
-            ]
+            return [[1] + input_dim_wo_batch_i for input_dim_wo_batch_i in self.input_dim_wo_batch]
         return [1] + self.input_dim_wo_batch
+
 
 @keras.saving.register_keras_serializable()
 class BackwardLinearLayer(BackwardLayer):
@@ -186,6 +171,7 @@ class BackwardLinearLayer(BackwardLayer):
     - It requires the wrapped layer to have compatible reverse operations.
     """
 
+
 @keras.saving.register_keras_serializable()
 class BackwardNonLinearLayer(BackwardLayer):
     """
@@ -212,6 +198,7 @@ class BackwardNonLinearLayer(BackwardLayer):
       reverses the application of operations as defined by the wrapped layer.
     - It requires the wrapped layer to have compatible reverse operations.
     """
+
 
 @keras.saving.register_keras_serializable()
 class BackwardBoundedLinearizedLayer(BackwardLinearLayer):
@@ -241,6 +228,7 @@ class BackwardBoundedLinearizedLayer(BackwardLinearLayer):
       reverses the application of operations as defined by the wrapped layer.
     - It requires the wrapped layer to have compatible reverse operations.
     """
+
 
 @keras.saving.register_keras_serializable()
 class BackwardWithActivation(BackwardNonLinearLayer):
@@ -304,9 +292,7 @@ class BackwardWithActivation(BackwardNonLinearLayer):
         input = inputs[1]
         inner_input = self.layer_wo_activation(input)
         # computer gradient*g'(f(x))
-        backward_output: Tensor = self.activation_backward(
-            inputs=[gradient, inner_input]
-        )
+        backward_output: Tensor = self.activation_backward(inputs=[gradient, inner_input])
         # compute gradient*g'(f(x))*f'(x)
         output = self.layer_backward(inputs=[backward_output])
 

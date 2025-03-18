@@ -1,5 +1,7 @@
-from typing import Union, List
+from typing import List, Union
+
 from keras import KerasTensor as Tensor
+
 
 def to_list(tensor: Union[Tensor, List[Tensor]]) -> List[Tensor]:
     """

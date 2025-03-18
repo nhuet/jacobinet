@@ -1,11 +1,17 @@
+from typing import List
+
 import keras
-from keras.layers import Layer, DepthwiseConv3D, Conv3DTranspose, Reshape  # type: ignore
-from keras.models import Sequential  # type: ignore
 import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
 from jacobinet.layers.utils import pooling_layer3D
+from keras.layers import (  # type: ignore
+    Conv3DTranspose,
+    DepthwiseConv3D,
+    Layer,
+    Reshape,
+)
+from keras.models import Sequential  # type: ignore
 
-from typing import List
 
 @keras.saving.register_keras_serializable()
 class BackwardDepthwiseConv3D(BackwardLinearLayer):
@@ -78,18 +84,10 @@ class BackwardDepthwiseConv3D(BackwardLinearLayer):
                 :, :, :, i : i + 1
             ]  # (kernel_d, kernel_w, kernel_h, 1, d_m)
             dico_depthwise_conv = layer.get_config()
-            dico_depthwise_conv["filters"] = dico_depthwise_conv[
-                "depth_multiplier"
-            ]
-            dico_depthwise_conv["kernel_initializer"] = dico_depthwise_conv[
-                "depthwise_initializer"
-            ]
-            dico_depthwise_conv["kernel_regularizer"] = dico_depthwise_conv[
-                "depthwise_regularizer"
-            ]
-            dico_depthwise_conv["kernel_constraint"] = dico_depthwise_conv[
-                "depthwise_constraint"
-            ]
+            dico_depthwise_conv["filters"] = dico_depthwise_conv["depth_multiplier"]
+            dico_depthwise_conv["kernel_initializer"] = dico_depthwise_conv["depthwise_initializer"]
+            dico_depthwise_conv["kernel_regularizer"] = dico_depthwise_conv["depthwise_regularizer"]
+            dico_depthwise_conv["kernel_constraint"] = dico_depthwise_conv["depthwise_constraint"]
             dico_depthwise_conv["padding"] = "valid"
 
             # remove unknown features in Conv3DTranspose
@@ -107,9 +105,7 @@ class BackwardDepthwiseConv3D(BackwardLinearLayer):
 
         # shape of transposed input
         input_dim_wo_batch_t = (
-            K.repeat(
-                conv_t_i(K.zeros([1] + split_shape)), c_in, axis=self.axis
-            )[0]
+            K.repeat(conv_t_i(K.zeros([1] + split_shape)), c_in, axis=self.axis)[0]
         ).shape
         if self.layer.data_format == "channels_first":
             d_pad = input_dim_wo_batch[-3] - input_dim_wo_batch_t[-3]
@@ -120,20 +116,15 @@ class BackwardDepthwiseConv3D(BackwardLinearLayer):
             w_pad = input_dim_wo_batch[1] - input_dim_wo_batch_t[1]
             h_pad = input_dim_wo_batch[2] - input_dim_wo_batch_t[2]
 
-        pad_layers = pooling_layer3D(
-            d_pad, w_pad, h_pad, self.layer.data_format
-        )
+        pad_layers = pooling_layer3D(d_pad, w_pad, h_pad, self.layer.data_format)
         if len(pad_layers):
             self.inner_models = [
-                Sequential([conv_t_i] + pad_layers)
-                for conv_t_i in conv_transpose_list
+                Sequential([conv_t_i] + pad_layers) for conv_t_i in conv_transpose_list
             ]
         else:
             self.inner_models = conv_transpose_list
 
-    def call_on_reshaped_gradient(
-        self, gradient, input=None, training=None, mask=None
-    ):
+    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
         outputs = self.op_reshape(
             gradient
         )  # (batch, d_m, c_in, d_out, w_out, h_out) if data_format=channel_first
@@ -146,12 +137,9 @@ class BackwardDepthwiseConv3D(BackwardLinearLayer):
         ]  # [(batch_size, d_m, d_out, w_out, h_out)]
 
         conv_outputs = [
-            self.inner_models[i](s_o_i)
-            for (i, s_o_i) in enumerate(split_outputs)
+            self.inner_models[i](s_o_i) for (i, s_o_i) in enumerate(split_outputs)
         ]  # [(batch_size, 1, d_in, w_in, h_in)]
-        output = K.concatenate(
-            conv_outputs, axis=self.axis
-        )  # (batch_size, c_in, d_in, w_in, h_in)
+        output = K.concatenate(conv_outputs, axis=self.axis)  # (batch_size, c_in, d_in, w_in, h_in)
         return output
 
 

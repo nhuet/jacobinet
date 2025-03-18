@@ -1,10 +1,10 @@
 import keras
-from keras.layers import Layer, Activation  # type: ignore
 import keras.ops as K  # type: ignore
-from jacobinet.layers.layer import BackwardNonLinearLayer
-
-from keras import KerasTensor as Tensor  # type: ignore
 from jacobinet.layers.activations.prime import deserialize
+from jacobinet.layers.layer import BackwardNonLinearLayer
+from keras import KerasTensor as Tensor  # type: ignore
+from keras.layers import Activation, Layer  # type: ignore
+
 
 @keras.saving.register_keras_serializable()
 class BackwardActivation(BackwardNonLinearLayer):
@@ -31,9 +31,7 @@ class BackwardActivation(BackwardNonLinearLayer):
         activation_name = layer.get_config()["activation"]
         self.layer_backward = deserialize(activation_name)
 
-    def call_on_reshaped_gradient(
-        self, gradient, input=None, training=None, mask=None
-    ):
+    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
         backward_output: Tensor = self.layer_backward(input)
         output = gradient * backward_output
         return output

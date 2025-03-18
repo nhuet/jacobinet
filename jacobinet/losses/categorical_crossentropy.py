@@ -1,7 +1,9 @@
 import keras
 import keras.ops as K  # type:ignore
+
 from .base_loss import BackwardLoss
 from .loss import CategoricalCrossentropy_Layer
+
 
 @keras.saving.register_keras_serializable()
 class BackwardCrossentropy(BackwardLoss):
@@ -30,16 +32,12 @@ class BackwardCrossentropy(BackwardLoss):
 
     layer: CategoricalCrossentropy_Layer
 
-    def call_on_reshaped_gradient(
-        self, gradient, input=None, training=None, mask=None
-    ):
+    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
         if self.layer.loss.from_logits:
             y_true, y_pred = input
             n_class = y_pred.shape[self.layer.loss.axis]
             softmax = K.softmax(y_pred, axis=self.layer.loss.axis)
-            gradient_ = K.eye(n_class)[None] * K.expand_dims(
-                (1 - softmax), self.layer.loss.axis
-            )
+            gradient_ = K.eye(n_class)[None] * K.expand_dims((1 - softmax), self.layer.loss.axis)
 
             grad_crossentropy = K.sum(
                 K.expand_dims(y_true, self.layer.loss.axis) * gradient_,

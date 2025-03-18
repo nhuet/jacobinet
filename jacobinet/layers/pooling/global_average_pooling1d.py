@@ -1,7 +1,8 @@
 import keras
-from keras.layers import Layer, GlobalAveragePooling1D  # type: ignore
-from jacobinet.layers.layer import BackwardLinearLayer
 import keras.ops as K  # type: ignore
+from jacobinet.layers.layer import BackwardLinearLayer
+from keras.layers import GlobalAveragePooling1D, Layer  # type: ignore
+
 
 @keras.saving.register_keras_serializable()
 class BackwardGlobalAveragePooling1D(BackwardLinearLayer):
@@ -22,9 +23,7 @@ class BackwardGlobalAveragePooling1D(BackwardLinearLayer):
 
     layer: GlobalAveragePooling1D
 
-    def call_on_reshaped_gradient(
-        self, gradient, input=None, training=None, mask=None
-    ):
+    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
         if self.layer.data_format == "channels_first":
             w_in = self.layer.input.shape[-1]
             if self.layer.keepdims:

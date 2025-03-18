@@ -1,13 +1,12 @@
-from typing import Union, Callable
-
-from keras.layers import Layer  # type:ignore
-from keras.losses import Loss  # type:ignore
+from typing import Callable, Union
 
 from jacobinet.attacks import AdvModel
 from jacobinet.attacks.fgsm import get_fgsm_model
 from jacobinet.attacks.pgd import get_pgd_model
-from .utils import FGSM, PGD
+from keras.layers import Layer  # type:ignore
+from keras.losses import Loss  # type:ignore
 
+from .utils import FGSM, PGD
 
 default_mapping_attack: dict[str, type[Callable]] = {  # type: ignore
     FGSM: get_fgsm_model,

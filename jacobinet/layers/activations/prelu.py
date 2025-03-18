@@ -1,11 +1,11 @@
 import keras
-from keras.layers import Layer, PReLU  # type: ignore
 import keras.ops as K  # type: ignore
-from keras import KerasTensor as Tensor
-
 from jacobinet.layers.layer import BackwardNonLinearLayer
+from keras import KerasTensor as Tensor
+from keras.layers import Layer, PReLU  # type: ignore
 
 from .prime import relu_prime
+
 
 @keras.saving.register_keras_serializable()
 class BackwardPReLU(BackwardNonLinearLayer):
@@ -30,9 +30,7 @@ class BackwardPReLU(BackwardNonLinearLayer):
     ):
         super().__init__(layer=layer, **kwargs)
 
-    def call_on_reshaped_gradient(
-        self, gradient, input=None, training=None, mask=None
-    ):
+    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
         backward_output: Tensor = relu_prime(
             input,
             negative_slope=self.layer.alpha,
@@ -48,11 +46,11 @@ def get_backward_PReLU(layer: PReLU) -> Layer:
     `BackwardPReLU`.
 
     ### Parameters:
-    - `layer`: A Keras `PReLU` layer instance. 
+    - `layer`: A Keras `PReLU` layer instance.
     The function uses this layer's configurations to set up the `BackwardPReLU` layer.
 
     ### Returns:
-    - `layer_backward`: An instance of `BackwardPReLU`, 
+    - `layer_backward`: An instance of `BackwardPReLU`,
     which acts as the reverse layer for the given `PReLU`.
 
     ### Example Usage:

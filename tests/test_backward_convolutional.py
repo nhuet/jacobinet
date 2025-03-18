@@ -1,23 +1,15 @@
 import keras
-from keras.layers import (
-    Conv1D,
-    Conv2D,
-    Conv3D,
-    DepthwiseConv1D,
-    DepthwiseConv2D,
-)
-from keras.models import Sequential
-from jacobinet import get_backward_layer as get_backward
 import numpy as np
-from .conftest import linear_mapping, serialize
 import pytest
+from jacobinet import get_backward_layer as get_backward
+from keras.layers import Conv1D, Conv2D, Conv3D, DepthwiseConv1D, DepthwiseConv2D
+from keras.models import Sequential
+
+from .conftest import linear_mapping, serialize
 
 
 # pool_size, strides=None, padding="valid", data_format=None
-def _test_backward_Conv3D(
-    input_shape, filters, kernel_size, strides, padding, use_bias
-):
-
+def _test_backward_Conv3D(input_shape, filters, kernel_size, strides, padding, use_bias):
     # data_format == 'channels_first'
     layer = Conv3D(
         filters=filters,
@@ -52,10 +44,7 @@ def _test_backward_Conv3D(
 
 
 # pool_size, strides=None, padding="valid", data_format=None
-def _test_backward_Conv2D(
-    input_shape, filters, kernel_size, strides, padding, use_bias
-):
-
+def _test_backward_Conv2D(input_shape, filters, kernel_size, strides, padding, use_bias):
     # data_format == 'channels_first'
     layer = Conv2D(
         filters=filters,
@@ -90,10 +79,7 @@ def _test_backward_Conv2D(
     serialize(layer, backward_layer)
 
 
-def _test_backward_Conv1D(
-    input_shape, filters, kernel_size, strides, padding, use_bias
-):
-
+def _test_backward_Conv1D(input_shape, filters, kernel_size, strides, padding, use_bias):
     # data_format == 'channels_first'
     layer = Conv1D(
         filters=filters,
@@ -132,7 +118,6 @@ def _test_backward_Conv1D(
 def _test_backward_DepthwiseConv2D(
     input_shape, depth_multiplier, kernel_size, strides, padding, use_bias
 ):
-
     # data_format == 'channels_first'
     layer = DepthwiseConv2D(
         depth_multiplier=depth_multiplier,
@@ -171,7 +156,6 @@ def _test_backward_DepthwiseConv2D(
 def _test_backward_DepthwiseConv1D(
     input_shape, depth_multiplier, kernel_size, strides, padding, use_bias
 ):
-
     # data_format == 'channels_first'
     layer = DepthwiseConv1D(
         depth_multiplier=depth_multiplier,
@@ -207,7 +191,6 @@ def _test_backward_DepthwiseConv1D(
 
 
 def test_backward_DepthwiseConv2D():
-
     input_shape = (1, 32, 32)
     kernel_size = (2, 2)
     strides = (1, 1)
@@ -250,7 +233,6 @@ def test_backward_DepthwiseConv2D():
 
 
 def test_backward_DepthwiseConv1D():
-
     input_shape = (10, 32)
     kernel_size = 2
     strides = 1
@@ -298,9 +280,7 @@ def test_backward_Conv3D():
         import torch
 
         if torch.backends.mps.is_available():
-            pytest.skip(
-                "skip tests on MPS device as Conv3DTranspose is not implemented"
-            )
+            pytest.skip("skip tests on MPS device as Conv3DTranspose is not implemented")
 
     input_shape = (3, 32, 32, 31)
     kernel_size = (2, 2, 1)
@@ -308,9 +288,7 @@ def test_backward_Conv3D():
     filters = 2
     padding = "same"
     use_bias = False
-    _test_backward_Conv3D(
-        input_shape, filters, kernel_size, strides, padding, use_bias
-    )
+    _test_backward_Conv3D(input_shape, filters, kernel_size, strides, padding, use_bias)
 
     input_shape = (1, 31, 31, 30)
     kernel_size = (2, 2, 1)
@@ -318,9 +296,7 @@ def test_backward_Conv3D():
     filters = 2
     padding = "valid"
     use_bias = False
-    _test_backward_Conv3D(
-        input_shape, filters, kernel_size, strides, padding, use_bias
-    )
+    _test_backward_Conv3D(input_shape, filters, kernel_size, strides, padding, use_bias)
 
     input_shape = (1, 32, 32, 31)
     kernel_size = (2, 2, 3)
@@ -328,9 +304,7 @@ def test_backward_Conv3D():
     filters = 2
     padding = "same"
     use_bias = False
-    _test_backward_Conv3D(
-        input_shape, filters, kernel_size, strides, padding, use_bias
-    )
+    _test_backward_Conv3D(input_shape, filters, kernel_size, strides, padding, use_bias)
 
     input_shape = (4, 32, 32, 30)
     kernel_size = (4, 3, 3)
@@ -338,22 +312,17 @@ def test_backward_Conv3D():
     filters = 2
     padding = "same"
     use_bias = False
-    _test_backward_Conv3D(
-        input_shape, filters, kernel_size, strides, padding, use_bias
-    )
+    _test_backward_Conv3D(input_shape, filters, kernel_size, strides, padding, use_bias)
 
 
 def test_backward_Conv2D():
-
     input_shape = (3, 32, 32)
     kernel_size = (2, 2)
     strides = (1, 1)
     filters = 2
     padding = "same"
     use_bias = False
-    _test_backward_Conv2D(
-        input_shape, filters, kernel_size, strides, padding, use_bias
-    )
+    _test_backward_Conv2D(input_shape, filters, kernel_size, strides, padding, use_bias)
 
     input_shape = (1, 31, 31)
     kernel_size = (2, 2)
@@ -361,9 +330,7 @@ def test_backward_Conv2D():
     filters = 2
     padding = "valid"
     use_bias = False
-    _test_backward_Conv2D(
-        input_shape, filters, kernel_size, strides, padding, use_bias
-    )
+    _test_backward_Conv2D(input_shape, filters, kernel_size, strides, padding, use_bias)
 
     input_shape = (1, 32, 32)
     kernel_size = (2, 2)
@@ -371,9 +338,7 @@ def test_backward_Conv2D():
     filters = 2
     padding = "same"
     use_bias = False
-    _test_backward_Conv2D(
-        input_shape, filters, kernel_size, strides, padding, use_bias
-    )
+    _test_backward_Conv2D(input_shape, filters, kernel_size, strides, padding, use_bias)
 
     input_shape = (4, 32, 32)
     kernel_size = (4, 3)
@@ -381,22 +346,17 @@ def test_backward_Conv2D():
     filters = 2
     padding = "same"
     use_bias = False
-    _test_backward_Conv2D(
-        input_shape, filters, kernel_size, strides, padding, use_bias
-    )
+    _test_backward_Conv2D(input_shape, filters, kernel_size, strides, padding, use_bias)
 
 
 def test_backward_Conv1D():
-
     input_shape = (3, 32)
     kernel_size = (2,)
     strides = 1
     filters = 2
     padding = "same"
     use_bias = False
-    _test_backward_Conv1D(
-        input_shape, filters, kernel_size, strides, padding, use_bias
-    )
+    _test_backward_Conv1D(input_shape, filters, kernel_size, strides, padding, use_bias)
 
     input_shape = (1, 31)
     kernel_size = (2,)
@@ -404,9 +364,7 @@ def test_backward_Conv1D():
     filters = 2
     padding = "valid"
     use_bias = False
-    _test_backward_Conv1D(
-        input_shape, filters, kernel_size, strides, padding, use_bias
-    )
+    _test_backward_Conv1D(input_shape, filters, kernel_size, strides, padding, use_bias)
 
     input_shape = (
         4,
@@ -417,6 +375,4 @@ def test_backward_Conv1D():
     filters = 2
     padding = "same"
     use_bias = False
-    _test_backward_Conv1D(
-        input_shape, filters, kernel_size, strides, padding, use_bias
-    )
+    _test_backward_Conv1D(input_shape, filters, kernel_size, strides, padding, use_bias)

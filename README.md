@@ -121,6 +121,3 @@ This project received funding from the French program within the <a href="https:
 ## 📝 License
 
 The package is released under <a href="https://choosealicense.com/licenses/mit"> MIT license</a>.
-
-
-

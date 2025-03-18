@@ -1,10 +1,10 @@
+from typing import Any
+
 import keras
-from jacobinet.layers.layer import (
-    BackwardLayer,
-)
+from jacobinet.layers.layer import BackwardLayer
 
 from .utils import is_linear_layer
-from typing import Any
+
 
 @keras.saving.register_keras_serializable()
 class BackwardModel(keras.Model):
@@ -48,6 +48,7 @@ class BackwardModel(keras.Model):
 
         return config
 
+
 @keras.saving.register_keras_serializable()
 class BackwardSequential(keras.Sequential):
     """
@@ -70,9 +71,7 @@ class BackwardSequential(keras.Sequential):
         self.is_linear = True
         self.n_input = 1
         if len(self.layers):
-            self.is_linear = min(
-                [is_linear_layer(layer) for layer in self.layers]
-            )
+            self.is_linear = min([is_linear_layer(layer) for layer in self.layers])
         super().__init__(layers=layers, trainable=trainable, name=name)
 
     def add(self, layer, rebuild=True):

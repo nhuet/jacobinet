@@ -1,7 +1,7 @@
 import keras
-from keras.layers import RepeatVector, Layer  # type: ignore
 import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
+from keras.layers import Layer, RepeatVector  # type: ignore
 
 
 @keras.saving.register_keras_serializable()
@@ -29,9 +29,7 @@ class BackwardRepeatVector(BackwardLinearLayer):
 
         self.layer = layer
 
-    def call_on_reshaped_gradient(
-        self, gradient, input=None, training=None, mask=None
-    ):
+    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
         return K.max(gradient, axis=1)
 
 

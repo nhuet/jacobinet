@@ -1,8 +1,14 @@
 import keras
-from keras.layers import ZeroPadding1D, Cropping1D, Cropping2D, Reshape, Input  # type: ignore
-from keras.layers import Layer  # type: ignore
-from keras.models import Sequential  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
+from keras.layers import Layer  # type: ignore
+from keras.layers import (  # type: ignore
+    Cropping1D,
+    Cropping2D,
+    Input,
+    Reshape,
+    ZeroPadding1D,
+)
+from keras.models import Sequential  # type: ignore
 
 
 @keras.saving.register_keras_serializable()
@@ -36,17 +42,11 @@ class BackwardZeroPadding1D(BackwardLinearLayer):
             self.layer_backward.built = True
         else:
             # Cropping1D is only working on axis=1, we need to use Cropping2D instead with 0 padding along axis=1
-            layer_reshape_b = Reshape(
-                target_shape=[1] + self.output_dim_wo_batch
-            )
-            layer_backward = Cropping2D(
-                cropping=(0, padding), data_format=data_format
-            )
+            layer_reshape_b = Reshape(target_shape=[1] + self.output_dim_wo_batch)
+            layer_backward = Cropping2D(cropping=(0, padding), data_format=data_format)
             layer_reshape_a = Reshape(target_shape=self.input_dim_wo_batch)
 
-            model_backward = Sequential(
-                [layer_reshape_b, layer_backward, layer_reshape_a]
-            )
+            model_backward = Sequential([layer_reshape_b, layer_backward, layer_reshape_a])
             _ = model_backward(Input(self.output_dim_wo_batch))
             self.layer_backward = model_backward
 

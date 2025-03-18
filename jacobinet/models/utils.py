@@ -1,16 +1,13 @@
+from typing import Any, Callable, List, Optional, Tuple, Union
+
 import keras
 import keras.ops as K  # type:ignore
-from keras.layers import Layer  # type:ignore
-from keras.models import Model  # type:ignore
-from jacobinet.layers.layer import (
-    BackwardLayer,
-    BackwardLinearLayer,
-)
 from jacobinet.layers.convert import get_backward as get_backward_layer
-from keras.layers import Layer, InputLayer  # type:ignore
-
+from jacobinet.layers.layer import BackwardLayer, BackwardLinearLayer
 from keras import KerasTensor as Tensor
-from typing import Union, Optional, Tuple, Any, List, Callable
+from keras.layers import Layer  # type:ignore
+from keras.layers import InputLayer  # type:ignore
+from keras.models import Model  # type:ignore
 
 
 def to_list(tensor: Union[Tensor, List[Tensor]]) -> List[Tensor]:
@@ -89,9 +86,7 @@ def is_linear_layer(layer):
 def get_backward(
     layer: Union[Layer, Model],
     gradient_shape=Union[None, Tuple[int], List[Tuple[int]]],
-    mapping_keras2backward_classes: Optional[
-        dict[type[Layer], type[BackwardLayer]]
-    ] = None,
+    mapping_keras2backward_classes: Optional[dict[type[Layer], type[BackwardLayer]]] = None,
     get_backward_layer: Callable = None,
 ):
     """
@@ -124,8 +119,8 @@ def get_backward(
     if isinstance(layer, Layer):
         return get_backward_layer(layer, mapping_keras2backward_classes)
     else:
-
         raise NotImplementedError()
+
 
 @keras.saving.register_keras_serializable()
 class GradConstant(Layer):
@@ -151,15 +146,12 @@ class GradConstant(Layer):
         config = super().get_config()
         config.update(
             {
-                "grad_const": keras.saving.serialize_keras_object(
-                    self.grad_const
-                ),
+                "grad_const": keras.saving.serialize_keras_object(self.grad_const),
             }
         )
         return config
 
     def compute_output_shape(self, input_shape):
-
         return list(self.grad_const.shape)
 
     @classmethod
@@ -185,10 +177,13 @@ def get_gradient(grad: Tensor, input) -> Tuple[Any, bool]:
     """
     # if grad is an InputLayer return grad
     if isinstance(grad, InputLayer) or isinstance(grad, keras.KerasTensor):
-        return grad  # grad is a KerasTensor that come from input or extra_inputs or is an Input Tensor
+        return (
+            grad  # grad is a KerasTensor that come from input or extra_inputs or is an Input Tensor
+        )
     # else return it as a Constant of a layer
     constant = GradConstant(gradient=grad)(input)
     return constant
+
 
 @keras.saving.register_keras_serializable()
 class FuseGradients(Layer):

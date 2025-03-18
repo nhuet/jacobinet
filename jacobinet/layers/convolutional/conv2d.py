@@ -1,13 +1,13 @@
 import keras
-from keras.layers import Conv2D, Conv2DTranspose, Input  # type: ignore
-from keras.layers import Layer  # type: ignore
-from keras.models import Sequential  # type: ignore
 import keras.ops as K  # type: ignore
-from jacobinet.layers.utils import pooling_layer2D
-from jacobinet.layers.layer import BackwardLinearLayer, BackwardWithActivation
 from jacobinet.layers.core.activations import BackwardActivation
-
+from jacobinet.layers.layer import BackwardLinearLayer, BackwardWithActivation
+from jacobinet.layers.utils import pooling_layer2D
 from keras import KerasTensor as Tensor  # type: ignore
+from keras.layers import Layer  # type: ignore
+from keras.layers import Conv2D, Conv2DTranspose, Input  # type: ignore
+from keras.models import Sequential  # type: ignore
+
 
 @keras.saving.register_keras_serializable()
 class BackwardConv2D(BackwardLinearLayer):
@@ -36,9 +36,7 @@ class BackwardConv2D(BackwardLinearLayer):
         # input_shape = list(layer.input.shape[1:])
         input_shape = self.input_dim_wo_batch
         # update filters to match input, pay attention to data_format
-        if (
-            layer.data_format == "channels_first"
-        ):  # better to use enum than raw str
+        if layer.data_format == "channels_first":  # better to use enum than raw str
             dico_conv["filters"] = input_shape[0]
         else:
             dico_conv["filters"] = input_shape[-1]
@@ -54,9 +52,7 @@ class BackwardConv2D(BackwardLinearLayer):
         # input_shape_wo_batch = list(layer.input.shape[1:])
         input_shape_wo_batch = self.input_dim_wo_batch
         # input_shape_wo_batch_wo_pad = list(layer_backward(layer.output)[0].shape)
-        input_shape_wo_batch_wo_pad = list(
-            layer_backward(Input(self.output_dim_wo_batch))[0].shape
-        )
+        input_shape_wo_batch_wo_pad = list(layer_backward(Input(self.output_dim_wo_batch))[0].shape)
 
         if layer.data_format == "channels_first":
             w_pad = input_shape_wo_batch[1] - input_shape_wo_batch_wo_pad[1]

@@ -1,8 +1,8 @@
 import keras
-from keras.layers import UpSampling2D  # type: ignore
-from keras.layers import Layer  # type: ignore
 import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
+from keras.layers import Layer  # type: ignore
+from keras.layers import UpSampling2D  # type: ignore
 
 
 @keras.saving.register_keras_serializable()
@@ -24,9 +24,7 @@ class BackwardUpSampling2D(BackwardLinearLayer):
 
     layer: UpSampling2D
 
-    def call_on_reshaped_gradient(
-        self, gradient, input=None, training=None, mask=None
-    ):
+    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
         # If data_format is "channels_last": (batch_size, rows, cols, channels)
         if self.layer.interpolation != "nearest":
             raise NotImplementedError(

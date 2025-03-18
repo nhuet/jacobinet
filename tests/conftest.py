@@ -1,15 +1,14 @@
 import os
-import numpy as np
-from numpy.testing import assert_almost_equal
-import keras
-from keras.models import Sequential # type: ignore
-import torch # type: ignore
 
+import keras
+import numpy as np
+import torch  # type: ignore
 from jacobinet.models import is_linear
+from keras.models import Sequential  # type: ignore
+from numpy.testing import assert_almost_equal
 
 
 def is_invertible(layer, backward_layer):
-
     input_shape = list(layer.input.shape[1:])
     batch_size = 10
     input_random = np.reshape(
@@ -22,7 +21,6 @@ def is_invertible(layer, backward_layer):
 
 
 def linear_mapping(layer, backward_layer):
-
     input_shape = list(layer.input.shape[1:])
     output_shape = list(layer.output.shape[1:])
     n_input = np.prod(input_shape)
@@ -42,7 +40,6 @@ def linear_mapping(layer, backward_layer):
 
 
 def serialize(layer, backward_layer):
-
     input_shape = list(layer.input.shape[1:])
     batch_size = 10
     input_random = np.reshape(
@@ -51,9 +48,7 @@ def serialize(layer, backward_layer):
     )
     toy_model = Sequential([layer, backward_layer])
 
-    filename = "test_serialize_{}_{}.keras".format(
-        layer.__class__.__name__, layer.name
-    )
+    filename = "test_serialize_{}_{}.keras".format(layer.__class__.__name__, layer.name)
     # detach toy model to cpu
     # toy_model.to('cpu')
     toy_model.save(filename)  # The file needs to end with the .keras extension
@@ -71,13 +66,10 @@ def serialize(layer, backward_layer):
 
 
 def serialize_model(list_input_dim, backward_model):
-
     batch_size = 10
     inputs = []
     for input_dim in list_input_dim:
-        input_random = np.reshape(
-            np.random.rand(input_dim * batch_size), [batch_size, input_dim]
-        )
+        input_random = np.reshape(np.random.rand(input_dim * batch_size), [batch_size, input_dim])
         inputs.append(input_random)
 
     if len(inputs) == 1:
@@ -89,9 +81,7 @@ def serialize_model(list_input_dim, backward_model):
     # detach toy model to cpu
     # toy_model.to('cpu')
     output_before_export = backward_model.predict(inputs)
-    backward_model.save(
-        filename
-    )  # The file needs to end with the .keras extension
+    backward_model.save(filename)  # The file needs to end with the .keras extension
 
     # deserialize
     load_model = keras.models.load_model(filename)
@@ -105,9 +95,7 @@ def serialize_model(list_input_dim, backward_model):
     )
 
 
-def compute_backward_layer(
-    input_shape, model, backward_model, input_random=False
-):
+def compute_backward_layer(input_shape, model, backward_model, input_random=False):
     if input_random:
         input_ = torch.randn(1, input_shape[0], requires_grad=True)
     else:
@@ -138,13 +126,9 @@ def compute_backward_model(
             dtype="float32",
         )
     elif value == "zeros":
-        input_np = np.asarray(
-            0.0 * np.random.rand(np.prod(input_shape)) - 0.0, dtype="float32"
-        )
+        input_np = np.asarray(0.0 * np.random.rand(np.prod(input_shape)) - 0.0, dtype="float32")
     elif value == "ones":
-        input_np = np.asarray(
-            0.0 * np.random.rand(np.prod(input_shape)) + 1.0, dtype="float32"
-        )
+        input_np = np.asarray(0.0 * np.random.rand(np.prod(input_shape)) + 1.0, dtype="float32")
     else:
         raise ValueError("unknown value {}".format(value))
     # input_ = torch.randn(np.prod(input_shape), requires_grad=True)
@@ -164,16 +148,8 @@ def compute_backward_model(
     if is_linear(backward_model):
         gradient_ = backward_model(mask_output).cpu().detach().numpy()
     else:
-        if (
-            isinstance(backward_model.input, list)
-            and len(backward_model.input) == 2
-        ):
-            gradient_ = (
-                backward_model([input_reshape, mask_output])
-                .cpu()
-                .detach()
-                .numpy()
-            )
+        if isinstance(backward_model.input, list) and len(backward_model.input) == 2:
+            gradient_ = backward_model([input_reshape, mask_output]).cpu().detach().numpy()
         else:
             gradient_ = backward_model(input_reshape).cpu().detach().numpy()
     gradient = np.reshape(gradient, input_shape)

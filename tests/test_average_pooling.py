@@ -1,36 +1,39 @@
 import keras
-from keras.layers import (
-    AveragePooling2D,
-    AveragePooling1D,
-    AveragePooling3D,
-    GlobalAveragePooling2D,
-    GlobalAveragePooling1D,
-    MaxPooling2D,
-)
-
-# comparison with depthwiseConv for AveragePooling
-from keras.layers import DepthwiseConv2D, DepthwiseConv1D
-from keras.layers import Dense, Reshape, Flatten, Input
-from keras.models import Sequential, Model
+import numpy as np
+import pytest
+import torch
 from jacobinet import get_backward_layer as get_backward
 from jacobinet.models import get_backward_sequential
-import numpy as np
+
+# comparison with depthwiseConv for AveragePooling
+from keras.layers import (
+    AveragePooling1D,
+    AveragePooling2D,
+    AveragePooling3D,
+    Dense,
+    DepthwiseConv1D,
+    DepthwiseConv2D,
+    Flatten,
+    GlobalAveragePooling1D,
+    GlobalAveragePooling2D,
+    Input,
+    MaxPooling2D,
+    Reshape,
+)
+from keras.models import Model, Sequential
+
 from .conftest import (
-    linear_mapping,
-    serialize,
     compute_backward_layer,
     compute_backward_model,
+    linear_mapping,
+    serialize,
     serialize_model,
 )
-import pytest
-
-import torch
 
 
 ####### AveragePooling2D #######
 # pool_size, strides=None, padding="valid", data_format=None
 def _test_backward_AveragePooling2D(input_shape, pool_size, strides, padding):
-
     # data_format == 'channels_first'
     layer = AveragePooling2D(
         pool_size=pool_size,
@@ -60,9 +63,7 @@ def _test_backward_AveragePooling2D(input_shape, pool_size, strides, padding):
 
     # check equality
     if padding == "valid":
-        random_input = np.reshape(
-            np.random.rand(np.prod(input_shape) * 5), [5] + list(input_shape)
-        )
+        random_input = np.reshape(np.random.rand(np.prod(input_shape) * 5), [5] + list(input_shape))
         output_pooling = layer(random_input)
         output_conv = layer_conv(random_input)
         np.testing.assert_almost_equal(
@@ -100,7 +101,6 @@ def _test_backward_AveragePooling2D(input_shape, pool_size, strides, padding):
 
 
 def test_backward_AveragePooling2D():
-
     pool_size = (2, 2)
     strides = (1, 1)
     padding = "valid"

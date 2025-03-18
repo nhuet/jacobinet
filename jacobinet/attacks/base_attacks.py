@@ -1,17 +1,17 @@
-import numpy as np
-from typing import Union, List, Any, Tuple
+from typing import Any, List, Tuple, Union
 
 import keras  # type:ignore
+import keras.ops as K  # type:ignore
+import numpy as np
+from jacobinet import clone_to_backward
+from jacobinet.losses import deserialize, get_loss_as_layer
+from jacobinet.models import BackwardModel
+from jacobinet.utils import to_list
 from keras import KerasTensor as Tensor  # type:ignore
 from keras.layers import Input, Layer  # type:ignore
 from keras.losses import Loss  # type:ignore
 from keras.models import Model, Sequential  # type:ignore
-import keras.ops as K  # type:ignore
 
-from jacobinet import clone_to_backward
-from jacobinet.models import BackwardModel
-from jacobinet.losses import deserialize, get_loss_as_layer
-from jacobinet.utils import to_list
 from .utils import FGSM
 
 
@@ -81,9 +81,7 @@ def get_model_with_loss(
         output_loss_dim_wo_batch
     )
 
-    model_with_loss: Model = keras.models.Model(
-        inputs + [gt_input], output_loss
-    )
+    model_with_loss: Model = keras.models.Model(inputs + [gt_input], output_loss)
 
     return model_with_loss, [gt_input]
 
@@ -95,9 +93,7 @@ def get_adv_model_base(
     mapping_keras2backward_classes={},
     mapping_keras2backward_losses={},
     **kwargs,
-) -> (
-    Model
-):  # we do not compute gradient on extra_inputs, loss should return (None, 1)
+) -> Model:  # we do not compute gradient on extra_inputs, loss should return (None, 1)
     """
     Creates a base adversarial model by incorporating the specified attack and loss function.
 
@@ -141,7 +137,6 @@ def get_adv_model_base(
             mapping_keras2backward_classes=mapping_keras2backward_classes,
         )
     else:
-
         model_with_loss: Model
         label_tensors: List[Tensor]
         model_with_loss, label_tensors = get_model_with_loss(
@@ -153,9 +148,7 @@ def get_adv_model_base(
         if mapping_keras2backward_classes is None:
             mapping_keras2backward_classes = mapping_keras2backward_losses
         elif not (mapping_keras2backward_losses is None):
-            mapping_keras2backward_classes.update(
-                mapping_keras2backward_losses
-            )
+            mapping_keras2backward_classes.update(mapping_keras2backward_losses)
 
         backward_model_base_attack = clone_to_backward(
             model=model_with_loss,
@@ -236,7 +229,6 @@ class AdvLayer(Layer):
         return self.radius
 
     def project_lp_ball(self, x):
-
         if self.p == -1:
             # no projection, return identity
             return x
@@ -294,9 +286,7 @@ class AdvModel(keras.Model):
 
     def get_config(self):
         config = super().get_config()
-        backward_config = keras.saving.serialize_keras_object(
-            self.backward_model
-        )
+        backward_config = keras.saving.serialize_keras_object(self.backward_model)
         layer_config = keras.saving.serialize_keras_object(self.layer_adv)
         config["backward_model"] = backward_config
         config["method"] = self.method

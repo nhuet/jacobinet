@@ -1,14 +1,15 @@
-import numpy as np
 import keras
+import keras.ops as K  # type: ignore
+import numpy as np
+from jacobinet.layers.layer import BackwardLinearLayer
 from keras.layers import (  # type: ignore
     AveragePooling3D,
     Conv3DTranspose,
-    ZeroPadding3D,
     Layer,
+    ZeroPadding3D,
 )
 from keras.models import Sequential  # type: ignore
-import keras.ops as K  # type: ignore
-from jacobinet.layers.layer import BackwardLinearLayer
+
 
 @keras.saving.register_keras_serializable()
 class BackwardAveragePooling3D(BackwardLinearLayer):
@@ -59,9 +60,7 @@ class BackwardAveragePooling3D(BackwardLinearLayer):
         layer_t.built = True
 
         # shape of transposed input
-        input_shape_t = list(
-            layer_t(K.ones([1] + self.output_dim_wo_batch)).shape[1:]
-        )
+        input_shape_t = list(layer_t(K.ones([1] + self.output_dim_wo_batch)).shape[1:])
         input_shape = self.input_dim_wo_batch
 
         if layer.data_format == "channels_first":
@@ -87,9 +86,7 @@ class BackwardAveragePooling3D(BackwardLinearLayer):
         self.model.trainable = False
         self.model.built = True
 
-    def call_on_reshaped_gradient(
-        self, gradient, input=None, training=None, mask=None
-    ):
+    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
         # inputs (batch, channel_out, w_out, h_out)
         if self.layer.data_format == "channels_first":
             channel_out = gradient.shape[1]
@@ -100,9 +97,7 @@ class BackwardAveragePooling3D(BackwardLinearLayer):
 
         split_inputs = K.split(gradient, channel_out, axis)
         # apply conv transpose on every of them
-        outputs = K.concatenate(
-            [self.model(input_i) for input_i in split_inputs], axis
-        )
+        outputs = K.concatenate([self.model(input_i) for input_i in split_inputs], axis)
         return outputs
 
 

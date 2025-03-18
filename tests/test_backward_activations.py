@@ -1,14 +1,13 @@
-from keras.layers import ReLU, Input, LeakyReLU, PReLU, ELU, Activation
-from keras.models import Sequential, Model
-from jacobinet import get_backward_layer as get_backward
-from .conftest import compute_backward_layer, serialize_model
 import keras.ops as K
-
 import pytest
+from jacobinet import get_backward_layer as get_backward
+from keras.layers import ELU, Activation, Input, LeakyReLU, PReLU, ReLU
+from keras.models import Model, Sequential
+
+from .conftest import compute_backward_layer, serialize_model
 
 
 def _test_backward_activation(layer):
-
     input_shape = (32,)
     model = Sequential([layer])
     model(K.ones([1] + list(input_shape)))

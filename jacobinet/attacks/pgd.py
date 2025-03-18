@@ -1,14 +1,14 @@
+from typing import List, Union
+
 import keras
-from keras import KerasTensor as Tensor  # type:ignore
 import keras.ops as K  # type:ignore
-from keras.layers import Layer, RNN  # type:ignore
-from keras.losses import Loss  # type:ignore
-
-from typing import Union, List
-
 from jacobinet.attacks import AdvLayer, AdvModel
 from jacobinet.attacks.fgsm import get_fgsm_model
 from jacobinet.utils import to_list
+from keras import KerasTensor as Tensor  # type:ignore
+from keras.layers import RNN, Layer  # type:ignore
+from keras.losses import Loss  # type:ignore
+
 from .utils import PGD
 
 
@@ -95,9 +95,7 @@ class ProjectedGradientDescent(AdvLayer):
     # saving
     def get_config(self):
         config = super().get_config()
-        inner_layer_config = keras.saving.serialize_keras_object(
-            self.inner_layer
-        )
+        inner_layer_config = keras.saving.serialize_keras_object(self.inner_layer)
         config["gpd_cell"] = inner_layer_config
         config["n_iter"] = self.n_iter
 
@@ -120,7 +118,6 @@ class ProjectedGradientDescent(AdvLayer):
         self.radius = self.fgsm_layer.radius
 
     def call(self, inputs, training=None, mask=None):
-
         x, y = inputs
         z = keras.ops.repeat(keras.ops.expand_dims(y, 1), self.n_iter, 1)
 
@@ -149,9 +146,7 @@ def get_pgd_model(
     mapping_keras2backward_classes={},  # define type
     mapping_keras2backward_losses={},
     **kwargs,
-) -> (
-    AdvModel
-):  # we do not compute gradient on extra_inputs, loss should return (None, 1)
+) -> AdvModel:  # we do not compute gradient on extra_inputs, loss should return (None, 1)
     """
     Creates an adversarial model that applies the Projected Gradient Descent (PGD) attack using an existing model.
 
@@ -197,14 +192,10 @@ def get_pgd_model(
     pred_adv = K.reshape(output_adv, [-1] + input_shape_wo_batch)
     y_adv = model(pred_adv)
     n_class = y_adv.shape[-1]
-    y_gt = K.repeat(
-        K.expand_dims(inputs[1], 1), n_iter, 1
-    )  # (batch, n_iter, n_class)
+    y_gt = K.repeat(K.expand_dims(inputs[1], 1), n_iter, 1)  # (batch, n_iter, n_class)
     y_gt = K.reshape(y_gt, [-1, n_class])
     # compute cross entropy
-    loss_adv = K.reshape(
-        K.categorical_crossentropy(y_gt, y_adv, from_logits=True), [-1, n_iter]
-    )
+    loss_adv = K.reshape(K.categorical_crossentropy(y_gt, y_adv, from_logits=True), [-1, n_iter])
     index_adv = K.argmax(loss_adv, -1)[:, None]  # (batch, 1)
     mask = K.one_hot(index_adv, n_iter)  # (batch, n_iter)
     mask = K.reshape(mask, [-1, n_iter] + [1] * len(input_shape_wo_batch))

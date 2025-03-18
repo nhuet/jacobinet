@@ -1,12 +1,10 @@
-from jacobinet.layers.layer import (
-    BackwardLinearLayer,
-    BackwardWithActivation,
-)
-from jacobinet.layers.core.activations import BackwardActivation
-from keras.layers import Layer, Dense  # type: ignore
-import keras.ops as K  # type: ignore
 import keras
+import keras.ops as K  # type: ignore
+from jacobinet.layers.core.activations import BackwardActivation
+from jacobinet.layers.layer import BackwardLinearLayer, BackwardWithActivation
 from keras import KerasTensor as Tensor
+from keras.layers import Dense, Layer  # type: ignore
+
 
 @keras.saving.register_keras_serializable()
 class BackwardDense(BackwardLinearLayer):
@@ -34,10 +32,9 @@ class BackwardDense(BackwardLinearLayer):
     ):
         super().__init__(layer=layer, **kwargs)
 
-    def call_on_reshaped_gradient(
-        self, gradient, input=None, training=None, mask=None
-    ):
+    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
         return K.matmul(gradient, K.transpose(self.layer.kernel))
+
 
 @keras.saving.register_keras_serializable()
 class BackwardDenseWithActivation(BackwardWithActivation):

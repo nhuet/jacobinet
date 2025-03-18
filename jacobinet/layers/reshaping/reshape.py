@@ -1,7 +1,8 @@
 import keras
-from keras.layers import Reshape  # type: ignore
-from keras.layers import Layer  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
+from keras.layers import Layer  # type: ignore
+from keras.layers import Reshape  # type: ignore
+
 
 @keras.saving.register_keras_serializable()
 class BackwardReshape(BackwardLinearLayer):

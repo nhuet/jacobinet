@@ -1,12 +1,11 @@
 # from backward
-import keras
-import keras.ops as K  # type:ignore
-from keras.layers import Layer  # type:ignore
-import numpy as np
-from jacobinet.models import BackwardModel, BackwardSequential
+from typing import Any, Union
 
 import keras  # type:ignore
-from typing import Any, Union
+import keras.ops as K  # type:ignore
+import numpy as np
+from jacobinet.models import BackwardModel, BackwardSequential
+from keras.layers import Layer  # type:ignore
 
 
 @keras.saving.register_keras_serializable()
@@ -91,12 +90,8 @@ class LipschitzModel(keras.Model):
 
     def get_config(self):
         config = super().get_config()
-        lipschitz_config = keras.saving.serialize_keras_object(
-            self.lipschitz_norm
-        )
+        lipschitz_config = keras.saving.serialize_keras_object(self.lipschitz_norm)
         config["lipschitz_norm"] = lipschitz_config
-        backward_config = keras.saving.serialize_keras_object(
-            self.backward_model
-        )
+        backward_config = keras.saving.serialize_keras_object(self.backward_model)
         config["backward_model"] = backward_config
         return config

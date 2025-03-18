@@ -1,24 +1,20 @@
-import numpy as np
 import math
-import keras
-from keras.layers import (  # type: ignore
-    AveragePooling2D,
-    Conv2DTranspose,
-    Layer,
-    Input,
-)
-from keras.models import Sequential  # type: ignore
-import keras.ops as K  # type: ignore
-from jacobinet.layers.layer import BackwardLinearLayer
-from jacobinet.layers.utils import pooling_layer2D
 import warnings
-
 
 # typing
 from typing import List
 
+import keras
+import keras.ops as K  # type: ignore
+import numpy as np
+from jacobinet.layers.layer import BackwardLinearLayer
+from jacobinet.layers.utils import pooling_layer2D
+from keras.layers import AveragePooling2D, Conv2DTranspose, Input, Layer  # type: ignore
+from keras.models import Sequential  # type: ignore
+
 ArrayLike = np.typing.ArrayLike
 Tensor = keras.KerasTensor
+
 
 @keras.saving.register_keras_serializable()
 class CroppingReflect2D(keras.layers.Layer):
@@ -67,9 +63,7 @@ class CroppingReflect2D(keras.layers.Layer):
             input_top, input_first_row, inputs = K.split(
                 inputs, [self.pad_top, 1 + self.pad_top], axis=axis_w
             )
-            input_first_row = input_first_row + K.sum(
-                input_top, axis=axis_w, keepdims=True
-            )
+            input_first_row = input_first_row + K.sum(input_top, axis=axis_w, keepdims=True)
             # then concat
             inputs = K.concatenate(
                 [input_first_row, inputs], axis=axis_w
@@ -77,25 +71,17 @@ class CroppingReflect2D(keras.layers.Layer):
 
         if self.pad_bottom:
             # [(batch, C, W, H_pad), (batch, C, 1, H_pad), (batch, C, pad_bottom, H_pad]
-            inputs, input_last_row, input_bottom = K.split(
-                inputs, [W - 1, W], axis=axis_w
-            )
-            input_last_row = input_last_row + K.sum(
-                input_bottom, axis=axis_w, keepdims=True
-            )
+            inputs, input_last_row, input_bottom = K.split(inputs, [W - 1, W], axis=axis_w)
+            input_last_row = input_last_row + K.sum(input_bottom, axis=axis_w, keepdims=True)
             # then concat
-            inputs = K.concatenate(
-                [inputs, input_last_row], axis=axis_w
-            )  # (batch, C, W, H_pad)
+            inputs = K.concatenate([inputs, input_last_row], axis=axis_w)  # (batch, C, W, H_pad)
 
         if self.pad_left:
             # [(batch, C, W, pad_left), (batch, C, W, 1), (batch, C, W, H-1)]
             input_left, input_first_col, inputs = K.split(
                 inputs, [self.pad_left, 1 + self.pad_left], axis=axis_h
             )
-            input_first_col = input_first_col + K.sum(
-                input_left, axis=axis_h, keepdims=True
-            )
+            input_first_col = input_first_col + K.sum(input_left, axis=axis_h, keepdims=True)
             # then concat
             inputs = K.concatenate(
                 [input_first_col, inputs], axis=axis_h
@@ -103,16 +89,10 @@ class CroppingReflect2D(keras.layers.Layer):
 
         if self.pad_right:
             # [(batch, C, W, H_pad), (batch, C, 1, H_pad), (batch, C, pad_bottom, H_pad]
-            inputs, input_last_col, input_right = K.split(
-                inputs, [H - 1, H], axis=axis_h
-            )
-            input_last_col = input_last_col + K.sum(
-                input_right, axis=axis_h, keepdims=True
-            )
+            inputs, input_last_col, input_right = K.split(inputs, [H - 1, H], axis=axis_h)
+            input_last_col = input_last_col + K.sum(input_right, axis=axis_h, keepdims=True)
             # then concat
-            inputs = K.concatenate(
-                [inputs, input_last_col], axis=axis_h
-            )  # (batch, C, W, H)
+            inputs = K.concatenate([inputs, input_last_col], axis=axis_h)  # (batch, C, W, H)
 
         return inputs  # (batch, C, W, H)
 
@@ -132,7 +112,6 @@ class CroppingReflect2D(keras.layers.Layer):
 
     @classmethod
     def from_config(cls, config):
-
         pad_top_config = config.pop("pad_top")
         pad_top = keras.saving.deserialize_keras_object(pad_top_config)
 
@@ -149,9 +128,7 @@ class CroppingReflect2D(keras.layers.Layer):
         data_format = keras.saving.deserialize_keras_object(data_format_config)
 
         input_dim_wo_batch_config = config.pop("input_dim_wo_batch")
-        input_dim_wo_batch = keras.saving.deserialize_keras_object(
-            input_dim_wo_batch_config
-        )
+        input_dim_wo_batch = keras.saving.deserialize_keras_object(input_dim_wo_batch_config)
 
         return cls(
             input_dim_wo_batch=input_dim_wo_batch,
@@ -162,6 +139,7 @@ class CroppingReflect2D(keras.layers.Layer):
             pad_right=pad_right,
             **config,
         )
+
 
 @keras.saving.register_keras_serializable()
 class BackwardAveragePooling2D(BackwardLinearLayer):
@@ -207,9 +185,7 @@ class BackwardAveragePooling2D(BackwardLinearLayer):
             use_bias=False,
             trainable=False,
         )
-        kernel_ = np.ones(pool_size + [1, 1], dtype="float32") / np.prod(
-            pool_size
-        )
+        kernel_ = np.ones(pool_size + [1, 1], dtype="float32") / np.prod(pool_size)
         layer_t.kernel = keras.Variable(kernel_)
         layer_t.built = True
 
@@ -219,9 +195,7 @@ class BackwardAveragePooling2D(BackwardLinearLayer):
             output_dim_wo_batch_c_1 = [1] + self.output_dim_wo_batch[1:]
 
         # shape of transposed input
-        input_shape_t = list(
-            layer_t(K.ones([1] + output_dim_wo_batch_c_1)).shape[1:]
-        )
+        input_shape_t = list(layer_t(K.ones([1] + output_dim_wo_batch_c_1)).shape[1:])
 
         if self.layer.padding == "valid":
             input_shape = self.input_dim_wo_batch
@@ -242,28 +216,18 @@ class BackwardAveragePooling2D(BackwardLinearLayer):
             # width
             # shape with valid
             output_shape_w_valid = (
-                math.floor(
-                    (input_shape_wh[0] - self.layer.pool_size[0])
-                    / self.layer.strides[0]
-                )
+                math.floor((input_shape_wh[0] - self.layer.pool_size[0]) / self.layer.strides[0])
                 + 1
             )
             # shape with same
-            output_shape_w_same = (
-                math.floor((input_shape_wh[0] - 1) / self.layer.strides[0]) + 1
-            )
+            output_shape_w_same = math.floor((input_shape_wh[0] - 1) / self.layer.strides[0]) + 1
 
             output_shape_h_valid = (
-                math.floor(
-                    (input_shape_wh[1] - self.layer.pool_size[1])
-                    / self.layer.strides[1]
-                )
+                math.floor((input_shape_wh[1] - self.layer.pool_size[1]) / self.layer.strides[1])
                 + 1
             )
             # shape with same
-            output_shape_h_same = (
-                math.floor((input_shape_wh[1] - 1) / self.layer.strides[1]) + 1
-            )
+            output_shape_h_same = math.floor((input_shape_wh[1] - 1) / self.layer.strides[1]) + 1
 
             w_pad: int = output_shape_w_same - output_shape_w_valid
             h_pad: int = output_shape_h_same - output_shape_h_valid
@@ -278,13 +242,9 @@ class BackwardAveragePooling2D(BackwardLinearLayer):
                 input_shape_wh[1] + pad_left + pad_right,
             ]
             if self.layer.data_format == "channels_first":
-                inner_input_dim_wo_batch = [
-                    self.input_dim_wo_batch[0]
-                ] + inner_input_dim_wo_batch
+                inner_input_dim_wo_batch = [self.input_dim_wo_batch[0]] + inner_input_dim_wo_batch
             else:
-                inner_input_dim_wo_batch = inner_input_dim_wo_batch + [
-                    self.input_dim_wo_batch[0]
-                ]
+                inner_input_dim_wo_batch = inner_input_dim_wo_batch + [self.input_dim_wo_batch[0]]
 
             pad_layer = CroppingReflect2D(
                 input_dim_wo_batch=inner_input_dim_wo_batch,
@@ -309,9 +269,7 @@ class BackwardAveragePooling2D(BackwardLinearLayer):
     def compute_output_shape(self, input_shape):
         return self.layer.input.shape
 
-    def call_on_reshaped_gradient(
-        self, gradient, input=None, training=None, mask=None
-    ):
+    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
         # inputs (batch, channel_out, w_out, h_out)
         if self.layer.data_format == "channels_first":
             channel_out = gradient.shape[1]
@@ -322,9 +280,7 @@ class BackwardAveragePooling2D(BackwardLinearLayer):
 
         split_inputs = K.split(gradient, channel_out, axis)
         # apply conv transpose on every of them
-        outputs = K.concatenate(
-            [self.model(input_i) for input_i in split_inputs], axis
-        )
+        outputs = K.concatenate([self.model(input_i) for input_i in split_inputs], axis)
         return outputs
 
 

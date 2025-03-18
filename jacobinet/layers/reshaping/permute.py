@@ -1,8 +1,9 @@
 import keras
-from keras.layers import Permute  # type: ignore
-from keras.layers import Layer  # type: ignore
 import numpy as np
 from jacobinet.layers.layer import BackwardLinearLayer
+from keras.layers import Layer  # type: ignore
+from keras.layers import Permute  # type: ignore
+
 
 @keras.saving.register_keras_serializable()
 class BackwardPermute(BackwardLinearLayer):

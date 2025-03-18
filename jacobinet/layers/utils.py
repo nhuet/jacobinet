@@ -1,18 +1,18 @@
-from typing import List, Union
-from keras.layers import (  # type:ignore
-    Layer,
-    ZeroPadding2D,
-    Cropping2D,
-    ZeroPadding1D,
-    Cropping1D,
-    ZeroPadding3D,
-    Cropping3D,
-    Permute,
-    Input,
-)
+from typing import Callable, List, Tuple, Union
+
 import keras.ops as K  # type:ignore
-from typing import Union, List, Tuple, Callable
 from keras import KerasTensor as Tensor
+from keras.layers import (  # type:ignore
+    Cropping1D,
+    Cropping2D,
+    Cropping3D,
+    Input,
+    Layer,
+    Permute,
+    ZeroPadding1D,
+    ZeroPadding2D,
+    ZeroPadding3D,
+)
 
 
 # compute output shape post convolution
@@ -121,9 +121,7 @@ def pooling_layer2D(
     return []
 
 
-def pooling_layer1D(
-    w_pad: int, data_format: str
-) -> List[Union[ZeroPadding1D, Cropping1D]]:
+def pooling_layer1D(w_pad: int, data_format: str) -> List[Union[ZeroPadding1D, Cropping1D]]:
     """
     Determines the padding and cropping layers to apply based on the width padding.
 
@@ -276,23 +274,15 @@ def call_backward_depthwise2d(
     # remove bias if needed
     if hasattr(layer, "use_bias") and layer.use_bias and use_bias:
         if layer.data_format == "channels_first":
-            inputs = (
-                inputs - layer.bias[None, :, None, None]
-            )  # (batch, d_m*c_in, w_out, h_out)
+            inputs = inputs - layer.bias[None, :, None, None]  # (batch, d_m*c_in, w_out, h_out)
         else:
-            inputs = (
-                inputs - layer.bias[None, None, None, :]
-            )  # (batch, w_out, h_out, d_m*c_in)
+            inputs = inputs - layer.bias[None, None, None, :]  # (batch, w_out, h_out, d_m*c_in)
 
-    outputs = op_reshape(
-        inputs
-    )  # (batch, d_m, c_in, w_out, h_out) if data_format=channel_first
+    outputs = op_reshape(inputs)  # (batch, d_m, c_in, w_out, h_out) if data_format=channel_first
 
     # if self.layer.use_bias and self.use_bias:
 
-    split_outputs = K.split(
-        outputs, c_in, axis=axis_c
-    )  # [(batch, d_m, 1, w_out, h_out)]
+    split_outputs = K.split(outputs, c_in, axis=axis_c)  # [(batch, d_m, 1, w_out, h_out)]
     split_outputs = [
         op_split(s_o_i) for s_o_i in split_outputs
     ]  # [(batch_size, d_m, w_out, h_out)]
@@ -300,9 +290,7 @@ def call_backward_depthwise2d(
     conv_outputs = [
         inner_models[i](s_o_i) for (i, s_o_i) in enumerate(split_outputs)
     ]  # [(batch_size, 1, w_in, h_in)]
-    return K.concatenate(
-        conv_outputs, axis=axis
-    )  # (batch_size, c_in, w_in, h_in)
+    return K.concatenate(conv_outputs, axis=axis)  # (batch_size, c_in, w_in, h_in)
 
 
 def reshape_to_batch(
@@ -369,13 +357,9 @@ def share_weights_and_build(
     """
     # Check the original_layer is built and the new_layer is not built
     if not original_layer.built:
-        raise ValueError(
-            "The original layer must already be built for sharing its weights."
-        )
+        raise ValueError("The original layer must already be built for sharing its weights.")
     if new_layer.built:
-        raise ValueError(
-            "The new layer must not be built to get the weights of the original layer"
-        )
+        raise ValueError("The new layer must not be built to get the weights of the original layer")
 
     # store the weights as a new_layer variable before build (ie before the lock)
     for w_name in weight_names:

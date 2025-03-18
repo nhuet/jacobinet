@@ -1,8 +1,8 @@
 import keras
-from keras.layers import Layer, Add  # type: ignore
 from jacobinet.layers.merging import BackwardMergeLinearLayer
-
 from keras import KerasTensor as Tensor  # type: ignore
+from keras.layers import Add, Layer  # type: ignore
+
 
 @keras.saving.register_keras_serializable()
 class BackwardAdd(BackwardMergeLinearLayer):
@@ -20,9 +20,7 @@ class BackwardAdd(BackwardMergeLinearLayer):
     output = backward_layer(input_tensor)
     """
 
-    def call_on_reshaped_gradient(
-        self, gradient, input=None, training=None, mask=None
-    ):
+    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
         return [gradient] * self.n_input
 
 

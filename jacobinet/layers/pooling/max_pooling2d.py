@@ -1,21 +1,19 @@
-import numpy as np
 import math
-import keras
-from keras.layers import Layer, Input, MaxPooling2D, Reshape  # type: ignore
-from keras.models import Sequential, Model  # type: ignore
-import keras.ops as K  # type: ignore
-from jacobinet.layers.utils import pooling_layer2D
-from jacobinet.layers.utils import reshape_to_batch
+from typing import List
 
-from jacobinet.layers.layer import BackwardNonLinearLayer
-from jacobinet.layers.reshaping import BackwardReshape
+import keras
+import keras.ops as K  # type: ignore
+import numpy as np
 from jacobinet.layers.convolutional import BackwardDepthwiseConv2D
 from jacobinet.layers.custom.prime import max_prime
+from jacobinet.layers.layer import BackwardNonLinearLayer
+from jacobinet.layers.reshaping import BackwardReshape
+from jacobinet.layers.utils import pooling_layer2D, reshape_to_batch
+from keras.layers import Input, Layer, MaxPooling2D, Reshape  # type: ignore
+from keras.models import Model, Sequential  # type: ignore
+
 from .utils_conv import get_conv_op
-
 from .utils_max import ConstantPadding2D
-
-from typing import List
 
 
 def get_pad_width(
@@ -24,7 +22,6 @@ def get_pad_width(
     strides: List[int],
     data_format: str,
 ) -> List[List[int]]:
-
     if data_format == "channels_first":
         input_shape_wh = input_shape_wo_batch[1:]
     else:
@@ -32,15 +29,11 @@ def get_pad_width(
 
     # width
     # shape with valid
-    output_shape_w_valid = (
-        math.floor((input_shape_wh[0] - pool_size[0]) / strides[0]) + 1
-    )
+    output_shape_w_valid = math.floor((input_shape_wh[0] - pool_size[0]) / strides[0]) + 1
     # shape with same
     output_shape_w_same = math.floor((input_shape_wh[0] - 1) / strides[0]) + 1
 
-    output_shape_h_valid = (
-        math.floor((input_shape_wh[1] - pool_size[1]) / strides[1]) + 1
-    )
+    output_shape_h_valid = math.floor((input_shape_wh[1] - pool_size[1]) / strides[1]) + 1
     # shape with same
     output_shape_h_same = math.floor((input_shape_wh[1] - 1) / strides[1]) + 1
 
@@ -67,6 +60,7 @@ def get_pad_width(
         pad_width = [pad_batch] + padding + [pad_channel]
 
     return pad_width, padding
+
 
 @keras.saving.register_keras_serializable()
 class BackwardMaxPooling2D(BackwardNonLinearLayer):
@@ -119,7 +113,6 @@ class BackwardMaxPooling2D(BackwardNonLinearLayer):
         conv_out_shape_wo_batch = list(x_1.shape[1:])
 
         if self.layer.data_format == "channels_first":
-
             in_channel = self.input_dim_wo_batch[0]
             image_shape = conv_out_shape_wo_batch[-2:]
             # image_shape = self.output_dim_wo_batch[-2:]
@@ -156,54 +149,33 @@ class BackwardMaxPooling2D(BackwardNonLinearLayer):
             )
 
             if layer.data_format == "channels_first":
-                w_pad = (
-                    input_shape_wo_batch[1] - input_shape_wo_batch_wo_pad[1]
-                )
-                h_pad = (
-                    input_shape_wo_batch[2] - input_shape_wo_batch_wo_pad[2]
-                )
+                w_pad = input_shape_wo_batch[1] - input_shape_wo_batch_wo_pad[1]
+                h_pad = input_shape_wo_batch[2] - input_shape_wo_batch_wo_pad[2]
             else:
-                w_pad = (
-                    input_shape_wo_batch[0] - input_shape_wo_batch_wo_pad[0]
-                )
-                h_pad = (
-                    input_shape_wo_batch[1] - input_shape_wo_batch_wo_pad[1]
-                )
+                w_pad = input_shape_wo_batch[0] - input_shape_wo_batch_wo_pad[0]
+                h_pad = input_shape_wo_batch[1] - input_shape_wo_batch_wo_pad[1]
 
             pad_layers = pooling_layer2D(w_pad, h_pad, layer.data_format)
             if len(pad_layers):
-                self.backward_conv2d = Sequential(
-                    [backward_conv2d] + pad_layers
-                )
+                self.backward_conv2d = Sequential([backward_conv2d] + pad_layers)
                 # init
                 self.backward_conv2d(Input(self.output_dim_wo_batch))
 
-        self.linear_block_backward = Sequential(
-            [self.backward_reshape_op, backward_conv2d]
-        )
+        self.linear_block_backward = Sequential([self.backward_reshape_op, backward_conv2d])
 
     def call(self, inputs, training=None, mask=None):
-
         layer_input = None
 
         gradient = inputs[0]  # (batch, n_out..., C_W_out, H_out)
         layer_input = inputs[1]  # (batch, C, W_in, H_in)
 
-        reshape_tag, gradient_, n_out = reshape_to_batch(
-            gradient, [1] + self.output_dim_wo_batch
-        )
+        reshape_tag, gradient_, n_out = reshape_to_batch(gradient, [1] + self.output_dim_wo_batch)
         # gradient_ (batch*prod(n_out), output_dim_wo_batch...)= (batch*prod(n_out), C, W_out, H_out) if channel_first
 
-        input_max = self.linear_block(
-            layer_input
-        )  # (batch, C, pool_size, W_out, H_out)
-        backward_max = max_prime(
-            input_max, axis=self.axis
-        )  # (batch, C, pool_size, W_out, H_out)
+        input_max = self.linear_block(layer_input)  # (batch, C, pool_size, W_out, H_out)
+        backward_max = max_prime(input_max, axis=self.axis)  # (batch, C, pool_size, W_out, H_out)
         # combine backward_max with gradient, we first need to reshape gradient_
-        inner_input_dim_wo_batch = list(
-            backward_max.shape[1:4]
-        )  # =(C, pool_size, W_out, H_out)
+        inner_input_dim_wo_batch = list(backward_max.shape[1:4])  # =(C, pool_size, W_out, H_out)
         if len(n_out):
             gradient_ = K.reshape(
                 gradient_, [-1, np.prod(n_out)] + self.output_dim_wo_batch
@@ -230,14 +202,10 @@ class BackwardMaxPooling2D(BackwardNonLinearLayer):
         else:
             # gradient_ (batch, C, W_out, H_out)
             # backward_max (batch, C, pool_size, W_out, H_out)
-            gradient_ = K.expand_dims(
-                gradient_, self.axis
-            )  # (batch, C, 1, W_out, H_out)
+            gradient_ = K.expand_dims(gradient_, self.axis)  # (batch, C, 1, W_out, H_out)
 
         # element wise product to apply chain rule
-        gradient_ = (
-            gradient_ * backward_max
-        )  # (batch, N_out, C, pool_size, W_out, H_out)
+        gradient_ = gradient_ * backward_max  # (batch, N_out, C, pool_size, W_out, H_out)
         # reshape
         if len(n_out):
             gradient_ = K.reshape(
@@ -247,9 +215,7 @@ class BackwardMaxPooling2D(BackwardNonLinearLayer):
         # backward_reshape
         # backward_reshape = self.backward_reshape_op(gradient_) # (batch*N_out, C*pool_size, W_out, H_out)
         # output = self.backward_conv2d(backward_reshape) #(batch*N_out, C, W_in, H_in)
-        output = self.linear_block_backward(
-            gradient_
-        )  # (batch*N_out, C, W_in, H_in)
+        output = self.linear_block_backward(gradient_)  # (batch*N_out, C, W_in, H_in)
 
         # reshape_tag
         if reshape_tag:

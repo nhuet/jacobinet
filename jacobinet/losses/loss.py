@@ -1,9 +1,7 @@
-import numpy as np
 import keras  # type:ignore
-from keras.layers import Layer  # type:ignore
 import numpy as np
-from keras.losses import Loss, CategoricalCrossentropy  # type:ignore
-
+from keras.layers import Layer  # type:ignore
+from keras.losses import CategoricalCrossentropy, Loss  # type:ignore
 
 CATEGORICAL_CROSSENTROPY = "categorical_crossentropy"
 MEAN_SQUARED_ERROR = "mean_squared_error"
@@ -20,9 +18,9 @@ MEAN_ABSOLUTE_ERROR = "mean_absolute_error"
 # KLDivergence
 # BinaryCrossentropy
 
-import keras
-
 from typing import Optional
+
+import keras
 
 
 def deserialize(name: str) -> Loss:
@@ -39,6 +37,7 @@ def deserialize(name: str) -> Loss:
     if name == CATEGORICAL_CROSSENTROPY:
         return keras.losses.CategoricalCrossentropy()
     raise ValueError("unknown loss")
+
 
 @keras.saving.register_keras_serializable()
 class Loss_Layer(Layer):
@@ -66,7 +65,6 @@ class Loss_Layer(Layer):
         self.loss = loss
 
     def call(self, inputs_):
-
         y_true, y_pred = inputs_
         # reshape to have batch dimension
         shape_wo_batch = np.prod(y_true.shape[1:])
@@ -76,6 +74,7 @@ class Loss_Layer(Layer):
         return keras.ops.zeros_like(y_true_flatten[:, :1]) + loss
 
     # serialization to do
+
 
 @keras.saving.register_keras_serializable()
 class CategoricalCrossentropy_Layer(Loss_Layer):

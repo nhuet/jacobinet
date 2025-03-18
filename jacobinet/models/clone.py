@@ -1,24 +1,21 @@
-from keras.models import Model, Sequential  # type:ignore
-from keras.layers import Layer, Input  # type:ignore
-from jacobinet.layers.layer import BackwardLayer
+from typing import List, Optional, Union
+
 from jacobinet import get_backward_layer
-from jacobinet.losses import get_backward_loss, Loss_Layer
+from jacobinet.layers.layer import BackwardLayer
+from jacobinet.losses import Loss_Layer, get_backward_loss
 from jacobinet.models import BackwardModel, BackwardSequential
 from jacobinet.models.model import get_backward_functional
 from jacobinet.models.sequential import get_backward_sequential
 from jacobinet.models.utils import to_list
-
 from keras import KerasTensor as Tensor
-from typing import Union, Optional, List
-from typing import Optional
+from keras.layers import Input, Layer  # type:ignore
+from keras.models import Model, Sequential  # type:ignore
 
 
 def clone_to_backward(
     model: Model,
     gradient: Union[None, Tensor, List[Tensor]] = None,
-    mapping_keras2backward_classes: Optional[
-        dict[type[Layer], type[BackwardLayer]]
-    ] = None,
+    mapping_keras2backward_classes: Optional[dict[type[Layer], type[BackwardLayer]]] = None,
     extra_inputs: Union[List[Input]] = [],
     input_mask=None,
     target_inputs=None,

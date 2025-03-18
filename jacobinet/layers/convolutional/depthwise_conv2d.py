@@ -1,18 +1,19 @@
+from typing import List
+
 import keras
+import keras.ops as K  # type: ignore
+from jacobinet.layers.core.activations import BackwardActivation
+from jacobinet.layers.layer import BackwardLinearLayer, BackwardWithActivation
+from jacobinet.layers.utils import call_backward_depthwise2d, pooling_layer2D
+from keras import KerasTensor as Tensor
 from keras.layers import (  # type: ignore
-    Layer,
-    DepthwiseConv2D,
     Conv2DTranspose,
+    DepthwiseConv2D,
+    Layer,
     Reshape,
 )
 from keras.models import Sequential  # type: ignore
-import keras.ops as K  # type: ignore
-from jacobinet.layers.layer import BackwardLinearLayer, BackwardWithActivation
-from jacobinet.layers.core.activations import BackwardActivation
-from jacobinet.layers.utils import pooling_layer2D, call_backward_depthwise2d
 
-from keras import KerasTensor as Tensor
-from typing import List
 
 @keras.saving.register_keras_serializable()
 class BackwardDepthwiseConv2D(BackwardLinearLayer):
@@ -74,22 +75,12 @@ class BackwardDepthwiseConv2D(BackwardLinearLayer):
         conv_transpose_list: List[Conv2DTranspose] = []
 
         for i in range(c_in):
-            kernel_i = self.layer.kernel[
-                :, :, i : i + 1
-            ]  # (kernel_w, kernel_h, 1, d_m)
+            kernel_i = self.layer.kernel[:, :, i : i + 1]  # (kernel_w, kernel_h, 1, d_m)
             dico_depthwise_conv = layer.get_config()
-            dico_depthwise_conv["filters"] = dico_depthwise_conv[
-                "depth_multiplier"
-            ]
-            dico_depthwise_conv["kernel_initializer"] = dico_depthwise_conv[
-                "depthwise_initializer"
-            ]
-            dico_depthwise_conv["kernel_regularizer"] = dico_depthwise_conv[
-                "depthwise_regularizer"
-            ]
-            dico_depthwise_conv["kernel_constraint"] = dico_depthwise_conv[
-                "depthwise_constraint"
-            ]
+            dico_depthwise_conv["filters"] = dico_depthwise_conv["depth_multiplier"]
+            dico_depthwise_conv["kernel_initializer"] = dico_depthwise_conv["depthwise_initializer"]
+            dico_depthwise_conv["kernel_regularizer"] = dico_depthwise_conv["depthwise_regularizer"]
+            dico_depthwise_conv["kernel_constraint"] = dico_depthwise_conv["depthwise_constraint"]
             dico_depthwise_conv["padding"] = "valid"  # self.layer.padding
 
             # remove unknown features in Conv2DTranspose
@@ -107,9 +98,7 @@ class BackwardDepthwiseConv2D(BackwardLinearLayer):
 
         # shape of transposed input
         input_dim_wo_batch_t = (
-            K.repeat(
-                conv_t_i(K.zeros([1] + split_shape)), c_in, axis=self.axis
-            )[0]
+            K.repeat(conv_t_i(K.zeros([1] + split_shape)), c_in, axis=self.axis)[0]
         ).shape
         if self.layer.data_format == "channels_first":
             w_pad = input_dim_wo_batch[-2] - input_dim_wo_batch_t[-2]
@@ -121,15 +110,12 @@ class BackwardDepthwiseConv2D(BackwardLinearLayer):
         pad_layers = pooling_layer2D(w_pad, h_pad, layer.data_format)
         if len(pad_layers):
             self.inner_models = [
-                Sequential([conv_t_i] + pad_layers)
-                for conv_t_i in conv_transpose_list
+                Sequential([conv_t_i] + pad_layers) for conv_t_i in conv_transpose_list
             ]
         else:
             self.inner_models = conv_transpose_list
 
-    def call_on_reshaped_gradient(
-        self, gradient, input=None, training=None, mask=None
-    ):
+    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
         output = call_backward_depthwise2d(
             gradient,
             self.layer,

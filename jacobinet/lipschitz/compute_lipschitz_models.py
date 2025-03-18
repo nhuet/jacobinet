@@ -1,14 +1,12 @@
 # from backward
+from typing import Union
+
 from jacobinet.lipschitz import Lipschitz, LipschitzModel
 from jacobinet.models import BackwardModel, BackwardSequential
 
-from typing import Union
-
 
 # from model
-def get_lipschitz_model(
-    backward_model: Union[BackwardModel, BackwardSequential], p: float
-):
+def get_lipschitz_model(backward_model: Union[BackwardModel, BackwardSequential], p: float):
     """
     Creates a `LipschitzModel` that computes the Lipschitz constant for the given backward model.
 
@@ -32,8 +30,7 @@ def get_lipschitz_model(
         ```
     """
     if not (
-        isinstance(backward_model, BackwardModel)
-        or isinstance(backward_model, BackwardSequential)
+        isinstance(backward_model, BackwardModel) or isinstance(backward_model, BackwardSequential)
     ):
         raise ValueError("the model is not a backward model")
 

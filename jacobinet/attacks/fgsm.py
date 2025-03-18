@@ -1,16 +1,16 @@
-import numpy as np
-from typing import Union, List, Dict
+from typing import Dict, List, Union
 
 import keras
+import numpy as np
+from jacobinet.attacks import AdvLayer, AdvModel, get_adv_model_base
+from jacobinet.layers.layer import BackwardLayer
+from jacobinet.losses import BackwardLoss
+from jacobinet.models import BackwardModel
+from jacobinet.utils import to_list
 from keras import KerasTensor as Tensor  # type:ignore
 from keras.layers import Layer  # type:ignore
 from keras.losses import Loss  # type:ignore
 
-from jacobinet.models import BackwardModel
-from jacobinet.layers.layer import BackwardLayer
-from jacobinet.losses import BackwardLoss
-from jacobinet.attacks import get_adv_model_base, AdvLayer, AdvModel
-from jacobinet.utils import to_list
 from .utils import FGSM
 
 
@@ -74,14 +74,10 @@ class FastGradientSign(AdvLayer):
 def get_fgsm_model(
     model,
     loss: Union[str, Loss, Layer] = "categorical_crossentropy",
-    mapping_keras2backward_classes: Dict[
-        type[Layer], type[BackwardLayer]
-    ] = {},  # define type
+    mapping_keras2backward_classes: Dict[type[Layer], type[BackwardLayer]] = {},  # define type
     mapping_keras2backward_losses: Dict[type[Layer], type[BackwardLoss]] = {},
     **kwargs,
-) -> (
-    AdvModel
-):  # we do not compute gradient on extra_inputs, loss should return (None, 1)
+) -> AdvModel:  # we do not compute gradient on extra_inputs, loss should return (None, 1)
     """
     Creates an adversarial model using the Fast Gradient Sign Method (FGSM) for generating adversarial examples.
 

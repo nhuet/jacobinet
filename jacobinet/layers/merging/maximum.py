@@ -1,7 +1,8 @@
 import keras
-from keras.layers import Layer, Maximum  # type: ignore
 import keras.ops as K  # type: ignore
 from jacobinet.layers.merging import BackwardMergeNonLinearLayer
+from keras.layers import Layer, Maximum  # type: ignore
+
 
 @keras.saving.register_keras_serializable()
 class BackwardMaximum(BackwardMergeNonLinearLayer):
@@ -19,15 +20,9 @@ class BackwardMaximum(BackwardMergeNonLinearLayer):
     output = backward_layer(input_tensor)
     """
 
-    def call_on_reshaped_gradient(
-        self, gradient, input=None, training=None, mask=None
-    ):
-
+    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
         output_layer = self.layer(input)
-        return [
-            gradient * (K.sign(input_i - output_layer) + 1)
-            for input_i in input
-        ]
+        return [gradient * (K.sign(input_i - output_layer) + 1) for input_i in input]
 
 
 def get_backward_Maximum(layer: Maximum) -> Layer:

@@ -1,6 +1,7 @@
+from typing import List
+
 import keras.ops as K  # type: ignore
 from keras import KerasTensor as Tensor
-from typing import List
 
 
 def max_prime(inputs: Tensor, axis: int):

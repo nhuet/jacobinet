@@ -1,26 +1,21 @@
 import keras
-from keras.layers import Conv1D, Conv1DTranspose, Input, Layer  # type: ignore
-from keras.layers import Layer  # type: ignore
-from keras.models import Sequential  # type: ignore
 import keras.ops as K  # type: ignore
-
-from jacobinet.layers.utils import pooling_layer1D
-from jacobinet.layers.layer import BackwardLinearLayer, BackwardWithActivation
 from jacobinet.layers.core.activations import BackwardActivation
-
+from jacobinet.layers.layer import BackwardLinearLayer, BackwardWithActivation
+from jacobinet.layers.utils import pooling_layer1D
 from keras import KerasTensor as Tensor  # type: ignore
+from keras.layers import Layer  # type: ignore
+from keras.layers import Conv1D, Conv1DTranspose, Input  # type: ignore
+from keras.models import Sequential  # type: ignore
 
 
 def init_backward_conv1D(layer, input_dim_wo_batch, output_dim_wo_batch):
-
     dico_conv = layer.get_config()
     dico_conv.pop("groups")
     # input_shape = list(layer.input.shape[1:])
     input_shape = input_dim_wo_batch
     # update filters to match input, pay attention to data_format
-    if (
-        layer.data_format == "channels_first"
-    ):  # better to use enum than raw str
+    if layer.data_format == "channels_first":  # better to use enum than raw str
         dico_conv["filters"] = input_shape[0]
     else:
         dico_conv["filters"] = input_shape[-1]
@@ -34,9 +29,7 @@ def init_backward_conv1D(layer, input_dim_wo_batch, output_dim_wo_batch):
     layer_backward.built = True
 
     input_shape_wo_batch = input_dim_wo_batch
-    input_shape_wo_batch_wo_pad = list(
-        layer_backward(Input(output_dim_wo_batch))[0].shape
-    )
+    input_shape_wo_batch_wo_pad = list(layer_backward(Input(output_dim_wo_batch))[0].shape)
 
     if layer.data_format == "channels_first":
         w_pad = input_shape_wo_batch[1] - input_shape_wo_batch_wo_pad[1]
@@ -49,6 +42,7 @@ def init_backward_conv1D(layer, input_dim_wo_batch, output_dim_wo_batch):
         _ = layer_backward(Input(output_dim_wo_batch))
 
     return layer_backward
+
 
 @keras.saving.register_keras_serializable()
 class BackwardConv1D(BackwardLinearLayer):

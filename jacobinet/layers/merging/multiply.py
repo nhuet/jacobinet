@@ -1,7 +1,8 @@
 import keras
-from keras.layers import Layer, Multiply  # type: ignore
 import keras.ops as K  # type: ignore
 from jacobinet.layers.merging import BackwardMergeNonLinearLayer
+from keras.layers import Layer, Multiply  # type: ignore
+
 
 @keras.saving.register_keras_serializable()
 class BackwardMultiply(BackwardMergeNonLinearLayer):
@@ -19,9 +20,7 @@ class BackwardMultiply(BackwardMergeNonLinearLayer):
     output = backward_layer(input_tensor)
     """
 
-    def call_on_reshaped_gradient(
-        self, gradient, input=None, training=None, mask=None
-    ):
+    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
         layer_input_0 = input[0]
         layer_input_1 = input[1]
 
@@ -36,9 +35,9 @@ class BackwardMultiply(BackwardMergeNonLinearLayer):
         reshape_tag, layer_output, n_out = reshape_to_batch(inputs, list(self.layer.output.shape))
 
         output = [layer_output*layer_input_1, layer_output*layer_input_0]
-        
+
         if reshape_tag:
-            output = [K.reshape(output[i], [-1]+n_out+list(self.input_dim_wo_batch[i])) for i in range(self.n_input)]   
+            output = [K.reshape(output[i], [-1]+n_out+list(self.input_dim_wo_batch[i])) for i in range(self.n_input)]
 
         return output
     """

@@ -1,22 +1,20 @@
-from keras.layers import Layer, Input, InputLayer  # type:ignore
-from keras.models import Model  # type:ignore
-from .node import get_backward_node
-from .base_model import BackwardModel
-from jacobinet.layers.layer import BackwardLayer
-from .utils import get_gradient, to_list
+from typing import List, Optional, Union
+
 from jacobinet import get_backward_layer
-
-
+from jacobinet.layers.layer import BackwardLayer
 from keras import KerasTensor as Tensor
-from typing import Union, Optional, List
+from keras.layers import Input, InputLayer, Layer  # type:ignore
+from keras.models import Model  # type:ignore
+
+from .base_model import BackwardModel
+from .node import get_backward_node
+from .utils import get_gradient, to_list
 
 
 def get_backward_functional(
     model: Model,
     gradient: Union[None, Tensor, List[Tensor]] = None,
-    mapping_keras2backward_classes: Optional[
-        dict[type[Layer], type[BackwardLayer]]
-    ] = None,
+    mapping_keras2backward_classes: Optional[dict[type[Layer], type[BackwardLayer]]] = None,
     extra_inputs: Union[List[Input]] = [],
     input_mask=None,
     target_inputs=None,
@@ -66,9 +64,7 @@ def get_backward_functional(
                     "None values among not None values of gradient is not considered. Mismatch between gradient and output nodes: The gradient must be specified for every output node, or not specified at all."
                 )
             if hasattr(grad, "_keras_history"):
-                grad_input_i = isinstance(
-                    grad._keras_history.operation, InputLayer
-                )
+                grad_input_i = isinstance(grad._keras_history.operation, InputLayer)
             else:
                 grad_input_i = False
 
@@ -92,23 +88,15 @@ def get_backward_functional(
         node_index = model_output._keras_history.node_index
         nodes = model._nodes_by_depth[node_index]
         try:
-            nodes_ = [
-                node
-                for node in nodes
-                if node.operation.output.name == model_output.name
-            ]
+            nodes_ = [node for node in nodes if node.operation.output.name == model_output.name]
             node = nodes_[0]
             output_nodes.append(node)
         except IndexError:
             model_output_bis = model_output._keras_history.operation.output
-            node_index_bis = (
-                model_output._keras_history.operation.output._keras_history.node_index
-            )
+            node_index_bis = model_output._keras_history.operation.output._keras_history.node_index
             nodes_bis = model._nodes_by_depth[node_index_bis]
             nodes_bis_ = [
-                node
-                for node in nodes_bis
-                if node.operation.output.name == model_output_bis.name
+                node for node in nodes_bis if node.operation.output.name == model_output_bis.name
             ]
             node = nodes_bis_[0]
             output_nodes.append(node)
@@ -140,13 +128,10 @@ def get_backward_functional(
     for input_ in target_inputs:
         input_name = input_.name
         if not input_name in input_mask:
-
             outputs_i = []
             is_linear_i = True
 
-            for i, (grad, output_node) in enumerate(
-                zip(gradient, output_nodes)
-            ):
+            for i, (grad, output_node) in enumerate(zip(gradient, output_nodes)):
                 output_node, is_linear_node, keep_branch = get_backward_node(
                     output_node,
                     grad,

@@ -1,7 +1,8 @@
 import keras
-from keras.layers import Layer, GlobalAveragePooling3D  # type: ignore
 import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
+from keras.layers import GlobalAveragePooling3D, Layer  # type: ignore
+
 
 @keras.saving.register_keras_serializable()
 class BackwardGlobalAveragePooling3D(BackwardLinearLayer):
@@ -22,9 +23,7 @@ class BackwardGlobalAveragePooling3D(BackwardLinearLayer):
 
     layer: GlobalAveragePooling3D
 
-    def call_on_reshaped_gradient(
-        self, gradient, input=None, training=None, mask=None
-    ):
+    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
         if self.layer.data_format == "channels_first":
             d_in, w_in, h_in = self.layer.input.shape[-3:]
             if self.layer.keepdims:
@@ -62,9 +61,7 @@ class BackwardGlobalAveragePooling3D(BackwardLinearLayer):
                 output = K.repeat(
                     K.repeat(
                         K.repeat(
-                            K.expand_dims(
-                                K.expand_dims(K.expand_dims(gradient, 1), 1), 1
-                            ),
+                            K.expand_dims(K.expand_dims(K.expand_dims(gradient, 1), 1), 1),
                             d_in,
                             1,
                         ),

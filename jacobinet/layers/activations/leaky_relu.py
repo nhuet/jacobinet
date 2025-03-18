@@ -1,11 +1,11 @@
 import keras
-from keras.layers import Layer, LeakyReLU  # type: ignore
 import keras.ops as K  # type: ignore
-from keras import KerasTensor as Tensor
-
 from jacobinet.layers.layer import BackwardNonLinearLayer
+from keras import KerasTensor as Tensor
+from keras.layers import Layer, LeakyReLU  # type: ignore
 
 from .prime import leaky_relu_prime
+
 
 @keras.saving.register_keras_serializable()
 class BackwardLeakyReLU(BackwardNonLinearLayer):
@@ -30,12 +30,8 @@ class BackwardLeakyReLU(BackwardNonLinearLayer):
     ):
         super().__init__(layer=layer, **kwargs)
 
-    def call_on_reshaped_gradient(
-        self, gradient, input=None, training=None, mask=None
-    ):
-        backward_output: Tensor = leaky_relu_prime(
-            input, negative_slope=self.layer.negative_slope
-        )
+    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
+        backward_output: Tensor = leaky_relu_prime(input, negative_slope=self.layer.negative_slope)
         output = gradient * backward_output
         return output
 

@@ -1,21 +1,19 @@
+from typing import List
+
 import keras
+import keras.ops as K  # type: ignore
+from jacobinet.layers.core.activations import BackwardActivation
+from jacobinet.layers.layer import BackwardLinearLayer, BackwardWithActivation
+from jacobinet.layers.utils import pooling_layer1D
+from keras import KerasTensor as Tensor  # type: ignore
 from keras.layers import (  # type: ignore
-    Layer,
-    DepthwiseConv1D,
     Conv1DTranspose,
+    DepthwiseConv1D,
+    Layer,
     Reshape,
 )
-from jacobinet.layers.layer import (
-    BackwardLinearLayer,
-    BackwardWithActivation,
-)
-from jacobinet.layers.core.activations import BackwardActivation
-from jacobinet.layers.utils import pooling_layer1D
 from keras.models import Sequential  # type: ignore
-import keras.ops as K  # type: ignore
 
-from typing import List
-from keras import KerasTensor as Tensor  # type: ignore
 
 @keras.saving.register_keras_serializable()
 class BackwardDepthwiseConv1D(BackwardLinearLayer):
@@ -75,18 +73,10 @@ class BackwardDepthwiseConv1D(BackwardLinearLayer):
         for i in range(c_in):
             kernel_i = self.layer.kernel[:, i : i + 1]  # (kernel_w, 1, d_m)
             dico_depthwise_conv = layer.get_config()
-            dico_depthwise_conv["filters"] = dico_depthwise_conv[
-                "depth_multiplier"
-            ]
-            dico_depthwise_conv["kernel_initializer"] = dico_depthwise_conv[
-                "depthwise_initializer"
-            ]
-            dico_depthwise_conv["kernel_regularizer"] = dico_depthwise_conv[
-                "depthwise_regularizer"
-            ]
-            dico_depthwise_conv["kernel_constraint"] = dico_depthwise_conv[
-                "depthwise_constraint"
-            ]
+            dico_depthwise_conv["filters"] = dico_depthwise_conv["depth_multiplier"]
+            dico_depthwise_conv["kernel_initializer"] = dico_depthwise_conv["depthwise_initializer"]
+            dico_depthwise_conv["kernel_regularizer"] = dico_depthwise_conv["depthwise_regularizer"]
+            dico_depthwise_conv["kernel_constraint"] = dico_depthwise_conv["depthwise_constraint"]
             dico_depthwise_conv["padding"] = "valid"
 
             # remove unknown features in Conv1DTranspose
@@ -106,11 +96,7 @@ class BackwardDepthwiseConv1D(BackwardLinearLayer):
         # input_shape_wo_batch = list(layer.input.shape[1:])
         input_shape_wo_batch = self.input_dim_wo_batch
         input_shape_wo_batch_wo_pad = list(
-            (
-                K.repeat(
-                    conv_t_i(K.zeros([1] + split_shape)), c_in, axis=self.axis
-                )[0]
-            ).shape
+            (K.repeat(conv_t_i(K.zeros([1] + split_shape)), c_in, axis=self.axis)[0]).shape
         )
 
         if layer.data_format == "channels_first":
@@ -121,15 +107,12 @@ class BackwardDepthwiseConv1D(BackwardLinearLayer):
         pad_layers = pooling_layer1D(w_pad, self.layer.data_format)
         if len(pad_layers):
             self.inner_models = [
-                Sequential([conv_t_i] + pad_layers)
-                for conv_t_i in conv_transpose_list
+                Sequential([conv_t_i] + pad_layers) for conv_t_i in conv_transpose_list
             ]
         else:
             self.inner_models = conv_transpose_list
 
-    def call_on_reshaped_gradient(
-        self, gradient, input=None, training=None, mask=None
-    ):
+    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
         outputs = self.op_reshape(
             gradient
         )  # (batch, d_m, c_in, w_out) if data_format=channel_first
@@ -142,12 +125,9 @@ class BackwardDepthwiseConv1D(BackwardLinearLayer):
         ]  # [(batch_size, d_m, w_out, h_out)]
 
         conv_outputs = [
-            self.inner_models[i](s_o_i)
-            for (i, s_o_i) in enumerate(split_outputs)
+            self.inner_models[i](s_o_i) for (i, s_o_i) in enumerate(split_outputs)
         ]  # [(batch_size, 1, w_in, h_in)]
-        output = K.concatenate(
-            conv_outputs, axis=self.axis
-        )  # (batch_size, c_in, w_in, h_in)
+        output = K.concatenate(conv_outputs, axis=self.axis)  # (batch_size, c_in, w_in, h_in)
         return output
 
 

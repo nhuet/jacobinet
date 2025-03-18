@@ -1,10 +1,9 @@
 import keras
-from keras.layers import BatchNormalization, Layer  # type: ignore
-from jacobinet.layers.layer import BackwardLinearLayer
-from keras.src import backend
-from keras.src import ops
-import keras
 import keras.ops as K  # type: ignore
+from jacobinet.layers.layer import BackwardLinearLayer
+from keras.layers import BatchNormalization, Layer  # type: ignore
+from keras.src import backend, ops
+
 
 @keras.saving.register_keras_serializable()
 class BackwardBatchNormalization(BackwardLinearLayer):
@@ -23,9 +22,7 @@ class BackwardBatchNormalization(BackwardLinearLayer):
     output = backward_layer(input_tensor)
     """
 
-    def call_on_reshaped_gradient(
-        self, gradient, input=None, training=None, mask=None
-    ):
+    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
         if mask is not None:
             if len(mask.shape) != len(gradient.shape) - 1:
                 # Raise a value error

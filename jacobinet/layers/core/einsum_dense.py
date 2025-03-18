@@ -1,8 +1,9 @@
 import keras
-from jacobinet.layers.layer import BackwardLinearLayer
-from keras.layers import Layer, EinsumDense  # type: ignore
-from keras.src import ops
 import keras.ops as K  # type: ignore
+from jacobinet.layers.layer import BackwardLinearLayer
+from keras.layers import EinsumDense, Layer  # type: ignore
+from keras.src import ops
+
 
 @keras.saving.register_keras_serializable()
 class BackwardEinsumDense(BackwardLinearLayer):
@@ -30,13 +31,8 @@ class BackwardEinsumDense(BackwardLinearLayer):
     ):
         super().__init__(layer=layer, **kwargs)
 
-    def call_on_reshaped_gradient(
-        self, gradient, input=None, training=None, mask=None
-    ):
-
-        output = ops.einsum(
-            self.layer.equation, gradient, K.transpose(self.layer.kernel)
-        )
+    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
+        output = ops.einsum(self.layer.equation, gradient, K.transpose(self.layer.kernel))
 
         return output
 

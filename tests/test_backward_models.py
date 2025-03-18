@@ -1,25 +1,26 @@
 import keras
-from keras.layers import (
-    Activation,
-    Dense,
-    Reshape,
-    Flatten,
-    ReLU,
-    Conv2D,
-    DepthwiseConv2D,
-    AveragePooling2D,
-    MaxPooling2D,
-    Input,
-)
-from keras.models import Sequential, Model
+import numpy as np
+import pytest
+import torch
 
 # from jacobinet.models.sequential import get_backward_sequential
 # from jacobinet.models.model import get_backward_functional
 from jacobinet.models import clone_to_backward
-from .conftest import compute_backward_model, serialize_model, compute_output
-import numpy as np
-import torch
-import pytest
+from keras.layers import (
+    Activation,
+    AveragePooling2D,
+    Conv2D,
+    Dense,
+    DepthwiseConv2D,
+    Flatten,
+    Input,
+    MaxPooling2D,
+    ReLU,
+    Reshape,
+)
+from keras.models import Model, Sequential
+
+from .conftest import compute_backward_model, compute_output, serialize_model
 
 # preliminary tests: gradient is derived automatically by considering single output model
 
@@ -52,7 +53,6 @@ def test_sequential_nonlinear():
 
 
 def test_sequential_multiD():
-
     input_dim = 36
     layers = [
         Reshape((1, 6, 6)),
@@ -80,7 +80,6 @@ def test_sequential_multiD():
     ],
 )
 def test_sequential_multiD_pooling(padding, layer_name):
-
     input_shape = (1, 3, 6)
     input_dim = np.prod(input_shape)
     layer_ = None
@@ -102,7 +101,6 @@ def test_sequential_multiD_pooling(padding, layer_name):
 
 
 def _test_sequential_multiD_channel_last():
-
     input_dim = 72
     layers = [
         Reshape((6, 6, 2)),
@@ -162,7 +160,6 @@ def test_model_nonlinear():
 
 
 def test_model_multiD():
-
     input_dim = 36
     layers = [
         Reshape((1, 6, 6)),
@@ -188,7 +185,6 @@ def test_model_multiD():
 
 
 def _test_model_multiD_channel_last():
-
     input_dim = 72
     layers = [
         Reshape((6, 6, 2)),
@@ -215,7 +211,6 @@ def _test_model_multiD_channel_last():
 
 ###### encode gradient as a KerasVariable #####
 def test_model_multiD_with_gradient_set():
-
     input_dim = 36
     layers = [
         Reshape((1, 6, 6)),
@@ -243,7 +238,6 @@ def test_model_multiD_with_gradient_set():
 
 # extra inputs
 def test_model_multiD_extra_input():
-
     input_dim = 36
     layers = [
         Reshape((1, 6, 6)),
@@ -264,9 +258,7 @@ def test_model_multiD_extra_input():
     # gradient is the result of extra_inputs
     extra_input = Input((10,))
     gradient = keras.ops.max(extra_input, axis=-1)
-    backward_model = clone_to_backward(
-        model, gradient=gradient, extra_inputs=[extra_input]
-    )
+    backward_model = clone_to_backward(model, gradient=gradient, extra_inputs=[extra_input])
     # model is not linear
     _ = backward_model([torch.ones((1, input_dim)), torch.ones((1, 10))])
 
@@ -286,7 +278,6 @@ def test_model_multiD_extra_input():
 # multiple outputs
 ### multi output neural network #####
 def test_model_multiD_multi_output():
-
     input_dim = 36
     layers = [
         Reshape((1, 6, 6)),
@@ -316,7 +307,6 @@ def test_model_multiD_multi_output():
 
 ### multi output neural network #####
 def _test_model_multiD_multi_outputs():
-
     input_dim = 36
     layers_0 = [
         Reshape((1, 6, 6)),
@@ -339,14 +329,10 @@ def _test_model_multiD_multi_outputs():
 
     model = Model(input_, [output_0, output_1])
     _ = model(torch.ones((1, input_dim)))
-    backward_model = clone_to_backward(
-        model, gradient=[Input((10,)), Input((20,))]
-    )
+    backward_model = clone_to_backward(model, gradient=[Input((10,)), Input((20,))])
     # model is not linear
 
-    _ = backward_model(
-        [torch.ones((1, input_dim)), torch.ones((1, 10)), torch.ones((1, 20))]
-    )
+    _ = backward_model([torch.ones((1, input_dim)), torch.ones((1, 10)), torch.ones((1, 20))])
 
     # freeze one model and computer backward on the other branch
 
@@ -355,12 +341,8 @@ def _test_model_multiD_multi_outputs():
         model, gradient=[Input((10,)), keras.Variable(np.zeros((1, 20)))]
     )
     backward_model_0_bis = clone_to_backward(model_0)
-    grad_0 = backward_model_0(
-        [torch.ones((1, input_dim)), torch.ones((1, 10))]
-    )
-    grad_0_bis = backward_model_0_bis(
-        [torch.ones((1, input_dim)), torch.ones((1, 10))]
-    )
+    grad_0 = backward_model_0([torch.ones((1, input_dim)), torch.ones((1, 10))])
+    grad_0_bis = backward_model_0_bis([torch.ones((1, input_dim)), torch.ones((1, 10))])
     # import pdb; pdb.set_trace()
 
     for i in range(10):
@@ -384,9 +366,7 @@ def test_nested_sequential_linear():
     inner_model_bis = Sequential(layers)
     _ = inner_model_bis(torch.ones((1, input_dim)))
 
-    model = Sequential(
-        [Dense(input_dim), inner_model, inner_model_bis, Dense(1)]
-    )
+    model = Sequential([Dense(input_dim), inner_model, inner_model_bis, Dense(1)])
     _ = model(torch.ones((1, input_dim)))
     backward_model = clone_to_backward(model)
     # model is linear
@@ -398,7 +378,6 @@ def test_nested_sequential_linear():
 
 
 def test_nested_sequential_nonlinear_linear():
-
     input_dim = 32
     layers = [Dense(input_dim), ReLU(), Dense(3)]
     nested_model = Sequential(layers)
@@ -415,15 +394,12 @@ def test_nested_sequential_nonlinear_linear():
 
     backward_nested_model = backward_model.layers[-1]
 
-    compute_backward_model(
-        (input_dim,), nested_model, backward_nested_model, 0
-    )
+    compute_backward_model((input_dim,), nested_model, backward_nested_model, 0)
     compute_backward_model((input_dim,), model, backward_model)
     serialize_model([input_dim, 1], backward_model)
 
 
 def test_nested_sequential_linear_nonlinear():
-
     input_dim = 32
     layers = [Dense(input_dim), ReLU(), Dense(3)]
     nested_model = Sequential(layers)
@@ -442,7 +418,6 @@ def test_nested_sequential_linear_nonlinear():
 
 
 def test_nested_sequential_model():
-
     input_dim = 32
     layers = [Dense(input_dim), ReLU(), Dense(3)]
     input_nested = Input((input_dim,))
@@ -485,7 +460,6 @@ def test_model_linear_nested_sequential():
 
 
 def test_nested_model_linear_nonlinear():
-
     input_dim = 32
     layers = [Dense(input_dim), ReLU(), Dense(3)]
     z = Input((input_dim,))

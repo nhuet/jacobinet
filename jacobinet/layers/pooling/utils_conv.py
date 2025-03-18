@@ -1,9 +1,13 @@
-import keras
-from keras.layers import Layer, MaxPooling2D, DepthwiseConv2D, Conv2DTranspose  # type: ignore
-
-import numpy as np
-
 from typing import Dict, List
+
+import keras
+import numpy as np
+from keras.layers import (  # type: ignore
+    Conv2DTranspose,
+    DepthwiseConv2D,
+    Layer,
+    MaxPooling2D,
+)
 
 
 def get_in_channels(data_format, input_dim_wo_shape) -> int:
@@ -32,7 +36,6 @@ def get_in_channels(data_format, input_dim_wo_shape) -> int:
 
 
 def get_conv_op_config(config: Dict, in_channels: int) -> keras.Variable:
-
     pool_size_x: int
     pool_size_y: int
     padding: str
@@ -62,10 +65,7 @@ def get_conv_op_config(config: Dict, in_channels: int) -> keras.Variable:
     return keras.Variable(kernel_pool, trainable=False)
 
 
-def get_conv_op(
-    layer: MaxPooling2D, input_dim_wo_batch: List[int]
-) -> DepthwiseConv2D:
-
+def get_conv_op(layer: MaxPooling2D, input_dim_wo_batch: List[int]) -> DepthwiseConv2D:
     config: Dict = layer.get_config()
     # in_channels = get_in_channels(layer)
     in_channels: int = get_in_channels(
@@ -99,14 +99,11 @@ def get_conv_op(
 
 
 def get_backward_layer(layer: DepthwiseConv2D) -> Layer:
-
     dico_conv = layer.get_config()
     # dico_conv.pop("groups")
     input_shape = list(layer.input.shape[1:])
     # update filters to match input, pay attention to data_format
-    if (
-        layer.data_format == "channels_first"
-    ):  # better to use enum than raw str
+    if layer.data_format == "channels_first":  # better to use enum than raw str
         dico_conv["filters"] = 1  # input_shape[0]
     else:
         dico_conv["filters"] = 1  # input_shape[-1]

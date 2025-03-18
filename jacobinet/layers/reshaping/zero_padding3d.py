@@ -1,7 +1,7 @@
 import keras
-from keras.layers import ZeroPadding3D, Cropping3D  # type: ignore
-from keras.layers import Layer  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
+from keras.layers import Layer  # type: ignore
+from keras.layers import Cropping3D, ZeroPadding3D  # type: ignore
 
 
 @keras.saving.register_keras_serializable()
@@ -31,9 +31,7 @@ class BackwardZeroPadding3D(BackwardLinearLayer):
         padding = dico_padding["padding"]
         data_format = dico_padding["data_format"]
 
-        self.layer_backward = Cropping3D(
-            cropping=padding, data_format=data_format
-        )
+        self.layer_backward = Cropping3D(cropping=padding, data_format=data_format)
         self.layer_backward.built = True
 
 

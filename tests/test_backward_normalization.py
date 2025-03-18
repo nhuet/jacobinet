@@ -1,12 +1,12 @@
+import numpy as np
+from jacobinet import get_backward_layer as get_backward
 from keras.layers import BatchNormalization
 from keras.models import Sequential
-from jacobinet import get_backward_layer as get_backward
-import numpy as np
-from .conftest import linear_mapping, is_invertible, serialize
+
+from .conftest import is_invertible, linear_mapping, serialize
 
 
 def test_backward_BatchNormalization():
-
     layer = BatchNormalization()
     layer.trainable = False
     model_layer = Sequential([layer])

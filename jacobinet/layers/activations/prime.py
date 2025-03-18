@@ -1,7 +1,8 @@
+from typing import Callable, Union
+
 import keras  # type: ignore
 import keras.ops as K  # type: ignore
 from keras import KerasTensor as Tensor  # type: ignore
-from typing import Union, Callable
 
 RELU = "relu"
 RELU6 = "relu6"
@@ -116,16 +117,12 @@ def relu_prime(
         Derivative of ReLU with respect to the inputs.
     """
 
-    mask_neg_slope: Tensor = K.relu(
-        K.sign(threshold - inputs)
-    )  # 1 iff layer_input[i]<threhshold
+    mask_neg_slope: Tensor = K.relu(K.sign(threshold - inputs))  # 1 iff layer_input[i]<threhshold
     mask_value: Tensor = K.relu(K.sign(inputs - threshold))
     if max_value:
         mask_value *= K.relu(K.sign(max_value - inputs))
 
-    backward_relu: Tensor = (
-        negative_slope * mask_neg_slope + (1 - mask_neg_slope) * mask_value
-    )
+    backward_relu: Tensor = negative_slope * mask_neg_slope + (1 - mask_neg_slope) * mask_value
 
     def grad(*args, upstream=None):
         return keras.ops.sigmoid(upstream)
@@ -133,9 +130,7 @@ def relu_prime(
     return backward_relu  # , grad
 
 
-def relu6_prime(
-    inputs: Tensor, negative_slope: float = 0.0, threshold: float = 0.0
-) -> Tensor:
+def relu6_prime(inputs: Tensor, negative_slope: float = 0.0, threshold: float = 0.0) -> Tensor:
     """
     Computes the derivative of the ReLU6 activation function, which is a clipped version of ReLU.
 
@@ -330,16 +325,10 @@ def hard_sigmoid_prime(inputs: Tensor) -> Tensor:
     - Derivative of Hard Sigmoid with respect to the inputs.
     """
 
-    mask_strictly_lower_than_3: Tensor = K.relu(
-        K.sign(3 - inputs)
-    )  # 1 if inputs <3
-    mask_strictly_greater_than_minus_3: Tensor = K.relu(
-        K.sign(inputs + 3)
-    )  # 1 if inputs >-3
+    mask_strictly_lower_than_3: Tensor = K.relu(K.sign(3 - inputs))  # 1 if inputs <3
+    mask_strictly_greater_than_minus_3: Tensor = K.relu(K.sign(inputs + 3))  # 1 if inputs >-3
 
-    return (
-        mask_strictly_greater_than_minus_3 * mask_strictly_lower_than_3 / 6.0
-    )
+    return mask_strictly_greater_than_minus_3 * mask_strictly_lower_than_3 / 6.0
 
 
 def hard_silu_prime(inputs: Tensor) -> Tensor:
@@ -399,6 +388,4 @@ def mish_prime(inputs: Tensor) -> Tensor:
     # mish'(x) = tanh(softplus(x)) + x*softplus'(x)*tanh'(softplus(x))
     softplus_x = K.softplus(inputs)
 
-    return K.tanh(softplus_x) + inputs * softplus_prime(inputs) * tanh_prime(
-        softplus_x
-    )
+    return K.tanh(softplus_x) + inputs * softplus_prime(inputs) * tanh_prime(softplus_x)

@@ -1,9 +1,9 @@
 import keras
-from keras.layers import Flatten, Reshape, Permute  # type: ignore
-from keras.layers import Layer  # type: ignore
-from keras.models import Sequential  # type: ignore
 import numpy as np
 from jacobinet.layers.layer import BackwardLinearLayer
+from keras.layers import Layer  # type: ignore
+from keras.layers import Flatten, Permute, Reshape  # type: ignore
+from keras.models import Sequential  # type: ignore
 
 
 @keras.saving.register_keras_serializable()
@@ -30,10 +30,7 @@ class BackwardFlatten(BackwardLinearLayer):
     ):
         super().__init__(layer=layer, **kwargs)
         input_shape_wo_batch = self.input_dim_wo_batch
-        if (
-            layer.data_format == "channels_first"
-            and len(input_shape_wo_batch) > 1
-        ):
+        if layer.data_format == "channels_first" and len(input_shape_wo_batch) > 1:
             # we first permute to obtain channel_last format and then flatten
             target_shape = input_shape_wo_batch[1:] + [input_shape_wo_batch[0]]
             layer_reshape = Reshape(target_shape=target_shape)
@@ -44,7 +41,6 @@ class BackwardFlatten(BackwardLinearLayer):
             layer_perm = Permute(dims_backward)
             self.layer_backward = Sequential([layer_reshape, layer_perm])
         else:
-
             self.layer_backward = Reshape(target_shape=input_shape_wo_batch)
 
 

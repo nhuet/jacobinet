@@ -1,12 +1,12 @@
-from keras_custom.layers import MulConstant, PlusConstant
+import numpy as np
 from keras.models import Sequential
 from keras_custom.backward import get_backward
-import numpy as np
-from .conftest import linear_mapping, is_invertible, serialize
+from keras_custom.layers import MulConstant, PlusConstant
+
+from .conftest import is_invertible, linear_mapping, serialize
 
 
 def test_backward_MulConstant():
-
     layer = MulConstant(constant=1.0)
     model_layer = Sequential([layer])
     input_shape = (2,)
@@ -48,7 +48,6 @@ def test_backward_MulConstant():
 
 
 def test_backward_PlusConstant():
-
     layer = PlusConstant(constant=0, minus=True)
     model_layer = Sequential([layer])
     input_shape = (2,)

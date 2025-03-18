@@ -1,6 +1,5 @@
-from keras.src import ops  # type: ignore
-
 from keras.layers import ZeroPadding2D  # type: ignore
+from keras.src import ops  # type: ignore
 
 
 class ConstantPadding2D(ZeroPadding2D):

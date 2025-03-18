@@ -1,21 +1,19 @@
-from keras import KerasTensor as Tensor  # type:ignore
-from keras.layers import Layer, InputLayer  # type:ignore
-from keras.models import Model, Sequential  # type:ignore
-from keras.src.ops.node import Node
-from typing import List, Union, Optional, Callable
-from jacobinet.layers.layer import BackwardLayer, BackwardLinearLayer
-from jacobinet.models.utils import FuseGradients, to_list
-from jacobinet import get_backward_layer
+from typing import Callable, List, Optional, Union
 
 import numpy as np
+from jacobinet import get_backward_layer
+from jacobinet.layers.layer import BackwardLayer, BackwardLinearLayer
+from jacobinet.models.utils import FuseGradients, to_list
+from keras import KerasTensor as Tensor  # type:ignore
+from keras.layers import InputLayer, Layer  # type:ignore
+from keras.models import Model, Sequential  # type:ignore
+from keras.src.ops.node import Node
 
 
 def get_backward_node(
     node: Node,
     gradient: Tensor,
-    mapping_keras2backward_classes: Optional[
-        dict[type[Layer], type[BackwardLayer]]
-    ] = None,
+    mapping_keras2backward_classes: Optional[dict[type[Layer], type[BackwardLayer]]] = None,
     input_name=None,
     get_backward: Callable = get_backward_layer,
 ):
@@ -103,9 +101,7 @@ def get_backward_node(
     if input_name in [e.name for e in layer_inputs]:
         if isinstance(gradients, list):
             # do something
-            index_grad = np.where(
-                [e.name == input_name for e in layer_inputs]
-            )[0]
+            index_grad = np.where([e.name == input_name for e in layer_inputs])[0]
             return gradients[index_grad], is_linear, keep_output
         else:
             return gradients, is_linear, keep_output
