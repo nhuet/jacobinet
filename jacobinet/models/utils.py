@@ -5,8 +5,8 @@ import keras.ops as K  # type:ignore
 from jacobinet.layers.convert import get_backward as get_backward_layer
 from jacobinet.layers.layer import BackwardLayer, BackwardLinearLayer
 from keras import KerasTensor as Tensor
-from keras.layers import Layer  # type:ignore
 from keras.layers import InputLayer  # type:ignore
+from keras.layers import Layer  # type:ignore
 from keras.models import Model  # type:ignore
 
 
