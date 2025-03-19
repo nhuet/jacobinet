@@ -1,6 +1,6 @@
 import keras
 import keras.ops as K  # type: ignore
-from jacobinet.layers.merging import BackwardMergeLinearLayer
+from jacobinet.layers.merging.base_merge import BackwardMergeLinearLayer
 from keras.layers import Concatenate, Layer  # type: ignore
 
 

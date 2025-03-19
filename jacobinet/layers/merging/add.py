@@ -1,5 +1,5 @@
 import keras
-from jacobinet.layers.merging import BackwardMergeLinearLayer
+from jacobinet.layers.merging.base_merge import BackwardMergeLinearLayer
 from keras import KerasTensor as Tensor  # type: ignore
 from keras.layers import Add, Layer  # type: ignore
 

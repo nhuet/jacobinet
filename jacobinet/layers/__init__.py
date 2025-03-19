@@ -52,7 +52,7 @@ from .layer import (
 )
 from .merging import (
     BackwardAdd,
-    BackwardMergeNonLinearLayer,
+    #BackwardMergeNonLinearLayer,
     get_backward_Add,
     get_backward_Average,
     get_backward_Concatenate,
@@ -61,6 +61,8 @@ from .merging import (
     get_backward_Multiply,
     get_backward_Subtract,
 )
+
+from .merging.base_merge import BackwardMergeNonLinearLayer
 
 # from .custom import get_backward_MulConstant, get_backward_PlusConstant
 from .normalization import get_backward_BatchNormalization

@@ -2,7 +2,7 @@ import keras
 import numpy as np
 import pytest
 import torch
-from jacobinet.models.model import get_backward_model
+from jacobinet.models.model import get_backward_functional as get_backward_model
 from jacobinet.models.sequential import get_backward_sequential
 from keras.layers import (
     Add,
