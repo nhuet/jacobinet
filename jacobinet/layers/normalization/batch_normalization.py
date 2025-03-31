@@ -70,8 +70,9 @@ class BackwardBatchNormalization(BackwardLinearLayer):
             K.ones_like(gamma_),
             K.zeros_like(gamma_),
         )
-        w = ops.sqrt(variance_ + self.layer.epsilon) / (gamma_ + mask)
-        w = w * (1 - mask)
+        # w = ops.sqrt(variance_ + self.layer.epsilon) / (gamma_ + mask)
+        # w = w * (1 - mask)
+        w = gamma_ / ops.sqrt(variance_ + self.layer.epsilon)
         outputs = w * gradient
 
         return outputs
