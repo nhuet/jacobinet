@@ -13,53 +13,7 @@ from keras.layers import Input, Layer, MaxPooling2D, Reshape  # type: ignore
 from keras.models import Model, Sequential  # type: ignore
 
 from .utils_conv import get_conv_op
-from .utils_max import ConstantPadding2D
-
-
-def get_pad_width(
-    input_shape_wo_batch: List[int],
-    pool_size: List[int],
-    strides: List[int],
-    data_format: str,
-) -> List[List[int]]:
-    if data_format == "channels_first":
-        input_shape_wh = input_shape_wo_batch[1:]
-    else:
-        input_shape_wh = input_shape_wo_batch[:2]
-
-    # width
-    # shape with valid
-    output_shape_w_valid = math.floor((input_shape_wh[0] - pool_size[0]) / strides[0]) + 1
-    # shape with same
-    output_shape_w_same = math.floor((input_shape_wh[0] - 1) / strides[0]) + 1
-
-    output_shape_h_valid = math.floor((input_shape_wh[1] - pool_size[1]) / strides[1]) + 1
-    # shape with same
-    output_shape_h_same = math.floor((input_shape_wh[1] - 1) / strides[1]) + 1
-
-    w_pad: int = output_shape_w_same - output_shape_w_valid
-    h_pad: int = output_shape_h_same - output_shape_h_valid
-    # split in top, bottom, left, right
-    pad_top: int = w_pad // 2
-    pad_bottom: int = pad_top + w_pad % 2
-    pad_left: int = h_pad // 2
-    pad_right: int = pad_left + h_pad % 2
-
-    pad_batch = [0, 0]
-    pad_channel = [0, 0]
-    pad_width = [pad_top, pad_bottom]
-    pad_height = [pad_left, pad_right]
-
-    padding = [pad_width, pad_height]
-
-    if data_format == "channels_first":
-        # pad_width = [pad_batch, pad_channel, pad_width, pad_height]
-        pad_width = [pad_batch, pad_channel] + padding
-    else:
-        # pad_width = [pad_batch, pad_width, pad_height, pad_channel]
-        pad_width = [pad_batch] + padding + [pad_channel]
-
-    return pad_width, padding
+from .utils_max import ConstantPadding2D, get_pad_width
 
 
 @keras.saving.register_keras_serializable()
