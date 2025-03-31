@@ -39,8 +39,8 @@ class FastGradientSign(AdvLayer):
     def __init__(
         self,
         epsilon=0.0,
-        lower = -np.inf,
-        upper = np.inf,
+        lower=-np.inf,
+        upper=np.inf,
         *args,
         **kwargs,
     ):
@@ -51,7 +51,7 @@ class FastGradientSign(AdvLayer):
     def call(self, inputs, training=None, mask=None):
         # inputs = [x and \delta f(x)]
         x, grad_x = inputs[:2]
-        
+
         """
         def grad(*args, upstream=None):
             import pdb
@@ -63,8 +63,8 @@ class FastGradientSign(AdvLayer):
         # project given lp norm
         adv_x = x + self.epsilon * keras.ops.sign(-grad_x)
         adv_x = self.project_lp_ball(adv_x)
-        #import pdb; pdb.set_trace()
-        if len(inputs)>2:
+        # import pdb; pdb.set_trace()
+        if len(inputs) > 2:
             lower, upper = inputs[:2]
             return keras.ops.minimum(keras.ops.maximum(adv_x, lower), upper)
         else:
@@ -145,7 +145,7 @@ def get_fgsm_model(
     if "lower" in kwargs and "upper" in kwargs:
         lower = kwargs["lower"]
         upper = kwargs["upper"]
-        bounds=[lower, upper]
+        bounds = [lower, upper]
     if "p" in kwargs:
         p = kwargs["p"]
     if "radius" in kwargs:
@@ -164,17 +164,15 @@ def get_fgsm_model(
             p=p,
             radius=radius,
         )
-    
-    output = fgsm_layer(inputs[:-1] + adv_pred+bounds)
 
-    
-    extra_inputs=[]
-    if 'extra_inputs' in kwargs:
-        extra_inputs = kwargs['extra_inputs']
-    
-    
+    output = fgsm_layer(inputs[:-1] + adv_pred + bounds)
+
+    extra_inputs = []
+    if "extra_inputs" in kwargs:
+        extra_inputs = kwargs["extra_inputs"]
+
     fgsm_model = AdvModel(
-        inputs=inputs+extra_inputs,
+        inputs=inputs + extra_inputs,
         outputs=output,
         layer_adv=fgsm_layer,
         backward_model=base_adv_model,

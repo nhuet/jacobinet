@@ -2,7 +2,7 @@ from typing import List, Union
 
 import keras
 import keras.ops as K  # type:ignore
-from jacobinet.attacks import AdvLayer, AdvModel
+from jacobinet.attacks.base_attacks import AdvLayer, AdvModel
 from jacobinet.attacks.fgsm import get_fgsm_model
 from jacobinet.utils import to_list
 from keras import KerasTensor as Tensor  # type:ignore
@@ -41,15 +41,32 @@ class PGD_Cell(keras.Layer):
         self.fgsm_model = fgsm_model
         self.state_size = 1
 
+    def build(self, input_shape):
+        self.built = True
+
     def call(self, y, states):
         x = states[0]  # x
         x_init = states[1]
+        if len(states) > 2:
+            lower = states[2]
+            upper = states[3]
         # get adversarial attack using fgsm_model
-        adv_x = self.fgsm_model([x, y])
+        try:
+            adv_x = self.fgsm_model([x, y] + list(states[2:]))
+        except KeyError:
+            import pdb
+
+            pdb.set_trace()
         # clip projected sample hard coding for now
-        adv_x = K.maximum(adv_x, x_init - 0.31)
+        adv_x = K.maximum(adv_x, x_init - 0.31)  # why ????
         adv_x = K.minimum(adv_x, x_init + 0.31)
-        return adv_x, [adv_x, x_init]
+
+        if len(states) > 2:
+            adv_x = K.maximum(adv_x, lower)
+            adv_x = K.minimum(adv_x, upper)
+            return adv_x, [adv_x, x_init, lower, upper]
+
+        return adv_x, [adv_x, x_init] + list(states[2:])
 
 
 class ProjectedGradientDescent(AdvLayer):
@@ -96,10 +113,14 @@ class ProjectedGradientDescent(AdvLayer):
     def get_config(self):
         config = super().get_config()
         inner_layer_config = keras.saving.serialize_keras_object(self.inner_layer)
-        config["gpd_cell"] = inner_layer_config
+        config["pgd_cell"] = inner_layer_config
         config["n_iter"] = self.n_iter
 
         return config
+
+    def build(self, input_shape):
+        # build fgsm model
+        self.built = True
 
     def set_upper(self, upper):
         self.fgsm_layer.set_upper(upper)
@@ -117,8 +138,11 @@ class ProjectedGradientDescent(AdvLayer):
         self.fgsm_layer.set_radius(radius)
         self.radius = self.fgsm_layer.radius
 
+    def compute_output_shape(self, input_shape):
+        return input_shape[0]
+
     def call(self, inputs, training=None, mask=None):
-        x, y = inputs
+        x, y = inputs[:2]
         z = keras.ops.repeat(keras.ops.expand_dims(y, 1), self.n_iter, 1)
 
         if self.random_init:
@@ -137,7 +161,8 @@ class ProjectedGradientDescent(AdvLayer):
             x_0 = K.minimum(x_0, x + 0.3)
         else:
             x_0 = x
-        return self.inner_layer(z, initial_state=[x_0, x])
+
+        return self.inner_layer(z, initial_state=[x_0, x] + inputs[2:])
 
 
 def get_pgd_model(
@@ -172,6 +197,20 @@ def get_pgd_model(
         pgd_model = get_pgd_model(model, loss='categorical_crossentropy', n_iter=20)
         pgd_model.compile(optimizer='adam', loss='categorical_crossentropy')
     """
+    n_iter = 10
+    if "n_iter" in kwargs:
+        n_iter = kwargs["n_iter"]
+
+    extra_inputs = []
+    if "extra_inputs" in kwargs:
+        extra_inputs = kwargs["extra_inputs"]
+
+    kwargs.pop("extra_inputs")  # remove extra_inputs so it is not parsed by fgsm
+
+    bounds = []
+    if "upper" in kwargs:
+        kwargs["extra_inputs"] = [kwargs["lower"], kwargs["upper"]]
+        bounds = kwargs["extra_inputs"]
 
     fgsm_model = get_fgsm_model(
         model,
@@ -180,17 +219,20 @@ def get_pgd_model(
         mapping_keras2backward_losses=mapping_keras2backward_losses,
         **kwargs,
     )
-    n_iter = 10
-    if "n_iter" in kwargs:
-        n_iter = kwargs["n_iter"]
-    pgd_layer = ProjectedGradientDescent(n_iter=n_iter, fgsm_model=fgsm_model)
     inputs: List[Tensor] = to_list(fgsm_model.inputs)
+    if len(kwargs["extra_inputs"]):
+        # remove upper and lower from inputs
+        inputs = inputs[:-2]
 
-    output_adv = pgd_layer(inputs)
+    pgd_layer = ProjectedGradientDescent(n_iter=n_iter, fgsm_model=fgsm_model)
+
+    output_adv = pgd_layer(inputs + bounds)
+
     # filter with the most adversarial example
     input_shape_wo_batch = list(inputs[0].shape[1:])
     pred_adv = K.reshape(output_adv, [-1] + input_shape_wo_batch)
     y_adv = model(pred_adv)
+
     n_class = y_adv.shape[-1]
     y_gt = K.repeat(K.expand_dims(inputs[1], 1), n_iter, 1)  # (batch, n_iter, n_class)
     y_gt = K.reshape(y_gt, [-1, n_class])
@@ -203,7 +245,7 @@ def get_pgd_model(
     output = K.sum(mask * output_adv, 1)
 
     pgd_model = AdvModel(
-        inputs=inputs,
+        inputs=inputs + extra_inputs,
         outputs=output,
         layer_adv=pgd_layer,
         backward_model=fgsm_model.backward_model,
