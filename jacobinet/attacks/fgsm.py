@@ -2,7 +2,7 @@ from typing import Dict, List, Union
 
 import keras
 import numpy as np
-from jacobinet.attacks import AdvLayer, AdvModel, get_adv_model_base
+from jacobinet.attacks.base_attacks import AdvLayer, AdvModel, get_adv_model_base
 from jacobinet.layers.layer import BackwardLayer
 from jacobinet.losses import BackwardLoss
 from jacobinet.models import BackwardModel
@@ -39,6 +39,8 @@ class FastGradientSign(AdvLayer):
     def __init__(
         self,
         epsilon=0.0,
+        lower = -np.inf,
+        upper = np.inf,
         *args,
         **kwargs,
     ):
@@ -48,18 +50,25 @@ class FastGradientSign(AdvLayer):
     # @keras.ops.custom_gradient
     def call(self, inputs, training=None, mask=None):
         # inputs = [x and \delta f(x)]
-        x, grad_x = inputs
-
+        x, grad_x = inputs[:2]
+        
+        """
         def grad(*args, upstream=None):
             import pdb
 
             pdb.set_trace()
             return keras.ops.tanh(upstream)
+        """
 
         # project given lp norm
         adv_x = x + self.epsilon * keras.ops.sign(-grad_x)
         adv_x = self.project_lp_ball(adv_x)
-        return keras.ops.clip(adv_x, self.lower, self.upper)
+        #import pdb; pdb.set_trace()
+        if len(inputs)>2:
+            lower, upper = inputs[:2]
+            return keras.ops.minimum(keras.ops.maximum(adv_x, lower), upper)
+        else:
+            return keras.ops.clip(adv_x, self.lower, self.upper)
 
     # saving
     def get_config(self):
@@ -132,10 +141,11 @@ def get_fgsm_model(
     upper = np.inf
     p = -1
     radius = np.inf
-    if "lower" in kwargs:
+    bounds = []
+    if "lower" in kwargs and "upper" in kwargs:
         lower = kwargs["lower"]
-    if "upper" in kwargs:
         upper = kwargs["upper"]
+        bounds=[lower, upper]
     if "p" in kwargs:
         p = kwargs["p"]
     if "radius" in kwargs:
@@ -145,24 +155,26 @@ def get_fgsm_model(
     if "epsilon" in kwargs:
         fgsm_layer = FastGradientSign(
             epsilon=kwargs["epsilon"],
-            lower=lower,
-            upper=upper,
             p=p,
             radius=radius,
         )
     else:
         fgsm_layer = FastGradientSign(
             epsilon=kwargs["epsilon"],
-            lower=lower,
-            upper=upper,
             p=p,
             radius=radius,
         )
+    
+    output = fgsm_layer(inputs[:-1] + adv_pred+bounds)
 
-    output = fgsm_layer(inputs[:-1] + adv_pred)
-
+    
+    extra_inputs=[]
+    if 'extra_inputs' in kwargs:
+        extra_inputs = kwargs['extra_inputs']
+    
+    
     fgsm_model = AdvModel(
-        inputs=inputs,
+        inputs=inputs+extra_inputs,
         outputs=output,
         layer_adv=fgsm_layer,
         backward_model=base_adv_model,

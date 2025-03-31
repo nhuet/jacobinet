@@ -1,6 +1,6 @@
 from typing import Callable, Union
 
-from jacobinet.attacks import AdvModel
+from jacobinet.attacks.base_attacks import AdvModel
 from jacobinet.attacks.fgsm import get_fgsm_model
 from jacobinet.attacks.pgd import get_pgd_model
 from keras.layers import Layer  # type:ignore
