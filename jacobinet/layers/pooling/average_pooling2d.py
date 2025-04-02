@@ -186,7 +186,7 @@ class BackwardAveragePooling2D(BackwardLinearLayer):
             trainable=False,
         )
         kernel_ = np.ones(pool_size + [1, 1], dtype="float32") / np.prod(pool_size)
-        layer_t.kernel = keras.Variable(kernel_)
+        layer_t.kernel = keras.Variable(kernel_.astype("float32"))
         layer_t.built = True
 
         if self.layer.data_format == "channels_last":

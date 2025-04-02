@@ -38,7 +38,7 @@ def _test_backward_AveragePooling2D(input_shape, pool_size, strides, padding):
         data_format="channels_first",
     )
     model_layer = Sequential([layer])
-    _ = model_layer(np.ones(input_shape)[None])
+    _ = model_layer(np.ones(input_shape, dtype="float32")[None])
 
     # equivalent DepthwiseConv2D
     pool_size = list(layer.pool_size)
@@ -51,7 +51,7 @@ def _test_backward_AveragePooling2D(input_shape, pool_size, strides, padding):
         use_bias=False,
         trainable=False,
     )
-    kernel_ = np.ones(pool_size + [1, 1]) / np.prod(pool_size)
+    kernel_ = np.ones(pool_size + [1, 1], dtype="float32") / np.prod(pool_size)
     # layer_conv.weights = [keras.Variable(kernel_)]
     layer_conv(layer.input)
     layer_conv.built = True
@@ -59,7 +59,9 @@ def _test_backward_AveragePooling2D(input_shape, pool_size, strides, padding):
 
     # check equality
     if padding == "valid":
-        random_input = np.reshape(np.random.rand(np.prod(input_shape) * 5), [5] + list(input_shape))
+        random_input = np.reshape(
+            np.random.rand(np.prod(input_shape) * 5), [5] + list(input_shape)
+        ).astype(dtype="float32")
         output_pooling = layer(random_input)
         output_conv = layer_conv(random_input)
         np.testing.assert_almost_equal(
@@ -81,7 +83,7 @@ def _test_backward_AveragePooling2D(input_shape, pool_size, strides, padding):
         data_format="channels_last",
     )
     model_layer = Sequential([layer])
-    _ = model_layer(np.ones(input_shape)[None])
+    _ = model_layer(np.ones(input_shape, dtype="float32")[None])
     backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
@@ -120,7 +122,7 @@ def _test_backward_AveragePooling1D(input_shape, pool_size, strides, padding):
         data_format="channels_first",
     )
     model_layer = Sequential([layer])
-    _ = model_layer(np.ones(input_shape)[None])
+    _ = model_layer(np.ones(input_shape, dtype="float32")[None])
 
     # equivalent DepthwiseConv1D
     pool_size = list(layer.pool_size)
@@ -134,7 +136,7 @@ def _test_backward_AveragePooling1D(input_shape, pool_size, strides, padding):
         trainable=False,
     )
 
-    kernel_ = np.ones(pool_size + [1, 1]) / np.prod(pool_size)
+    kernel_ = np.ones(pool_size + [1, 1], dtype="float32") / np.prod(pool_size)
     # layer_conv.weights = [keras.Variable(kernel_)]
     layer_conv(layer.input)
     layer_conv.built = True
@@ -142,7 +144,10 @@ def _test_backward_AveragePooling1D(input_shape, pool_size, strides, padding):
 
     # check equality
     if padding == "valid":
-        random_input = np.reshape(np.random.rand(np.prod(input_shape) * 5), [5] + list(input_shape))
+        random_input = np.asarray(
+            np.reshape(np.random.rand(np.prod(input_shape) * 5), [5] + list(input_shape)),
+            dtype="float32",
+        )
         output_pooling = layer(random_input)
         output_conv = layer_conv(random_input)
         np.testing.assert_almost_equal(
@@ -163,7 +168,7 @@ def _test_backward_AveragePooling1D(input_shape, pool_size, strides, padding):
         data_format="channels_last",
     )
     model_layer = Sequential([layer])
-    _ = model_layer(np.ones(input_shape)[None])
+    _ = model_layer(np.ones(input_shape, dtype="float32")[None])
     backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
@@ -202,7 +207,7 @@ def _test_backward_AveragePooling3D(input_shape, pool_size, strides, padding):
         data_format="channels_first",
     )
     model_layer = Sequential([layer])
-    _ = model_layer(np.ones(input_shape)[None])
+    _ = model_layer(np.ones(input_shape, dtype="float32")[None])
 
     backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
@@ -218,7 +223,7 @@ def _test_backward_AveragePooling3D(input_shape, pool_size, strides, padding):
         data_format="channels_last",
     )
     model_layer = Sequential([layer])
-    _ = model_layer(np.ones(input_shape)[None])
+    _ = model_layer(np.ones(input_shape, dtype="float32")[None])
     backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
@@ -259,7 +264,7 @@ def _test_backward_GlobalAveragePooling2D(input_shape, keepdims):
     # data_format == 'channels_first'
     layer = GlobalAveragePooling2D(keepdims=keepdims, data_format="channels_first")
     model_layer = Sequential([layer])
-    _ = model_layer(np.ones(input_shape)[None])
+    _ = model_layer(np.ones(input_shape, dtype="float32")[None])
 
     backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
@@ -271,7 +276,7 @@ def _test_backward_GlobalAveragePooling2D(input_shape, keepdims):
     input_shape = input_shape[::-1]
     layer = GlobalAveragePooling2D(keepdims=keepdims, data_format="channels_last")
     model_layer = Sequential([layer])
-    _ = model_layer(np.ones(input_shape)[None])
+    _ = model_layer(np.ones(input_shape, dtype="float32")[None])
     backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
@@ -294,7 +299,7 @@ def _test_backward_GlobalAveragePooling1D(input_shape, keepdims):
     # data_format == 'channels_first'
     layer = GlobalAveragePooling1D(keepdims=keepdims, data_format="channels_first")
     model_layer = Sequential([layer])
-    _ = model_layer(np.ones(input_shape)[None])
+    _ = model_layer(np.ones(input_shape, dtype="float32")[None])
 
     backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
@@ -306,7 +311,7 @@ def _test_backward_GlobalAveragePooling1D(input_shape, keepdims):
     input_shape = input_shape[::-1]
     layer = GlobalAveragePooling1D(keepdims=keepdims, data_format="channels_last")
     model_layer = Sequential([layer])
-    _ = model_layer(np.ones(input_shape)[None])
+    _ = model_layer(np.ones(input_shape, dtype="float32")[None])
     backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
@@ -326,7 +331,7 @@ def test_backward_GlobalAveragePooling1D():
 ###### MaxPooling2D ######
 def _test_backward_MaxPooling2D(input_shape, pool_size, strides, padding):
     # data_format == 'channels_last'
-    input_dim = np.prod(input_shape)
+    input_dim = int(np.prod(input_shape, dtype="float32"))
     layer = MaxPooling2D(
         pool_size=pool_size,
         strides=strides,
@@ -341,7 +346,7 @@ def _test_backward_MaxPooling2D(input_shape, pool_size, strides, padding):
     ]
     model = Sequential(layers)
 
-    _ = model(torch.ones((1, input_dim)))
+    _ = model(np.ones((1, input_dim), dtype="float32"))
     backward_model = clone_to_backward(model)
     # model is not linear
     _ = backward_model([torch.ones((1, input_dim)), torch.ones((1, 1))])
@@ -377,7 +382,7 @@ def _test_backward_GlobalMaxPooling2D(input_shape, keepdims):
     layer = GlobalMaxPooling2D(keepdims=keepdims, data_format="channels_first")
 
     # build a model
-    input_dim = np.prod(input_shape)
+    input_dim = int(np.prod(input_shape, dtype="float32"))
     layers = [Reshape(input_shape), layer, Reshape((-1,)), Dense(1)]
     input_ = Input((input_dim,))
     output = None
@@ -387,7 +392,7 @@ def _test_backward_GlobalMaxPooling2D(input_shape, keepdims):
         else:
             output = layer(output)
     model = Model(input_, output)
-    _ = model(torch.ones((1, input_dim)))
+    _ = model(np.ones((1, input_dim), dtype="float32"))
     backward_model = clone_to_backward(model)
     # model is not linear
     _ = backward_model([torch.ones((1, input_dim)), torch.ones((1, 1))])
