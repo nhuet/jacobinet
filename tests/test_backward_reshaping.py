@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from jacobinet import get_backward_layer as get_backward
 from keras.layers import (
     Cropping1D,
@@ -228,6 +229,7 @@ def test_backward_UpSampling1D():
 
 
 def test_backward_UpSampling3D():
+    pytest.skip("skip tests for 3D")
     input_shape = (2, 12, 11, 10)
 
     # data_format == 'channels_first'

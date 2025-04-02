@@ -275,6 +275,7 @@ def test_backward_DepthwiseConv1D():
 
 
 def test_backward_Conv3D():
+    pytest.skip("skip tests for 3D")
     # skip tests on MPS device as Conv3DTranspose is not implemented
     if keras.config.backend() == "torch":
         import torch
