@@ -219,7 +219,7 @@ def test_model_multiD_with_gradient_set():
         Reshape((-1,)),
         Dense(1),
     ]
-    gradient = keras.Variable(np.ones((1, 1), dtype='float32'))
+    gradient = keras.Variable(np.ones((1, 1), dtype="float32"))
     input_ = Input((input_dim,))
     output = None
     for layer in layers:
