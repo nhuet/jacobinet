@@ -48,7 +48,7 @@ class BackwardGlobalMaxPooling2D(BackwardNonLinearLayer):
             )  # (batch, C, W_in*H_in)
         else:
             axis = 1
-            C, W, H = self.input_dim_wo_batch
+            W, H, C = self.input_dim_wo_batch
             layer_input_ = K.reshape(layer_input, [-1, W * H, C])
             backward_max = K.reshape(max_prime(layer_input_, axis=axis), [-1, W, H, C])
 
