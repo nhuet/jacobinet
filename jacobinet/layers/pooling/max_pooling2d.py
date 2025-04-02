@@ -11,9 +11,10 @@ from jacobinet.layers.reshaping import BackwardReshape
 from jacobinet.layers.utils import pooling_layer2D, reshape_to_batch
 from keras.layers import Input, Layer, MaxPooling2D, Reshape  # type: ignore
 from keras.models import Model, Sequential  # type: ignore
+from keras_custom.layers import ConstantPadding2D  # type:ignore
 
 from .utils_conv import get_conv_op
-from .utils_max import ConstantPadding2D, get_pad_width
+from .utils_max import get_pad_width
 
 
 @keras.saving.register_keras_serializable()
@@ -90,10 +91,9 @@ class BackwardMaxPooling2D(BackwardNonLinearLayer):
 
         backward_conv2d = BackwardDepthwiseConv2D(layer=self.conv_op)
 
+        pad_layers = []
         # to do
-        if self.layer.padding == "valid":
-            self.backward_conv2d = backward_conv2d
-        else:
+        if self.layer.padding != "valid":
             # do cropping !!!
             # input_shape_wo_batch = list(layer.input.shape[1:])
             input_shape_wo_batch = self.input_dim_wo_batch
@@ -110,12 +110,10 @@ class BackwardMaxPooling2D(BackwardNonLinearLayer):
                 h_pad = input_shape_wo_batch[1] - input_shape_wo_batch_wo_pad[1]
 
             pad_layers = pooling_layer2D(w_pad, h_pad, layer.data_format)
-            if len(pad_layers):
-                self.backward_conv2d = Sequential([backward_conv2d] + pad_layers)
-                # init
-                self.backward_conv2d(Input(self.output_dim_wo_batch))
 
-        self.linear_block_backward = Sequential([self.backward_reshape_op, backward_conv2d])
+        self.linear_block_backward = Sequential(
+            [self.backward_reshape_op, backward_conv2d] + pad_layers
+        )
 
     def call(self, inputs, training=None, mask=None):
         layer_input = None

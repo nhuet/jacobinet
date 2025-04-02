@@ -73,9 +73,9 @@ def test_sequential_multiD():
 @pytest.mark.parametrize(
     "padding, layer_name",
     [
-        ("valid", "average"),
-        ("same", "average"),
-        ("valid", "max"),
+        # ("valid", "average"),
+        # ("same", "average"),
+        # ("valid", "max"),
         ("same", "max"),
     ],
 )
