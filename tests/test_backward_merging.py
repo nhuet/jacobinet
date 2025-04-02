@@ -24,13 +24,17 @@ from keras.models import Model, Sequential
 from .conftest import compute_backward_model, compute_output, serialize_model
 
 
-def _test_model_multiD_multi_output(merge_layer, n_inputs):
+def _test_model_multiD_multi_output(merge_layer, n_inputs, data_format):
     input_dim = 36
     input_ = Input((input_dim,))
     output_bones = []
+    if data_format == "channels_first":
+        target_shape = (1, 6, 6)
+    else:
+        target_shape = (6, 6, 1)
     for _ in range(n_inputs):
         layers_bone = [
-            Reshape((1, 6, 6)),
+            Reshape(target_shape),
             Conv2D(2, (3, 3)),
             ReLU(),
             Reshape((-1,)),
@@ -56,13 +60,17 @@ def _test_model_multiD_multi_output(merge_layer, n_inputs):
     serialize_model([input_dim, 4], backward_model)
 
 
-def _test_model_multiD_multi_output_concat(merge_layer, n_inputs, axis):
+def _test_model_multiD_multi_output_concat(merge_layer, n_inputs, axis, data_format):
     input_dim = 36
     input_ = Input((input_dim,))
     output_bones = []
+    if data_format == "channels_first":
+        target_shape = (1, 6, 6)
+    else:
+        target_shape = (6, 6, 1)
     for _ in range(n_inputs):
         layers_bone = [
-            Reshape((1, 6, 6)),
+            Reshape(target_shape),
             Conv2D(2, (3, 3)),
             ReLU(),
             Reshape((-1,)),
@@ -93,69 +101,76 @@ def _test_model_multiD_multi_output_concat(merge_layer, n_inputs, axis):
 
 
 def test_backward_add():
-    keras.config.set_image_data_format("channels_first")
+    data_format = keras.config.image_data_format()
+    keras.config.set_image_data_format(data_format)
     merge_layer = Add()
     n_inputs = 2
-    _test_model_multiD_multi_output(merge_layer, n_inputs)
+    _test_model_multiD_multi_output(merge_layer, n_inputs, data_format=data_format)
 
     merge_layer = Add()
     n_inputs = 5
-    _test_model_multiD_multi_output(merge_layer, n_inputs)
+    _test_model_multiD_multi_output(merge_layer, n_inputs, data_format=data_format)
 
 
 def test_backward_subtract():
-    keras.config.set_image_data_format("channels_first")
+    data_format = keras.config.image_data_format()
+    keras.config.set_image_data_format(data_format)
     merge_layer = Subtract()
     n_inputs = 2
-    _test_model_multiD_multi_output(merge_layer, n_inputs)
+    _test_model_multiD_multi_output(merge_layer, n_inputs, data_format=data_format)
 
 
 def test_backward_average():
-    keras.config.set_image_data_format("channels_first")
+    data_format = keras.config.image_data_format()
+    keras.config.set_image_data_format(data_format)
     merge_layer = Average()
     n_inputs = 2
-    _test_model_multiD_multi_output(merge_layer, n_inputs)
+    _test_model_multiD_multi_output(merge_layer, n_inputs, data_format=data_format)
 
     merge_layer = Average()
     n_inputs = 5
-    _test_model_multiD_multi_output(merge_layer, n_inputs)
+    _test_model_multiD_multi_output(merge_layer, n_inputs, data_format=data_format)
 
 
 def _test_backward_maximum():
+    data_format = keras.config.image_data_format()
     merge_layer = Maximum()
     n_inputs = 2
-    _test_model_multiD_multi_output(merge_layer, n_inputs)
+    _test_model_multiD_multi_output(merge_layer, n_inputs, data_format=data_format)
 
     merge_layer = Maximum()
     n_inputs = 5
-    _test_model_multiD_multi_output(merge_layer, n_inputs)
+    _test_model_multiD_multi_output(merge_layer, n_inputs, data_format=data_format)
 
 
-def test_backward_minimum():
-    keras.config.set_image_data_format("channels_first")
+@pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
+def test_backward_minimum(data_format):
+    keras.config.set_image_data_format(data_format)
     merge_layer = Minimum()
     n_inputs = 2
-    _test_model_multiD_multi_output(merge_layer, n_inputs)
+    _test_model_multiD_multi_output(merge_layer, n_inputs, data_format=data_format)
 
     merge_layer = Minimum()
     n_inputs = 5
-    _test_model_multiD_multi_output(merge_layer, n_inputs)
+    _test_model_multiD_multi_output(merge_layer, n_inputs, data_format=data_format)
 
 
-def test_backward_multiply():
-    keras.config.set_image_data_format("channels_first")
+@pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
+def test_backward_multiply(data_format):
+    keras.config.set_image_data_format(data_format)
     merge_layer = Multiply()
     n_inputs = 2
-    _test_model_multiD_multi_output(merge_layer, n_inputs)
+    _test_model_multiD_multi_output(merge_layer, n_inputs, data_format=data_format)
 
 
 @pytest.mark.parametrize("axis", [-1, 1])
 def test_backward_concatenate(axis):
     keras.config.set_image_data_format("channels_first")
+    data_format = keras.config.image_data_format()
     merge_layer = Concatenate(axis=axis)
     n_inputs = 2
-    _test_model_multiD_multi_output_concat(merge_layer, n_inputs, axis)
+    _test_model_multiD_multi_output_concat(merge_layer, n_inputs, axis, data_format=data_format)
 
     merge_layer = Concatenate(axis=axis)
     n_inputs = 5
-    _test_model_multiD_multi_output_concat(merge_layer, n_inputs, axis)
+    _test_model_multiD_multi_output_concat(merge_layer, n_inputs, axis, data_format=data_format)

@@ -35,7 +35,6 @@ def _test_backward_AveragePooling2D(input_shape, pool_size, strides, padding):
         pool_size=pool_size,
         strides=strides,
         padding=padding,
-        data_format="channels_first",
     )
     model_layer = Sequential([layer])
     _ = model_layer(np.ones(input_shape, dtype="float32")[None])
@@ -73,41 +72,36 @@ def _test_backward_AveragePooling2D(input_shape, pool_size, strides, padding):
     # use_bias should have an impact
     serialize(layer, backward_layer)
 
-    # data_format == 'channels_last'
 
-    input_shape = input_shape[::-1]
-    layer = AveragePooling2D(
-        pool_size=pool_size,
-        strides=strides,
-        padding=padding,
-        data_format="channels_last",
-    )
-    model_layer = Sequential([layer])
-    _ = model_layer(np.ones(input_shape, dtype="float32")[None])
-    backward_layer = get_backward(layer)
-    linear_mapping(layer, backward_layer)
-    # use_bias should have an impact
-    serialize(layer, backward_layer)
-
-
-def test_backward_AveragePooling2D():
+@pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
+def test_backward_AveragePooling2D(data_format):
+    keras.config.set_image_data_format(data_format)
     pool_size = (2, 2)
     strides = (1, 1)
     padding = "valid"
-    input_shape = (1, 32, 32)
+    if data_format == "channels_first":
+        input_shape = (1, 32, 32)
+    else:
+        input_shape = (32, 32, 1)
     _test_backward_AveragePooling2D(input_shape, pool_size, strides, padding)
 
     pool_size = (3, 3)
     strides = (2, 1)
     padding = "valid"
-    input_shape = (1, 31, 32)
+    if data_format == "channels_first":
+        input_shape = (1, 31, 32)
+    else:
+        input_shape = (31, 32, 1)
     _test_backward_AveragePooling2D(input_shape, pool_size, strides, padding)
 
     # not working: same NotImplementedError
     pool_size = (3, 3)
     strides = (2, 2)
     padding = "valid"
-    input_shape = (1, 31, 32)
+    if data_format == "channels_first":
+        input_shape = (1, 31, 32)
+    else:
+        input_shape = (31, 32, 1)
     _test_backward_AveragePooling2D(input_shape, pool_size, strides, padding)
 
 
@@ -119,7 +113,6 @@ def _test_backward_AveragePooling1D(input_shape, pool_size, strides, padding):
         pool_size=pool_size,
         strides=strides,
         padding=padding,
-        data_format="channels_first",
     )
     model_layer = Sequential([layer])
     _ = model_layer(np.ones(input_shape, dtype="float32")[None])
@@ -159,40 +152,36 @@ def _test_backward_AveragePooling1D(input_shape, pool_size, strides, padding):
     # use_bias should have an impact
     serialize(layer, backward_layer)
 
-    # data_format == 'channels_last'
-    input_shape = input_shape[::-1]
-    layer = AveragePooling1D(
-        pool_size=pool_size,
-        strides=strides,
-        padding=padding,
-        data_format="channels_last",
-    )
-    model_layer = Sequential([layer])
-    _ = model_layer(np.ones(input_shape, dtype="float32")[None])
-    backward_layer = get_backward(layer)
-    linear_mapping(layer, backward_layer)
-    # use_bias should have an impact
-    serialize(layer, backward_layer)
 
-
-def test_backward_AveragePooling1D():
+@pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
+def test_backward_AveragePooling1D(data_format):
+    keras.config.set_image_data_format(data_format)
     pool_size = (2,)
     strides = (1,)
     padding = "valid"
-    input_shape = (1, 32)
+    if data_format == "channels_first":
+        input_shape = (1, 32)
+    else:
+        input_shape = (32, 1)
     _test_backward_AveragePooling1D(input_shape, pool_size, strides, padding)
 
     pool_size = (3,)
     strides = (2,)
     padding = "valid"
-    input_shape = (1, 31)
+    if data_format == "channels_first":
+        input_shape = (1, 31)
+    else:
+        input_shape = (31, 1)
     _test_backward_AveragePooling1D(input_shape, pool_size, strides, padding)
 
     # not working: same NotImplementedError
     pool_size = (3,)
     strides = (2,)
     padding = "valid"
-    input_shape = (1, 31)
+    if data_format == "channels_first":
+        input_shape = (1, 31)
+    else:
+        input_shape = (31, 1)
     _test_backward_AveragePooling1D(input_shape, pool_size, strides, padding)
 
 
@@ -204,26 +193,10 @@ def _test_backward_AveragePooling3D(input_shape, pool_size, strides, padding):
         pool_size=pool_size,
         strides=strides,
         padding=padding,
-        data_format="channels_first",
     )
     model_layer = Sequential([layer])
     _ = model_layer(np.ones(input_shape, dtype="float32")[None])
 
-    backward_layer = get_backward(layer)
-    linear_mapping(layer, backward_layer)
-    # use_bias should have an impact
-    serialize(layer, backward_layer)
-
-    # data_format == 'channels_last'
-    input_shape = input_shape[::-1]
-    layer = AveragePooling3D(
-        pool_size=pool_size,
-        strides=strides,
-        padding=padding,
-        data_format="channels_last",
-    )
-    model_layer = Sequential([layer])
-    _ = model_layer(np.ones(input_shape, dtype="float32")[None])
     backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
     # use_bias should have an impact
@@ -263,7 +236,7 @@ def test_backward_AveragePooling3D():
 # pool_size, strides=None, padding="valid", data_format=None
 def _test_backward_GlobalAveragePooling2D(input_shape, keepdims):
     # data_format == 'channels_first'
-    layer = GlobalAveragePooling2D(keepdims=keepdims, data_format="channels_first")
+    layer = GlobalAveragePooling2D(keepdims=keepdims)
     model_layer = Sequential([layer])
     _ = model_layer(np.ones(input_shape, dtype="float32")[None])
 
@@ -272,25 +245,21 @@ def _test_backward_GlobalAveragePooling2D(input_shape, keepdims):
     # use_bias should have an impact
     serialize(layer, backward_layer)
 
-    # data_format == 'channels_last'
 
-    input_shape = input_shape[::-1]
-    layer = GlobalAveragePooling2D(keepdims=keepdims, data_format="channels_last")
-    model_layer = Sequential([layer])
-    _ = model_layer(np.ones(input_shape, dtype="float32")[None])
-    backward_layer = get_backward(layer)
-    linear_mapping(layer, backward_layer)
-    # use_bias should have an impact
-    serialize(layer, backward_layer)
-
-
-def test_backward_GlobalAveragePooling2D():
-    keras.config.set_image_data_format("channels_first")
-    input_shape = (3, 32, 32)
+@pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
+def test_backward_GlobalAveragePooling2D(data_format):
+    keras.config.set_image_data_format(data_format)
+    if data_format == "channels_first":
+        input_shape = (3, 32, 32)
+    else:
+        input_shape = (32, 32, 3)
     _test_backward_GlobalAveragePooling2D(input_shape, keepdims=True)
     _test_backward_GlobalAveragePooling2D(input_shape, keepdims=False)
 
-    input_shape = (2, 31, 32)
+    if data_format == "channels_first":
+        input_shape = (2, 31, 32)
+    else:
+        input_shape = (31, 32, 2)
     _test_backward_GlobalAveragePooling2D(input_shape, keepdims=True)
     _test_backward_GlobalAveragePooling2D(input_shape, keepdims=False)
 
@@ -299,7 +268,7 @@ def test_backward_GlobalAveragePooling2D():
 # pool_size, strides=None, padding="valid", data_format=None
 def _test_backward_GlobalAveragePooling1D(input_shape, keepdims):
     # data_format == 'channels_first'
-    layer = GlobalAveragePooling1D(keepdims=keepdims, data_format="channels_first")
+    layer = GlobalAveragePooling1D(keepdims=keepdims)
     model_layer = Sequential([layer])
     _ = model_layer(np.ones(input_shape, dtype="float32")[None])
 
@@ -308,25 +277,21 @@ def _test_backward_GlobalAveragePooling1D(input_shape, keepdims):
     # use_bias should have an impact
     serialize(layer, backward_layer)
 
-    # data_format == 'channels_last'
 
-    input_shape = input_shape[::-1]
-    layer = GlobalAveragePooling1D(keepdims=keepdims, data_format="channels_last")
-    model_layer = Sequential([layer])
-    _ = model_layer(np.ones(input_shape, dtype="float32")[None])
-    backward_layer = get_backward(layer)
-    linear_mapping(layer, backward_layer)
-    # use_bias should have an impact
-    serialize(layer, backward_layer)
-
-
-def test_backward_GlobalAveragePooling1D():
-    keras.config.set_image_data_format("channels_first")
-    input_shape = (3, 32)
+@pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
+def test_backward_GlobalAveragePooling1D(data_format):
+    keras.config.set_image_data_format(data_format)
+    if data_format == "channels_first":
+        input_shape = (3, 32)
+    else:
+        input_shape = (32, 3)
     _test_backward_GlobalAveragePooling1D(input_shape, keepdims=True)
     _test_backward_GlobalAveragePooling1D(input_shape, keepdims=False)
 
-    input_shape = (2, 31)
+    if data_format == "channels_first":
+        input_shape = (2, 31)
+    else:
+        input_shape = (31, 2)
     _test_backward_GlobalAveragePooling1D(input_shape, keepdims=True)
     _test_backward_GlobalAveragePooling1D(input_shape, keepdims=False)
 
@@ -339,7 +304,6 @@ def _test_backward_MaxPooling2D(input_shape, pool_size, strides, padding):
         pool_size=pool_size,
         strides=strides,
         padding=padding,
-        data_format="channels_first",
     )
     layers = [
         Reshape(input_shape),
@@ -357,25 +321,35 @@ def _test_backward_MaxPooling2D(input_shape, pool_size, strides, padding):
     serialize_model([input_dim, 1], backward_model)
 
 
-def test_backward_MaxPooling2D():
-    keras.config.set_image_data_format("channels_first")
+@pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
+def test_backward_MaxPooling2D(data_format):
+    keras.config.set_image_data_format(data_format)
     pool_size = (2, 2)
     strides = (1, 1)
     padding = "valid"
-    input_shape = (1, 32, 32)
+    if data_format == "channels_first":
+        input_shape = (1, 32, 32)
+    else:
+        input_shape = (32, 32, 1)
     _test_backward_MaxPooling2D(input_shape, pool_size, strides, padding)
 
     pool_size = (3, 3)
     strides = (2, 1)
     padding = "valid"
-    input_shape = (1, 31, 32)
+    if data_format == "channels_first":
+        input_shape = (1, 31, 32)
+    else:
+        input_shape = (31, 32, 1)
     _test_backward_MaxPooling2D(input_shape, pool_size, strides, padding)
 
     # not working: same NotImplementedError
     pool_size = (3, 3)
     strides = (2, 2)
     padding = "valid"
-    input_shape = (1, 31, 32)
+    if data_format == "channels_first":
+        input_shape = (1, 31, 32)
+    else:
+        input_shape = (31, 32, 1)
     _test_backward_MaxPooling2D(input_shape, pool_size, strides, padding)
 
 
@@ -383,7 +357,7 @@ def test_backward_MaxPooling2D():
 # pool_size, strides=None, padding="valid", data_format=None
 def _test_backward_GlobalMaxPooling2D(input_shape, keepdims):
     # data_format == 'channels_first'
-    layer = GlobalMaxPooling2D(keepdims=keepdims, data_format="channels_first")
+    layer = GlobalMaxPooling2D(keepdims=keepdims)
 
     # build a model
     input_dim = int(np.prod(input_shape, dtype="float32"))
@@ -404,12 +378,18 @@ def _test_backward_GlobalMaxPooling2D(input_shape, keepdims):
     serialize_model([input_dim, 1], backward_model)
 
 
-def test_backward_GlobalMaxPooling2D():
-    keras.config.set_image_data_format("channels_first")
-    input_shape = (1, 5, 5)
+@pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
+def test_backward_GlobalMaxPooling2D(data_format):
+    keras.config.set_image_data_format(data_format)
+    if data_format == "channels_first":
+        input_shape = (1, 5, 5)
+    else:
+        input_shape = (5, 5, 1)
     _test_backward_GlobalMaxPooling2D(input_shape, keepdims=True)
     _test_backward_GlobalMaxPooling2D(input_shape, keepdims=False)
-
-    input_shape = (2, 31, 32)
+    if data_format == "channels_first":
+        input_shape = (2, 31, 32)
+    else:
+        input_shape = (31, 32, 2)
     _test_backward_GlobalMaxPooling2D(input_shape, keepdims=True)
     _test_backward_GlobalMaxPooling2D(input_shape, keepdims=False)

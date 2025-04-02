@@ -1,14 +1,16 @@
 import keras
 import numpy as np
+import pytest
 from jacobinet import get_backward_layer as get_backward
-from keras.layers import BatchNormalization
-from keras.models import Sequential
+from keras.layers import BatchNormalization  # type:ignore
+from keras.models import Sequential  # type:ignore
 
 from .conftest import is_invertible, linear_mapping, serialize
 
 
-def test_backward_BatchNormalization():
-    keras.config.set_image_data_format("channels_first")
+@pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
+def test_backward_BatchNormalization(data_format):
+    keras.config.set_image_data_format(data_format)
     layer = BatchNormalization()
     layer.trainable = False
 

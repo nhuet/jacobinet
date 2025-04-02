@@ -105,10 +105,15 @@ def test_sequential_multiD_pooling(padding, layer_name):
 
 
 def _test_sequential_multiD_channel_last():
+    data_format = keras.config.get_image_data_format()
     input_dim = 72
+    if data_format == "channels_first":
+        target_shape = (2, 6, 6)
+    else:
+        target_shape = (6, 6, 2)
     layers = [
-        Reshape((6, 6, 2)),
-        DepthwiseConv2D(2, (3, 3), data_format="channels_last"),
+        Reshape(target_shape),
+        DepthwiseConv2D(2, (3, 3)),
         ReLU(),
         Reshape((-1,)),
         Dense(1),
@@ -165,11 +170,16 @@ def test_model_nonlinear():
     serialize_model([input_dim, 1], backward_model)
 
 
-def test_model_multiD():
-    keras.config.set_image_data_format("channels_first")
+@pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
+def test_model_multiD(data_format):
+    keras.config.set_image_data_format(data_format)
     input_dim = 36
+    if data_format == "channels_first":
+        target_shape = (1, 6, 6)
+    else:
+        target_shape = (6, 6, 1)
     layers = [
-        Reshape((1, 6, 6)),
+        Reshape(target_shape),
         Conv2D(2, (3, 3)),
         ReLU(),
         Reshape((-1,)),
@@ -192,10 +202,15 @@ def test_model_multiD():
 
 
 def _test_model_multiD_channel_last():
+    data_format = keras.config.get_image_data_format()
     input_dim = 72
+    if data_format == "channels_first":
+        target_shape = (2, 6, 6)
+    else:
+        target_shape = (6, 6, 2)
     layers = [
-        Reshape((6, 6, 2)),
-        Conv2D(2, (3, 3), data_format="channels_last"),
+        Reshape(target_shape),
+        Conv2D(2, (3, 3)),
         ReLU(),
         Reshape((-1,)),
         Dense(1),
@@ -217,11 +232,16 @@ def _test_model_multiD_channel_last():
 
 
 ###### encode gradient as a KerasVariable #####
-def test_model_multiD_with_gradient_set():
-    keras.config.set_image_data_format("channels_first")
+@pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
+def test_model_multiD_with_gradient_set(data_format):
+    keras.config.set_image_data_format(data_format)
     input_dim = 36
+    if data_format == "channels_first":
+        target_shape = (1, 6, 6)
+    else:
+        target_shape = (6, 6, 1)
     layers = [
-        Reshape((1, 6, 6)),
+        Reshape(target_shape),
         Conv2D(2, (3, 3)),
         ReLU(),
         Reshape((-1,)),
@@ -245,11 +265,16 @@ def test_model_multiD_with_gradient_set():
 
 
 # extra inputs
-def test_model_multiD_extra_input():
-    keras.config.set_image_data_format("channels_first")
+@pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
+def test_model_multiD_extra_input(data_format):
+    keras.config.set_image_data_format(data_format)
     input_dim = 36
+    if data_format == "channels_first":
+        target_shape = (1, 6, 6)
+    else:
+        target_shape = (6, 6, 1)
     layers = [
-        Reshape((1, 6, 6)),
+        Reshape(target_shape),
         Conv2D(2, (3, 3)),
         ReLU(),
         Reshape((-1,)),
@@ -286,11 +311,17 @@ def test_model_multiD_extra_input():
 
 # multiple outputs
 ### multi output neural network #####
-def test_model_multiD_multi_output():
-    keras.config.set_image_data_format("channels_first")
+@pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
+def test_model_multiD_multi_output(data_format):
+    keras.config.set_image_data_format(data_format)
+    input_dim = 36
+    if data_format == "channels_first":
+        target_shape = (1, 6, 6)
+    else:
+        target_shape = (6, 6, 1)
     input_dim = 36
     layers = [
-        Reshape((1, 6, 6)),
+        Reshape(target_shape),
         Conv2D(2, (3, 3)),
         ReLU(),
         Reshape((-1,)),
@@ -317,16 +348,21 @@ def test_model_multiD_multi_output():
 
 ### multi output neural network #####
 def _test_model_multiD_multi_outputs():
+    data_format = keras.config.image_data_format()
     input_dim = 36
+    if data_format == "channels_first":
+        target_shape = (1, 6, 6)
+    else:
+        target_shape = (6, 6, 1)
     layers_0 = [
-        Reshape((1, 6, 6)),
+        Reshape(target_shape),
         Conv2D(2, (3, 3)),
         ReLU(),
         Reshape((-1,)),
         Dense(10),
     ]
     layers_1 = [
-        Reshape((1, 6, 6)),
+        Reshape(target_shape),
         Conv2D(2, (3, 3)),
         ReLU(),
         Reshape((-1,)),
@@ -366,8 +402,9 @@ def _test_model_multiD_multi_outputs():
 
 
 # nested models
-def test_nested_sequential_linear():
-    keras.config.set_image_data_format("channels_first")
+@pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
+def test_nested_sequential_linear(data_format):
+    keras.config.set_image_data_format(data_format)
     input_dim = 32
     layers = [Dense(2, use_bias=False), Dense(input_dim, use_bias=False)]
     inner_model = Sequential(layers)
@@ -388,8 +425,9 @@ def test_nested_sequential_linear():
     serialize_model([1], backward_model)
 
 
-def test_nested_sequential_nonlinear_linear():
-    keras.config.set_image_data_format("channels_first")
+@pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
+def test_nested_sequential_nonlinear_linear(data_format):
+    keras.config.set_image_data_format(data_format)
     input_dim = 32
     layers = [Dense(input_dim), ReLU(), Dense(3)]
     nested_model = Sequential(layers)
@@ -411,8 +449,9 @@ def test_nested_sequential_nonlinear_linear():
     serialize_model([input_dim, 1], backward_model)
 
 
-def test_nested_sequential_linear_nonlinear():
-    keras.config.set_image_data_format("channels_first")
+@pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
+def test_nested_sequential_linear_nonlinear(data_format):
+    keras.config.set_image_data_format(data_format)
     input_dim = 32
     layers = [Dense(input_dim), ReLU(), Dense(3)]
     nested_model = Sequential(layers)
@@ -430,8 +469,9 @@ def test_nested_sequential_linear_nonlinear():
     # serialize_model([input_dim, 1], backward_model)
 
 
-def test_nested_sequential_model():
-    keras.config.set_image_data_format("channels_first")
+@pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
+def test_nested_sequential_model(data_format):
+    keras.config.set_image_data_format(data_format)
     input_dim = 32
     layers = [Dense(input_dim), ReLU(), Dense(3)]
     input_nested = Input((input_dim,))
@@ -451,8 +491,9 @@ def test_nested_sequential_model():
     compute_backward_model((input_dim,), model, backward_model)
 
 
-def test_model_linear_nested_sequential():
-    keras.config.set_image_data_format("channels_first")
+@pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
+def test_model_linear_nested_sequential(data_format):
+    keras.config.set_image_data_format(data_format)
     input_dim = 32
     layer_nested = [Dense(input_dim), Dense(input_dim)]
     model_nested = Sequential(layer_nested)
@@ -474,8 +515,9 @@ def test_model_linear_nested_sequential():
     compute_backward_model((input_dim,), model, backward_model)
 
 
-def test_nested_model_linear_nonlinear():
-    keras.config.set_image_data_format("channels_first")
+@pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
+def test_nested_model_linear_nonlinear(data_format):
+    keras.config.set_image_data_format(data_format)
     input_dim = 32
     layers = [Dense(input_dim), ReLU(), Dense(3)]
     z = Input((input_dim,))

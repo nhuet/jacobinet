@@ -37,7 +37,6 @@ def _test_backward_Conv3D(
         kernel_size=kernel_size,
         strides=strides,
         padding=padding,
-        data_format="channels_first",
         use_bias=use_bias,
         activation=activation,
     )
@@ -67,7 +66,6 @@ def _test_backward_Conv2D(
         kernel_size=kernel_size,
         strides=strides,
         padding=padding,
-        data_format="channels_first",
         use_bias=use_bias,
         activation=activation,
     )
@@ -96,7 +94,6 @@ def _test_backward_Conv1D(
         kernel_size=kernel_size,
         strides=strides,
         padding=padding,
-        data_format="channels_first",
         use_bias=use_bias,
         activation=activation,
     )
@@ -125,7 +122,6 @@ def _test_backward_DepthwiseConv2D(
         kernel_size=kernel_size,
         strides=strides,
         padding=padding,
-        data_format="channels_first",
         use_bias=use_bias,
         activation=activation,
     )
@@ -135,7 +131,6 @@ def _test_backward_DepthwiseConv2D(
         kernel_size=kernel_size,
         strides=strides,
         padding=padding,
-        data_format="channels_first",
         use_bias=use_bias,
     )
 
@@ -187,7 +182,6 @@ def _test_backward_DepthwiseConv1D(
         kernel_size=kernel_size,
         strides=strides,
         padding=padding,
-        data_format="channels_first",
         use_bias=use_bias,
         activation=activation,
     )
@@ -196,7 +190,6 @@ def _test_backward_DepthwiseConv1D(
         kernel_size=kernel_size,
         strides=strides,
         padding=padding,
-        data_format="channels_first",
         use_bias=use_bias,
     )
 
@@ -232,9 +225,13 @@ def _test_backward_DepthwiseConv1D(
     serialize_model([input_dim, 1], backward_model)
 
 
-def test_backward_DepthwiseConv2D():
-    keras.config.set_image_data_format("channels_first")
-    input_shape = (1, 32, 32)
+@pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
+def test_backward_DepthwiseConv2D(data_format):
+    keras.config.set_image_data_format(data_format)
+    if data_format == "channels_first":
+        input_shape = (1, 32, 32)
+    else:
+        input_shape = (32, 32, 1)
     kernel_size = (2, 2)
     strides = (1, 1)
     depth_multiplier = 2
@@ -243,8 +240,10 @@ def test_backward_DepthwiseConv2D():
     _test_backward_DepthwiseConv2D(
         input_shape, depth_multiplier, kernel_size, strides, padding, use_bias
     )
-
-    input_shape = (1, 31, 31)
+    if data_format == "channels_first":
+        input_shape = (1, 31, 31)
+    else:
+        input_shape = (31, 31, 1)
     kernel_size = (2, 2)
     strides = (1, 1)
     depth_multiplier = 2
@@ -253,8 +252,10 @@ def test_backward_DepthwiseConv2D():
     _test_backward_DepthwiseConv2D(
         input_shape, depth_multiplier, kernel_size, strides, padding, use_bias
     )
-
-    input_shape = (1, 32, 32)
+    if data_format == "channels_first":
+        input_shape = (1, 32, 32)
+    else:
+        input_shape = (32, 32, 1)
     kernel_size = (2, 2)
     strides = (3, 2)
     depth_multiplier = 2
@@ -263,8 +264,10 @@ def test_backward_DepthwiseConv2D():
     _test_backward_DepthwiseConv2D(
         input_shape, depth_multiplier, kernel_size, strides, padding, use_bias
     )
-
-    input_shape = (1, 32, 32)
+    if data_format == "channels_first":
+        input_shape = (1, 32, 32)
+    else:
+        input_shape = (32, 32, 1)
     kernel_size = (4, 3)
     strides = (3, 2)
     depth_multiplier = 2
@@ -275,10 +278,23 @@ def test_backward_DepthwiseConv2D():
     )
 
 
-@pytest.mark.parametrize("activation", ["relu", "sigmoid", "tanh"])
-def test_backward_DepthwiseConv1D(activation):
-    keras.config.set_image_data_format("channels_first")
-    input_shape = (10, 32)
+@pytest.mark.parametrize(
+    "activation, data_format",
+    [
+        ("relu", "channels_first"),
+        ("sigmoid", "channels_first"),
+        ("tanh", "channels_first"),
+        ("relu", "channels_last"),
+        ("sigmoid", "channels_last"),
+        ("tanh", "channels_last"),
+    ],
+)
+def test_backward_DepthwiseConv1D(activation, data_format):
+    keras.config.set_image_data_format(data_format)
+    if data_format == "channels_first":
+        input_shape = (10, 32)
+    else:
+        input_shape = (32, 10)
     kernel_size = 2
     strides = 1
     depth_multiplier = 3
@@ -293,8 +309,10 @@ def test_backward_DepthwiseConv1D(activation):
         use_bias,
         activation=activation,
     )
-
-    input_shape = (10, 31)
+    if data_format == "channels_first":
+        input_shape = (10, 31)
+    else:
+        input_shape = (31, 10)
     kernel_size = 2
     strides = 1
     depth_multiplier = 2
@@ -309,8 +327,10 @@ def test_backward_DepthwiseConv1D(activation):
         use_bias,
         activation=activation,
     )
-
-    input_shape = (1, 32)
+    if data_format == "channels_first":
+        input_shape = (1, 32)
+    else:
+        input_shape = (32, 1)
     kernel_size = 2
     strides = 3
     depth_multiplier = 2
@@ -325,8 +345,10 @@ def test_backward_DepthwiseConv1D(activation):
         use_bias,
         activation=activation,
     )
-
-    input_shape = (11, 32)
+    if data_format == "channels_first":
+        input_shape = (11, 32)
+    else:
+        input_shape = (32, 11)
     kernel_size = 4
     strides = 3
     depth_multiplier = 2
@@ -419,10 +441,23 @@ def test_backward_Conv3D(activation):
     )
 
 
-@pytest.mark.parametrize("activation", ["relu", "sigmoid", "tanh"])
-def test_backward_Conv2D(activation):
-    keras.config.set_image_data_format("channels_first")
-    input_shape = (3, 32, 32)
+@pytest.mark.parametrize(
+    "activation, data_format",
+    [
+        ("relu", "channels_first"),
+        ("sigmoid", "channels_first"),
+        ("tanh", "channels_first"),
+        ("relu", "channels_last"),
+        ("sigmoid", "channels_last"),
+        ("tanh", "channels_last"),
+    ],
+)
+def test_backward_Conv2D(activation, data_format):
+    keras.config.set_image_data_format(data_format)
+    if data_format == "channels_first":
+        input_shape = (3, 32, 32)
+    else:
+        input_shape = (32, 32, 3)
     kernel_size = (2, 2)
     strides = (1, 1)
     filters = 2
@@ -437,8 +472,10 @@ def test_backward_Conv2D(activation):
         use_bias,
         activation=activation,
     )
-
-    input_shape = (1, 31, 31)
+    if data_format == "channels_first":
+        input_shape = (1, 31, 31)
+    else:
+        input_shape = (31, 31, 1)
     kernel_size = (2, 2)
     strides = (1, 1)
     filters = 2
@@ -453,8 +490,10 @@ def test_backward_Conv2D(activation):
         use_bias,
         activation=activation,
     )
-
-    input_shape = (1, 32, 32)
+    if data_format == "channels_first":
+        input_shape = (1, 32, 32)
+    else:
+        input_shape = (32, 32, 1)
     kernel_size = (2, 2)
     strides = (3, 2)
     filters = 2
@@ -469,8 +508,10 @@ def test_backward_Conv2D(activation):
         use_bias,
         activation=activation,
     )
-
-    input_shape = (4, 32, 32)
+    if data_format == "channels_first":
+        input_shape = (4, 32, 32)
+    else:
+        input_shape = (32, 32, 4)
     kernel_size = (4, 3)
     strides = (3, 2)
     filters = 2
@@ -487,8 +528,18 @@ def test_backward_Conv2D(activation):
     )
 
 
-@pytest.mark.parametrize("activation", ["relu", "sigmoid", "tanh"])
-def Atest_backward_Conv1D(activation):
+@pytest.mark.parametrize(
+    "activation, data_format",
+    [
+        ("relu", "channels_first"),
+        ("sigmoid", "channels_first"),
+        ("tanh", "channels_first"),
+        ("relu", "channels_last"),
+        ("sigmoid", "channels_last"),
+        ("tanh", "channels_last"),
+    ],
+)
+def Atest_backward_Conv1D(activation, data_format):
     input_shape = (3, 32)
     kernel_size = (2,)
     strides = 1

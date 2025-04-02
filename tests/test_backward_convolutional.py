@@ -25,23 +25,6 @@ def _test_backward_Conv3D(input_shape, filters, kernel_size, strides, padding, u
     linear_mapping(layer, backward_layer)
     serialize(layer, backward_layer)
 
-    # data_format == 'channels_last'
-    layer = Conv3D(
-        filters=filters,
-        kernel_size=kernel_size,
-        strides=strides,
-        padding=padding,
-        data_format="channels_last",
-        use_bias=use_bias,
-    )
-    model_layer = Sequential([layer])
-    input_shape = input_shape[::-1]
-    _ = model_layer(np.ones(input_shape)[None])
-    backward_layer = get_backward(layer)
-    linear_mapping(layer, backward_layer)
-    # use_bias should have an impact
-    serialize(layer, backward_layer)
-
 
 # pool_size, strides=None, padding="valid", data_format=None
 def _test_backward_Conv2D(input_shape, filters, kernel_size, strides, padding, use_bias):
@@ -51,27 +34,9 @@ def _test_backward_Conv2D(input_shape, filters, kernel_size, strides, padding, u
         kernel_size=kernel_size,
         strides=strides,
         padding=padding,
-        data_format="channels_first",
         use_bias=use_bias,
     )
     model_layer = Sequential([layer])
-    _ = model_layer(np.ones(input_shape)[None])
-    backward_layer = get_backward(layer)
-    linear_mapping(layer, backward_layer)
-    # use_bias should have an impact
-    serialize(layer, backward_layer)
-
-    # data_format == 'channels_last'
-    layer = Conv2D(
-        filters=filters,
-        kernel_size=kernel_size,
-        strides=strides,
-        padding=padding,
-        data_format="channels_last",
-        use_bias=use_bias,
-    )
-    model_layer = Sequential([layer])
-    input_shape = input_shape[::-1]
     _ = model_layer(np.ones(input_shape)[None])
     backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
@@ -86,27 +51,9 @@ def _test_backward_Conv1D(input_shape, filters, kernel_size, strides, padding, u
         kernel_size=kernel_size,
         strides=strides,
         padding=padding,
-        data_format="channels_first",
         use_bias=use_bias,
     )
     model_layer = Sequential([layer])
-    _ = model_layer(np.ones(input_shape)[None])
-    backward_layer = get_backward(layer)
-    linear_mapping(layer, backward_layer)
-    # use_bias should have an impact
-    serialize(layer, backward_layer)
-
-    # data_format == 'channels_last'
-    layer = Conv1D(
-        filters=filters,
-        kernel_size=kernel_size,
-        strides=strides,
-        padding=padding,
-        data_format="channels_last",
-        use_bias=use_bias,
-    )
-    model_layer = Sequential([layer])
-    input_shape = input_shape[::-1]
     _ = model_layer(np.ones(input_shape)[None])
     backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
@@ -124,27 +71,9 @@ def _test_backward_DepthwiseConv2D(
         kernel_size=kernel_size,
         strides=strides,
         padding=padding,
-        data_format="channels_first",
         use_bias=use_bias,
     )
     model_layer = Sequential([layer])
-    _ = model_layer(np.ones(input_shape)[None])
-    backward_layer = get_backward(layer)
-    linear_mapping(layer, backward_layer)
-    # use_bias should have an impact
-    serialize(layer, backward_layer)
-
-    # data_format == 'channels_last'
-    layer = DepthwiseConv2D(
-        depth_multiplier=depth_multiplier,
-        kernel_size=kernel_size,
-        strides=strides,
-        padding=padding,
-        data_format="channels_last",
-        use_bias=use_bias,
-    )
-    model_layer = Sequential([layer])
-    input_shape = input_shape[::-1]
     _ = model_layer(np.ones(input_shape)[None])
     backward_layer = get_backward(layer)
     linear_mapping(layer, backward_layer)
@@ -162,7 +91,6 @@ def _test_backward_DepthwiseConv1D(
         kernel_size=kernel_size,
         strides=strides,
         padding=padding,
-        data_format="channels_first",
         use_bias=use_bias,
     )
     model_layer = Sequential([layer])
@@ -172,27 +100,14 @@ def _test_backward_DepthwiseConv1D(
     # use_bias should have an impact
     serialize(layer, backward_layer)
 
-    # data_format == 'channels_last'
-    layer = DepthwiseConv1D(
-        depth_multiplier=depth_multiplier,
-        kernel_size=kernel_size,
-        strides=strides,
-        padding=padding,
-        data_format="channels_last",
-        use_bias=use_bias,
-    )
-    model_layer = Sequential([layer])
-    input_shape = input_shape[::-1]
-    _ = model_layer(np.ones(input_shape)[None])
-    backward_layer = get_backward(layer)
-    linear_mapping(layer, backward_layer)
-    # use_bias should have an impact
-    serialize(layer, backward_layer)
 
-
-def test_backward_DepthwiseConv2D():
-    keras.config.set_image_data_format("channels_first")
-    input_shape = (1, 32, 32)
+@pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
+def test_backward_DepthwiseConv2D(data_format):
+    keras.config.set_image_data_format(data_format)
+    if data_format == "channels_first":
+        input_shape = (1, 32, 32)
+    else:
+        input_shape = (32, 32, 1)
     kernel_size = (2, 2)
     strides = (1, 1)
     depth_multiplier = 2
@@ -202,7 +117,10 @@ def test_backward_DepthwiseConv2D():
         input_shape, depth_multiplier, kernel_size, strides, padding, use_bias
     )
 
-    input_shape = (1, 31, 31)
+    if data_format == "channels_first":
+        input_shape = (1, 31, 31)
+    else:
+        input_shape = (31, 31, 1)
     kernel_size = (2, 2)
     strides = (1, 1)
     depth_multiplier = 2
@@ -211,8 +129,10 @@ def test_backward_DepthwiseConv2D():
     _test_backward_DepthwiseConv2D(
         input_shape, depth_multiplier, kernel_size, strides, padding, use_bias
     )
-
-    input_shape = (1, 32, 32)
+    if data_format == "channels_first":
+        input_shape = (1, 32, 32)
+    else:
+        input_shape = (32, 32, 1)
     kernel_size = (2, 2)
     strides = (3, 2)
     depth_multiplier = 2
@@ -221,8 +141,10 @@ def test_backward_DepthwiseConv2D():
     _test_backward_DepthwiseConv2D(
         input_shape, depth_multiplier, kernel_size, strides, padding, use_bias
     )
-
-    input_shape = (1, 32, 32)
+    if data_format == "channels_first":
+        input_shape = (1, 32, 32)
+    else:
+        input_shape = (32, 32, 1)
     kernel_size = (4, 3)
     strides = (3, 2)
     depth_multiplier = 2
@@ -233,9 +155,13 @@ def test_backward_DepthwiseConv2D():
     )
 
 
-def test_backward_DepthwiseConv1D():
-    keras.config.set_image_data_format("channels_first")
-    input_shape = (10, 32)
+@pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
+def test_backward_DepthwiseConv1D(data_format):
+    keras.config.set_image_data_format(data_format)
+    if data_format == "channels_first":
+        input_shape = (10, 32)
+    else:
+        input_shape = (32, 10)
     kernel_size = 2
     strides = 1
     depth_multiplier = 3
@@ -244,8 +170,10 @@ def test_backward_DepthwiseConv1D():
     _test_backward_DepthwiseConv1D(
         input_shape, depth_multiplier, kernel_size, strides, padding, use_bias
     )
-
-    input_shape = (10, 31)
+    if data_format == "channels_first":
+        input_shape = (10, 31)
+    else:
+        input_shape = (31, 10)
     kernel_size = 2
     strides = 1
     depth_multiplier = 2
@@ -254,8 +182,10 @@ def test_backward_DepthwiseConv1D():
     _test_backward_DepthwiseConv1D(
         input_shape, depth_multiplier, kernel_size, strides, padding, use_bias
     )
-
-    input_shape = (1, 32)
+    if data_format == "channels_first":
+        input_shape = (1, 32)
+    else:
+        input_shape = (32, 1)
     kernel_size = 2
     strides = 3
     depth_multiplier = 2
@@ -264,8 +194,10 @@ def test_backward_DepthwiseConv1D():
     _test_backward_DepthwiseConv1D(
         input_shape, depth_multiplier, kernel_size, strides, padding, use_bias
     )
-
-    input_shape = (11, 32)
+    if data_format == "channels_first":
+        input_shape = (11, 32)
+    else:
+        input_shape = (32, 11)
     kernel_size = 4
     strides = 3
     depth_multiplier = 2
@@ -319,9 +251,14 @@ def test_backward_Conv3D():
     _test_backward_Conv3D(input_shape, filters, kernel_size, strides, padding, use_bias)
 
 
-def test_backward_Conv2D():
-    keras.config.set_image_data_format("channels_first")
-    input_shape = (3, 32, 32)
+@pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
+def test_backward_Conv2D(data_format):
+    keras.config.set_image_data_format(data_format)
+
+    if data_format == "channels_first":
+        input_shape = (3, 32, 32)
+    else:
+        input_shape = (32, 32, 3)
     kernel_size = (2, 2)
     strides = (1, 1)
     filters = 2
@@ -329,7 +266,10 @@ def test_backward_Conv2D():
     use_bias = False
     _test_backward_Conv2D(input_shape, filters, kernel_size, strides, padding, use_bias)
 
-    input_shape = (1, 31, 31)
+    if data_format == "channels_first":
+        input_shape = (1, 31, 31)
+    else:
+        input_shape = (31, 31, 1)
     kernel_size = (2, 2)
     strides = (1, 1)
     filters = 2
@@ -337,7 +277,10 @@ def test_backward_Conv2D():
     use_bias = False
     _test_backward_Conv2D(input_shape, filters, kernel_size, strides, padding, use_bias)
 
-    input_shape = (1, 32, 32)
+    if data_format == "channels_first":
+        input_shape = (1, 32, 32)
+    else:
+        input_shape = (32, 32, 1)
     kernel_size = (2, 2)
     strides = (3, 2)
     filters = 2
@@ -345,18 +288,25 @@ def test_backward_Conv2D():
     use_bias = False
     _test_backward_Conv2D(input_shape, filters, kernel_size, strides, padding, use_bias)
 
-    input_shape = (4, 32, 32)
+    if data_format == "channels_first":
+        input_shape = (4, 32, 32)
+    else:
+        input_shape = (32, 32, 4)
     kernel_size = (4, 3)
     strides = (3, 2)
-    filters = 2
+    filters = 1
     padding = "same"
     use_bias = False
     _test_backward_Conv2D(input_shape, filters, kernel_size, strides, padding, use_bias)
 
 
-def test_backward_Conv1D():
-    keras.config.set_image_data_format("channels_first")
-    input_shape = (3, 32)
+@pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
+def test_backward_Conv1D(data_format):
+    keras.config.set_image_data_format(data_format)
+    if data_format == "channels_first":
+        input_shape = (3, 32)
+    else:
+        input_shape = (32, 3)
     kernel_size = (2,)
     strides = 1
     filters = 2
@@ -364,7 +314,10 @@ def test_backward_Conv1D():
     use_bias = False
     _test_backward_Conv1D(input_shape, filters, kernel_size, strides, padding, use_bias)
 
-    input_shape = (1, 31)
+    if data_format == "channels_first":
+        input_shape = (1, 31)
+    else:
+        input_shape = (31, 1)
     kernel_size = (2,)
     strides = (1,)
     filters = 2
@@ -372,10 +325,10 @@ def test_backward_Conv1D():
     use_bias = False
     _test_backward_Conv1D(input_shape, filters, kernel_size, strides, padding, use_bias)
 
-    input_shape = (
-        4,
-        32,
-    )
+    if data_format == "channels_first":
+        input_shape = (4, 32)
+    else:
+        input_shape = (32, 4)
     kernel_size = (4,)
     strides = (3,)
     filters = 2
