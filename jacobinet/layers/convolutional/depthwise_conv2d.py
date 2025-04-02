@@ -129,6 +129,7 @@ class BackwardDepthwiseConv2D(BackwardLinearLayer):
         )
         return output
 
+
 @keras.saving.register_keras_serializable()
 class BackwardDepthwiseConv2DWithActivation(BackwardWithActivation):
     """

@@ -130,6 +130,7 @@ class BackwardDepthwiseConv1D(BackwardLinearLayer):
         output = K.concatenate(conv_outputs, axis=self.axis)  # (batch_size, c_in, w_in, h_in)
         return output
 
+
 @keras.saving.register_keras_serializable()
 class BackwardDepthwiseConv1DWithActivation(BackwardWithActivation):
     """

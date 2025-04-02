@@ -68,6 +68,7 @@ class BackwardConv2D(BackwardLinearLayer):
             layer_backward(Input(self.output_dim_wo_batch))
         self.layer_backward = layer_backward
 
+
 @keras.saving.register_keras_serializable()
 class BackwardConv2DWithActivation(BackwardWithActivation):
     """
