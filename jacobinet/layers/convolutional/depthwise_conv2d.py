@@ -129,7 +129,7 @@ class BackwardDepthwiseConv2D(BackwardLinearLayer):
         )
         return output
 
-
+@keras.saving.register_keras_serializable()
 class BackwardDepthwiseConv2DWithActivation(BackwardWithActivation):
     """
     This class implements a custom layer for backward pass of a `DepthwiseConv2D` layer in Keras with a non linear activation function.

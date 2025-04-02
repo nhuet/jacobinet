@@ -68,7 +68,7 @@ class BackwardConv2D(BackwardLinearLayer):
             layer_backward(Input(self.output_dim_wo_batch))
         self.layer_backward = layer_backward
 
-
+@keras.saving.register_keras_serializable()
 class BackwardConv2DWithActivation(BackwardWithActivation):
     """
     This class implements a custom layer for backward pass of a `Conv2D` layer in Keras with a non linear activation function.

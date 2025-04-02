@@ -70,7 +70,7 @@ class BackwardConv1D(BackwardLinearLayer):
             layer, self.input_dim_wo_batch, self.output_dim_wo_batch
         )
 
-
+@keras.saving.register_keras_serializable()
 class BackwardConv1DWithActivation(BackwardWithActivation):
     """
     This class implements a custom layer for backward pass of a `Conv1D` layer in Keras with a non linear activation function.

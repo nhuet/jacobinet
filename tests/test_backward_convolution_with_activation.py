@@ -18,7 +18,7 @@ from keras.layers import (
 )
 from keras.models import Sequential
 
-from .conftest import compute_backward_model, linear_mapping, serialize_model
+from .conftest import compute_backward_model, linear_mapping, serialize_model, serialize
 
 
 # pool_size, strides=None, padding="valid", data_format=None
