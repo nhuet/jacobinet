@@ -7,12 +7,13 @@ from typing import List
 import keras
 import keras.ops as K  # type: ignore
 import numpy as np
+import numpy.typing as npt
 from jacobinet.layers.layer import BackwardLinearLayer
 from jacobinet.layers.utils import pooling_layer2D
 from keras.layers import AveragePooling2D, Conv2DTranspose, Input, Layer  # type: ignore
 from keras.models import Sequential  # type: ignore
 
-ArrayLike = np.typing.ArrayLike
+ArrayLike = npt.ArrayLike
 Tensor = keras.KerasTensor
 
 
