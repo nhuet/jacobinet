@@ -93,6 +93,7 @@ def _test_model_multiD_multi_output_concat(merge_layer, n_inputs, axis):
 
 
 def test_backward_add():
+    keras.config.set_image_data_format("channels_first")
     merge_layer = Add()
     n_inputs = 2
     _test_model_multiD_multi_output(merge_layer, n_inputs)
@@ -103,12 +104,14 @@ def test_backward_add():
 
 
 def test_backward_subtract():
+    keras.config.set_image_data_format("channels_first")
     merge_layer = Subtract()
     n_inputs = 2
     _test_model_multiD_multi_output(merge_layer, n_inputs)
 
 
 def test_backward_average():
+    keras.config.set_image_data_format("channels_first")
     merge_layer = Average()
     n_inputs = 2
     _test_model_multiD_multi_output(merge_layer, n_inputs)
@@ -129,6 +132,7 @@ def _test_backward_maximum():
 
 
 def test_backward_minimum():
+    keras.config.set_image_data_format("channels_first")
     merge_layer = Minimum()
     n_inputs = 2
     _test_model_multiD_multi_output(merge_layer, n_inputs)
@@ -139,6 +143,7 @@ def test_backward_minimum():
 
 
 def test_backward_multiply():
+    keras.config.set_image_data_format("channels_first")
     merge_layer = Multiply()
     n_inputs = 2
     _test_model_multiD_multi_output(merge_layer, n_inputs)
@@ -146,6 +151,7 @@ def test_backward_multiply():
 
 @pytest.mark.parametrize("axis", [-1, 1])
 def test_backward_concatenate(axis):
+    keras.config.set_image_data_format("channels_first")
     merge_layer = Concatenate(axis=axis)
     n_inputs = 2
     _test_model_multiD_multi_output_concat(merge_layer, n_inputs, axis)

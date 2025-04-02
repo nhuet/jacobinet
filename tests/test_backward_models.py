@@ -26,6 +26,7 @@ from .conftest import compute_backward_model, compute_output, serialize_model
 
 
 def test_sequential_linear():
+    keras.config.set_image_data_format("channels_first")
     input_dim = 32
     layers = [Dense(2, use_bias=False), Dense(1, use_bias=False)]
     model = Sequential(layers)
@@ -41,6 +42,7 @@ def test_sequential_linear():
 
 
 def test_sequential_nonlinear():
+    keras.config.set_image_data_format("channels_first")
     input_dim = 32
     layers = [Dense(2, use_bias=False), ReLU(), Dense(1, use_bias=False)]
     model = Sequential(layers)
@@ -53,6 +55,7 @@ def test_sequential_nonlinear():
 
 
 def test_sequential_multiD():
+    keras.config.set_image_data_format("channels_first")
     input_dim = 36
     layers = [
         Reshape((1, 6, 6)),
@@ -80,6 +83,7 @@ def test_sequential_multiD():
     ],
 )
 def test_sequential_multiD_pooling(padding, layer_name):
+    keras.config.set_image_data_format("channels_first")
     input_shape = (1, 3, 6)
     input_dim = np.prod(input_shape)
     layer_ = None
@@ -120,6 +124,7 @@ def _test_sequential_multiD_channel_last():
 
 # same using model instead of Sequential
 def test_model_linear():
+    keras.config.set_image_data_format("channels_first")
     input_dim = 32
     layers = [Dense(2, use_bias=False), Dense(1, use_bias=False)]
     input_ = Input((input_dim,))
@@ -141,6 +146,7 @@ def test_model_linear():
 
 
 def test_model_nonlinear():
+    keras.config.set_image_data_format("channels_first")
     input_dim = 32
     layers = [Dense(2, use_bias=False), ReLU(), Dense(1, use_bias=False)]
     input_ = Input((input_dim,))
@@ -160,6 +166,7 @@ def test_model_nonlinear():
 
 
 def test_model_multiD():
+    keras.config.set_image_data_format("channels_first")
     input_dim = 36
     layers = [
         Reshape((1, 6, 6)),
@@ -211,6 +218,7 @@ def _test_model_multiD_channel_last():
 
 ###### encode gradient as a KerasVariable #####
 def test_model_multiD_with_gradient_set():
+    keras.config.set_image_data_format("channels_first")
     input_dim = 36
     layers = [
         Reshape((1, 6, 6)),
@@ -238,6 +246,7 @@ def test_model_multiD_with_gradient_set():
 
 # extra inputs
 def test_model_multiD_extra_input():
+    keras.config.set_image_data_format("channels_first")
     input_dim = 36
     layers = [
         Reshape((1, 6, 6)),
@@ -278,6 +287,7 @@ def test_model_multiD_extra_input():
 # multiple outputs
 ### multi output neural network #####
 def test_model_multiD_multi_output():
+    keras.config.set_image_data_format("channels_first")
     input_dim = 36
     layers = [
         Reshape((1, 6, 6)),
@@ -357,6 +367,7 @@ def _test_model_multiD_multi_outputs():
 
 # nested models
 def test_nested_sequential_linear():
+    keras.config.set_image_data_format("channels_first")
     input_dim = 32
     layers = [Dense(2, use_bias=False), Dense(input_dim, use_bias=False)]
     inner_model = Sequential(layers)
@@ -378,6 +389,7 @@ def test_nested_sequential_linear():
 
 
 def test_nested_sequential_nonlinear_linear():
+    keras.config.set_image_data_format("channels_first")
     input_dim = 32
     layers = [Dense(input_dim), ReLU(), Dense(3)]
     nested_model = Sequential(layers)
@@ -400,6 +412,7 @@ def test_nested_sequential_nonlinear_linear():
 
 
 def test_nested_sequential_linear_nonlinear():
+    keras.config.set_image_data_format("channels_first")
     input_dim = 32
     layers = [Dense(input_dim), ReLU(), Dense(3)]
     nested_model = Sequential(layers)
@@ -418,6 +431,7 @@ def test_nested_sequential_linear_nonlinear():
 
 
 def test_nested_sequential_model():
+    keras.config.set_image_data_format("channels_first")
     input_dim = 32
     layers = [Dense(input_dim), ReLU(), Dense(3)]
     input_nested = Input((input_dim,))
@@ -438,6 +452,7 @@ def test_nested_sequential_model():
 
 
 def test_model_linear_nested_sequential():
+    keras.config.set_image_data_format("channels_first")
     input_dim = 32
     layer_nested = [Dense(input_dim), Dense(input_dim)]
     model_nested = Sequential(layer_nested)
@@ -460,6 +475,7 @@ def test_model_linear_nested_sequential():
 
 
 def test_nested_model_linear_nonlinear():
+    keras.config.set_image_data_format("channels_first")
     input_dim = 32
     layers = [Dense(input_dim), ReLU(), Dense(3)]
     z = Input((input_dim,))

@@ -1,3 +1,4 @@
+import keras
 import numpy as np
 from jacobinet import get_backward_layer as get_backward
 from keras.layers import BatchNormalization
@@ -7,6 +8,7 @@ from .conftest import is_invertible, linear_mapping, serialize
 
 
 def test_backward_BatchNormalization():
+    keras.config.set_image_data_format("channels_first")
     layer = BatchNormalization()
     layer.trainable = False
 

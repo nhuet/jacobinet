@@ -1,3 +1,4 @@
+import keras
 import numpy as np
 import pytest
 from jacobinet import get_backward_layer as get_backward
@@ -21,6 +22,7 @@ from .conftest import is_invertible, linear_mapping, serialize
 
 
 def test_backward_Reshape():
+    keras.config.set_image_data_format("channels_first")
     input_shape = (2, 5, 10)
     # data_format == 'channels_first'
     layer = Reshape((2, 50))
@@ -35,6 +37,7 @@ def test_backward_Reshape():
 
 
 def test_backward_RepeatVector():
+    keras.config.set_image_data_format("channels_first")
     input_shape = (10,)
     layer = RepeatVector(2)
     model_layer = Sequential([layer])
@@ -48,6 +51,7 @@ def test_backward_RepeatVector():
 
 
 def test_backward_Permute():
+    keras.config.set_image_data_format("channels_first")
     input_shape = (2, 5, 10)
     # data_format == 'channels_first'
     layer = Permute((1, 3, 2))
@@ -63,6 +67,7 @@ def test_backward_Permute():
 
 
 def test_backward_Flatten():
+    keras.config.set_image_data_format("channels_first")
     input_shape = (2, 4, 3)
     # data_format == 'channels_first'
     layer = Flatten()
@@ -77,6 +82,7 @@ def test_backward_Flatten():
 
 
 def test_backward_Cropping2D():
+    keras.config.set_image_data_format("channels_first")
     input_shape = (2, 12, 11)
     # data_format == 'channels_first'
     layer = Cropping2D(cropping=(3, 3), data_format="channels_first")
@@ -100,6 +106,7 @@ def test_backward_Cropping2D():
 
 
 def test_backward_ZeroPadding2D():
+    keras.config.set_image_data_format("channels_first")
     input_shape = (2, 12, 11)
     # data_format == 'channels_first'
     layer = ZeroPadding2D(padding=(3, 3), data_format="channels_first")
@@ -123,6 +130,7 @@ def test_backward_ZeroPadding2D():
 
 
 def test_backward_Cropping1D():
+    keras.config.set_image_data_format("channels_first")
     input_shape = (11, 2)
     # data_format == 'channels_first'
     layer = Cropping1D(cropping=3)
@@ -136,6 +144,7 @@ def test_backward_Cropping1D():
 
 
 def test_backward_ZeroPadding1D():
+    keras.config.set_image_data_format("channels_first")
     input_shape = (2, 12)
     # data_format == 'channels_first'
     layer = ZeroPadding1D(padding=3, data_format="channels_first")
@@ -159,6 +168,7 @@ def test_backward_ZeroPadding1D():
 
 
 def test_backward_Cropping3D():
+    keras.config.set_image_data_format("channels_first")
     input_shape = (2, 12, 11, 10)
     # data_format == 'channels_first'
     layer = Cropping3D(cropping=(3, 3, 2), data_format="channels_first")
@@ -182,6 +192,7 @@ def test_backward_Cropping3D():
 
 
 def test_backward_UpSampling2D():
+    keras.config.set_image_data_format("channels_first")
     input_shape = (2, 12, 11)
     # data_format == 'channels_first'
     layer = UpSampling2D(size=(2, 2), data_format="channels_first")
@@ -205,6 +216,7 @@ def test_backward_UpSampling2D():
 
 
 def test_backward_UpSampling1D():
+    keras.config.set_image_data_format("channels_first")
     input_shape = (2, 12)
     # data_format == 'channels_first'
     layer = UpSampling1D(size=3)
@@ -229,6 +241,7 @@ def test_backward_UpSampling1D():
 
 
 def test_backward_UpSampling3D():
+    keras.config.set_image_data_format("channels_first")
     pytest.skip("skip tests for 3D")
     input_shape = (2, 12, 11, 10)
 

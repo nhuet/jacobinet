@@ -191,6 +191,7 @@ def _test_backward_DepthwiseConv1D(
 
 
 def test_backward_DepthwiseConv2D():
+    keras.config.set_image_data_format("channels_first")
     input_shape = (1, 32, 32)
     kernel_size = (2, 2)
     strides = (1, 1)
@@ -233,6 +234,7 @@ def test_backward_DepthwiseConv2D():
 
 
 def test_backward_DepthwiseConv1D():
+    keras.config.set_image_data_format("channels_first")
     input_shape = (10, 32)
     kernel_size = 2
     strides = 1
@@ -275,6 +277,7 @@ def test_backward_DepthwiseConv1D():
 
 
 def test_backward_Conv3D():
+    keras.config.set_image_data_format("channels_first")
     pytest.skip("skip tests for 3D")
     # skip tests on MPS device as Conv3DTranspose is not implemented
     if keras.config.backend() == "torch":
@@ -317,6 +320,7 @@ def test_backward_Conv3D():
 
 
 def test_backward_Conv2D():
+    keras.config.set_image_data_format("channels_first")
     input_shape = (3, 32, 32)
     kernel_size = (2, 2)
     strides = (1, 1)
@@ -351,6 +355,7 @@ def test_backward_Conv2D():
 
 
 def test_backward_Conv1D():
+    keras.config.set_image_data_format("channels_first")
     input_shape = (3, 32)
     kernel_size = (2,)
     strides = 1

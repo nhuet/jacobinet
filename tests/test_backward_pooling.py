@@ -285,6 +285,7 @@ def _test_backward_GlobalAveragePooling2D(input_shape, keepdims):
 
 
 def test_backward_GlobalAveragePooling2D():
+    keras.config.set_image_data_format("channels_first")
     input_shape = (3, 32, 32)
     _test_backward_GlobalAveragePooling2D(input_shape, keepdims=True)
     _test_backward_GlobalAveragePooling2D(input_shape, keepdims=False)
@@ -320,6 +321,7 @@ def _test_backward_GlobalAveragePooling1D(input_shape, keepdims):
 
 
 def test_backward_GlobalAveragePooling1D():
+    keras.config.set_image_data_format("channels_first")
     input_shape = (3, 32)
     _test_backward_GlobalAveragePooling1D(input_shape, keepdims=True)
     _test_backward_GlobalAveragePooling1D(input_shape, keepdims=False)
@@ -356,6 +358,7 @@ def _test_backward_MaxPooling2D(input_shape, pool_size, strides, padding):
 
 
 def test_backward_MaxPooling2D():
+    keras.config.set_image_data_format("channels_first")
     pool_size = (2, 2)
     strides = (1, 1)
     padding = "valid"
@@ -402,6 +405,7 @@ def _test_backward_GlobalMaxPooling2D(input_shape, keepdims):
 
 
 def test_backward_GlobalMaxPooling2D():
+    keras.config.set_image_data_format("channels_first")
     input_shape = (1, 5, 5)
     _test_backward_GlobalMaxPooling2D(input_shape, keepdims=True)
     _test_backward_GlobalMaxPooling2D(input_shape, keepdims=False)
