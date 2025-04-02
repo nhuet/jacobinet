@@ -135,9 +135,15 @@ class GradConstant(Layer):
         grad_const (Tensor): The constant gradient tensor to be returned.
     """
 
-    def __init__(self, gradient, **kwargs):
+    def __init__(self, gradient, input_dim_wo_batch: Union[None, List[int]] = None, **kwargs):
         super(GradConstant, self).__init__(**kwargs)
         self.grad_const = keras.ops.convert_to_tensor(gradient)
+        if not input_dim_wo_batch is None:
+            self.input_dim_wo_batch = input_dim_wo_batch
+        self.output_dim_wo_batch = list(self.grad_const.shape)
+
+    def build(self, input_shape):
+        self.input_dim_wo_batch = list(input_shape[1:])
 
     def call(self, inputs_):
         return self.grad_const
@@ -147,6 +153,7 @@ class GradConstant(Layer):
         config.update(
             {
                 "grad_const": keras.saving.serialize_keras_object(self.grad_const),
+                "input_dim_wo_batch": self.input_dim_wo_batch,
             }
         )
         return config

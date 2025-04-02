@@ -5,7 +5,7 @@ from jacobinet.layers.convolutional import (
     BackwardDepthwiseConv1D,
     BackwardDepthwiseConv2D,
 )
-from jacobinet.layers.core import BackwardDense, BackwardEinsumDense
+from jacobinet.layers.core import BackwardActivation, BackwardDense, BackwardEinsumDense
 from jacobinet.layers.normalization import BackwardBatchNormalization
 from jacobinet.layers.pooling import (
     BackwardAveragePooling1D,
