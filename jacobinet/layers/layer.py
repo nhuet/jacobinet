@@ -84,15 +84,26 @@ class BackwardLayer(Layer):
 
         return config
 
-    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
+    def call_on_reshaped_gradient(
+        self,
+        gradient: Tensor,
+        input: Union[None, Tensor] = None,
+        training: bool = None,
+        mask: Union[None, Tensor] = None,
+    ) -> Union[Tensor, List[Tensor]]:
         if self.layer_backward:
             return self.layer_backward(gradient)
         raise NotImplementedError()
 
-    def build(input_shape):
+    def build(input_shape: tuple[int]):
         super().build(input_shape)
 
-    def call(self, inputs, training=None, mask=None):
+    def call(
+        self,
+        inputs: Union[Tensor, List[Tensor]],
+        training: bool = None,
+        mask: Union[None, Tensor] = None,
+    ) -> Union[Tensor, List[Tensor]]:
         layer_input = None
 
         if not isinstance(inputs, list):
@@ -159,12 +170,7 @@ class BackwardLayer(Layer):
             return tuple(
                 (1,) + input_dim_wo_batch_i for input_dim_wo_batch_i in self.input_dim_wo_batch
             )
-        try:
-            return (1,) + self.input_dim_wo_batch
-        except TypeError:
-            import pdb
-
-            pdb.set_trace()
+        return (1,) + self.input_dim_wo_batch
 
 
 @keras.saving.register_keras_serializable()
@@ -306,7 +312,12 @@ class BackwardWithActivation(BackwardNonLinearLayer):
 
         self.layer_wo_activation.built = True
 
-    def call(self, inputs, training=None, mask=None):
+    def call(
+        self,
+        inputs: Union[Tensor, List[Tensor]],
+        training: bool = None,
+        mask: Union[None, Tensor] = None,
+    ) -> Union[Tensor, List[Tensor]]:
         # apply locally the chain rule
         # (f(g(x)))' = f'(x)*g'(f(x))
         # compute f(x) as inner_input
