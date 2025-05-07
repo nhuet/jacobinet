@@ -328,7 +328,7 @@ def reshape_to_batch(
         n_out = list(input_tensor.shape[: -len(layer_output_shape[1:])][1:])
         return (
             True,
-            K.reshape(input_tensor, [-1] + layer_output_shape[1:]),
+            K.reshape(input_tensor, (-1,) + layer_output_shape[1:]),
             n_out,
         )
     else:

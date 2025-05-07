@@ -42,7 +42,7 @@ class BackwardZeroPadding1D(BackwardLinearLayer):
             self.layer_backward.built = True
         else:
             # Cropping1D is only working on axis=1, we need to use Cropping2D instead with 0 padding along axis=1
-            layer_reshape_b = Reshape(target_shape=[1] + self.output_dim_wo_batch)
+            layer_reshape_b = Reshape(target_shape=(1,) + self.output_dim_wo_batch)
             layer_backward = Cropping2D(cropping=(0, padding), data_format=data_format)
             layer_reshape_a = Reshape(target_shape=self.input_dim_wo_batch)
 

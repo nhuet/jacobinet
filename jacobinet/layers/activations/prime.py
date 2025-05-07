@@ -118,16 +118,19 @@ def relu_prime(
     """
 
     mask_neg_slope: Tensor = K.relu(K.sign(threshold - inputs))  # 1 iff layer_input[i]<threhshold
-    mask_value: Tensor = K.relu(K.sign(inputs - threshold))
+    mask_value: Tensor = K.relu(K.sign(inputs - threshold))  # 0 if mask_neg_slope=1
     if max_value:
         mask_value *= K.relu(K.sign(max_value - inputs))
 
     backward_relu: Tensor = negative_slope * mask_neg_slope + (1 - mask_neg_slope) * mask_value
-
+    """
     def grad(*args, upstream=None):
+        if upstream is None:
+            (upstream,) = args
         return keras.ops.sigmoid(upstream)
+    """
 
-    return backward_relu  # , grad
+    return backward_relu
 
 
 def relu6_prime(inputs: Tensor, negative_slope: float = 0.0, threshold: float = 0.0) -> Tensor:

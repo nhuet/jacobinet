@@ -27,7 +27,7 @@ class BackwardConcatenate(BackwardMergeLinearLayer):
     ):
         super().__init__(layer=layer, **kwargs)
         self.dims = [
-            ([1] + layer_i_shape)[self.layer.axis] for layer_i_shape in self.input_dim_wo_batch
+            ((1,) + layer_i_shape)[self.layer.axis] for layer_i_shape in self.input_dim_wo_batch
         ]
 
     def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):

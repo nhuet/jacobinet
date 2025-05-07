@@ -31,7 +31,7 @@ class BackwardGlobalMaxPooling2D(BackwardNonLinearLayer):
 
         layer_input = inputs[1]  # (batch, C, W_in, H_in)
 
-        reshape_tag, gradient_, n_out = reshape_to_batch(gradient, [1] + self.output_dim_wo_batch)
+        reshape_tag, gradient_, n_out = reshape_to_batch(gradient, (1,) + self.output_dim_wo_batch)
         if not self.layer.keepdims:
             if self.layer.data_format == "channels_first":
                 gradient_ = K.expand_dims(K.expand_dims(gradient, -1), -1)
@@ -55,7 +55,7 @@ class BackwardGlobalMaxPooling2D(BackwardNonLinearLayer):
         # combine backward_max with gradient, we first need to reshape gradient_
         if len(n_out):
             gradient_ = K.reshape(
-                gradient_, [-1, np.prod(n_out)] + self.output_dim_wo_batch
+                gradient_, (-1, np.prod(n_out)) + self.output_dim_wo_batch
             )  # (batch, N_out, C, W_out, H_out)
 
         # n_out=[] gradient_.shape = (batch, N_out, C, W_out, H_out) else (batch, C, W_out, H_out)

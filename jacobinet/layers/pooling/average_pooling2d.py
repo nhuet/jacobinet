@@ -98,7 +98,7 @@ class CroppingReflect2D(keras.layers.Layer):
         return inputs  # (batch, C, W, H)
 
     def compute_output_shape(self, input_shape):
-        output_shape = [1] + self.input_dim_wo_batch
+        output_shape = (1,) + tuple(self.input_dim_wo_batch)
         return output_shape
 
     def get_config(self):
@@ -191,12 +191,12 @@ class BackwardAveragePooling2D(BackwardLinearLayer):
         layer_t.built = True
 
         if self.layer.data_format == "channels_last":
-            output_dim_wo_batch_c_1 = self.output_dim_wo_batch[:-1] + [1]
+            output_dim_wo_batch_c_1 = self.output_dim_wo_batch[:-1] + (1,)
         else:
-            output_dim_wo_batch_c_1 = [1] + self.output_dim_wo_batch[1:]
+            output_dim_wo_batch_c_1 = (1,) + self.output_dim_wo_batch[1:]
 
         # shape of transposed input
-        input_shape_t = list(layer_t(K.ones([1] + output_dim_wo_batch_c_1)).shape[1:])
+        input_shape_t = list(layer_t(K.ones((1,) + output_dim_wo_batch_c_1)).shape[1:])
 
         if self.layer.padding == "valid":
             input_shape = self.input_dim_wo_batch

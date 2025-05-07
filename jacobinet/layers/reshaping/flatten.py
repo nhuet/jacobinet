@@ -32,7 +32,7 @@ class BackwardFlatten(BackwardLinearLayer):
         input_shape_wo_batch = self.input_dim_wo_batch
         if layer.data_format == "channels_first" and len(input_shape_wo_batch) > 1:
             # we first permute to obtain channel_last format and then flatten
-            target_shape = input_shape_wo_batch[1:] + [input_shape_wo_batch[0]]
+            target_shape = input_shape_wo_batch[1:] + input_shape_wo_batch[:1]
             layer_reshape = Reshape(target_shape=target_shape)
 
             dim = [i + 1 for i in range(len(input_shape_wo_batch))]

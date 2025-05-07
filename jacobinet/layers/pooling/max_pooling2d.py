@@ -121,7 +121,7 @@ class BackwardMaxPooling2D(BackwardNonLinearLayer):
         gradient = inputs[0]  # (batch, n_out..., C_W_out, H_out)
         layer_input = inputs[1]  # (batch, C, W_in, H_in)
 
-        reshape_tag, gradient_, n_out = reshape_to_batch(gradient, [1] + self.output_dim_wo_batch)
+        reshape_tag, gradient_, n_out = reshape_to_batch(gradient, (1,) + self.output_dim_wo_batch)
         # gradient_ (batch*prod(n_out), output_dim_wo_batch...)= (batch*prod(n_out), C, W_out, H_out) if channel_first
 
         input_max = self.linear_block(layer_input)  # (batch, C, pool_size, W_out, H_out)
@@ -130,7 +130,7 @@ class BackwardMaxPooling2D(BackwardNonLinearLayer):
         inner_input_dim_wo_batch = list(backward_max.shape[1:4])  # =(C, pool_size, W_out, H_out)
         if len(n_out):
             gradient_ = K.reshape(
-                gradient_, [-1, np.prod(n_out)] + self.output_dim_wo_batch
+                gradient_, (-1, np.prod(n_out)) + self.output_dim_wo_batch
             )  # (batch, N_out, C, W_out, H_out)
 
         # n_out=[] gradient_.shape = (batch, N_out, C, W_out, H_out) else (batch, C, W_out, H_out)
@@ -161,7 +161,7 @@ class BackwardMaxPooling2D(BackwardNonLinearLayer):
         # reshape
         if len(n_out):
             gradient_ = K.reshape(
-                gradient_, [-1] + inner_input_dim_wo_batch
+                gradient_, (-1,) + inner_input_dim_wo_batch
             )  # (batch*N_out, C, pool_size, W_out, H_out)
 
         # backward_reshape
@@ -171,7 +171,7 @@ class BackwardMaxPooling2D(BackwardNonLinearLayer):
 
         # reshape_tag
         if reshape_tag:
-            output = K.reshape(output, [-1] + n_out + self.input_dim_wo_batch)
+            output = K.reshape(output, (-1,) + n_out + self.input_dim_wo_batch)
 
         return output
 

@@ -1,5 +1,5 @@
 # abstract class for BackwardLayer
-from typing import List, Type, Union
+from typing import List, Tuple, Type, Union
 
 import keras
 import keras.ops as K  # type:ignore
@@ -38,25 +38,26 @@ class BackwardLayer(Layer):
     def __init__(
         self,
         layer: Layer,
-        input_dim_wo_batch: Union[None, List[int]] = None,
-        output_dim_wo_batch: Union[None, List[int]] = None,
+        input_dim_wo_batch: Union[None, Tuple[int]] = None,
+        output_dim_wo_batch: Union[None, Tuple[int]] = None,
         **kwargs,
     ):
         super().__init__(**kwargs)
+
         self.layer = layer
         if input_dim_wo_batch is None:
             if isinstance(layer.input, list):
-                input_dim_wo_batch = [list(input_i.shape[1:]) for input_i in self.layer.input]
+                input_dim_wo_batch = tuple(input_i.shape[1:] for input_i in self.layer.input)
             else:
-                input_dim_wo_batch = list(self.layer.input.shape[1:])
+                input_dim_wo_batch = self.layer.input.shape[1:]
 
         self.input_dim_wo_batch = input_dim_wo_batch
-        if isinstance(self.input_dim_wo_batch[0], list):
+        if isinstance(self.input_dim_wo_batch[0], tuple):
             self.n_input = len(input_dim_wo_batch)
         else:
             self.n_input = 1
         if output_dim_wo_batch is None:
-            output_dim_wo_batch = list(self.layer.output.shape[1:])
+            output_dim_wo_batch = self.layer.output.shape[1:]
         self.output_dim_wo_batch = output_dim_wo_batch
 
         # In many scenarios, the backward pass can be represented using a native Keras layer
@@ -102,7 +103,7 @@ class BackwardLayer(Layer):
                 layer_input = inputs[1]
             elif len(inputs) > 2:
                 layer_input = inputs[1:]
-        reshape_tag, gradient_, n_out = reshape_to_batch(gradient, [1] + self.output_dim_wo_batch)
+        reshape_tag, gradient_, n_out = reshape_to_batch(gradient, (1,) + self.output_dim_wo_batch)
         output = self.call_on_reshaped_gradient(
             gradient_, input=layer_input, training=training, mask=mask
         )
@@ -112,12 +113,12 @@ class BackwardLayer(Layer):
                 output = [
                     K.reshape(
                         output[i],
-                        [-1] + n_out + list(self.input_dim_wo_batch[i]),
+                        (-1,) + tuple(n_out) + self.input_dim_wo_batch[i],
                     )
                     for i in range(self.n_input)
                 ]
             else:
-                output = K.reshape(output, [-1] + n_out + self.input_dim_wo_batch)
+                output = K.reshape(output, (-1,) + tuple(n_out) + self.input_dim_wo_batch)
 
         return output
 
@@ -128,8 +129,23 @@ class BackwardLayer(Layer):
 
         input_dim_wo_batch_config = config.pop("input_dim_wo_batch")
         input_dim_wo_batch = keras.saving.deserialize_keras_object(input_dim_wo_batch_config)
+        if isinstance(input_dim_wo_batch, list):
+            if isinstance(input_dim_wo_batch[0], list):
+                input_dim_wo_batch = tuple(
+                    tuple(input_dim_wo_batch_i) for input_dim_wo_batch_i in input_dim_wo_batch
+                )
+            else:
+                input_dim_wo_batch = tuple(input_dim_wo_batch)
+
         output_dim_wo_batch_config = config.pop("output_dim_wo_batch")
         output_dim_wo_batch = keras.saving.deserialize_keras_object(output_dim_wo_batch_config)
+        if isinstance(output_dim_wo_batch, list):
+            if isinstance(output_dim_wo_batch[0], list):
+                output_dim_wo_batch = tuple(
+                    tuple(output_dim_wo_batch_i) for output_dim_wo_batch_i in output_dim_wo_batch
+                )
+            else:
+                output_dim_wo_batch = tuple(output_dim_wo_batch)
 
         return cls(
             layer=layer,
@@ -139,9 +155,16 @@ class BackwardLayer(Layer):
         )
 
     def compute_output_shape(self, input_shape):
-        if isinstance(self.input_dim_wo_batch[0], list):
-            return [[1] + input_dim_wo_batch_i for input_dim_wo_batch_i in self.input_dim_wo_batch]
-        return [1] + self.input_dim_wo_batch
+        if isinstance(self.input_dim_wo_batch[0], tuple):
+            return tuple(
+                (1,) + input_dim_wo_batch_i for input_dim_wo_batch_i in self.input_dim_wo_batch
+            )
+        try:
+            return (1,) + self.input_dim_wo_batch
+        except TypeError:
+            import pdb
+
+            pdb.set_trace()
 
 
 @keras.saving.register_keras_serializable()
