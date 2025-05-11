@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Any, Callable, Optional
 
 from jacobinet.layers import (  # merging
     get_backward_Activation,
@@ -88,18 +88,11 @@ from keras.layers import (  # type:ignore
     ZeroPadding3D,
 )
 
-
-# define BackwardLinear here to avoid circular import
-def convert_to_backward(layer, use_bias):
-    layer_backward = get_backward(layer, use_bias)
-    return layer_backward
-
-
 logger = logging.getLogger(__name__)
 
 BACKWARD_PREFIX = "get_backward"
 
-default_mapping_keras2backward_layer: dict[type[Layer], type[callable]] = {
+default_mapping_keras2backward_layer: dict[type[Layer], Callable[..., Any]] = {
     # convolution
     Conv2D: get_backward_Conv2D,
     Conv1D: get_backward_Conv1D,
@@ -154,8 +147,8 @@ default_mapping_keras2backward_layer: dict[type[Layer], type[callable]] = {
 def get_backward(
     layer: Layer,
     mapping_keras2backward_classes: Optional[dict[type[Layer], type[BackwardLayer]]] = None,
-    **kwargs,
-):
+    **kwargs: Any,
+) -> BackwardLayer:
     keras_class = type(layer)
 
     if mapping_keras2backward_classes is not None:
