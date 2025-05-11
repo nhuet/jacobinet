@@ -1,9 +1,10 @@
 # abstract class for BackwardLayer
-from typing import List, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import keras
 import keras.ops as K  # type:ignore
 from jacobinet.layers.utils import reshape_to_batch, share_weights_and_build
+from jacobinet.utils import to_tuple
 from keras import KerasTensor as Tensor
 from keras.layers import Activation, Input, Layer  # type:ignore
 
@@ -40,7 +41,7 @@ class BackwardLayer(Layer):
         layer: Layer,
         input_dim_wo_batch: Union[None, Tuple[int]] = None,
         output_dim_wo_batch: Union[None, Tuple[int]] = None,
-        **kwargs,
+        **kwargs: Any,
     ):
         super().__init__(**kwargs)
 
@@ -64,9 +65,9 @@ class BackwardLayer(Layer):
         # (e.g., Conv2D can map to Conv2DTranspose).
         # In such cases, users can directly specify a `layer_backward` function,
         # which will be invoked automatically.
-        self.layer_backward = None
+        self.layer_backward: Optional[Callable[..., Any]] = None
 
-    def get_config(self):
+    def get_config(self) -> Dict:
         config = super().get_config()
         layer_config = keras.saving.serialize_keras_object(self.layer)
         # self.constant is a tensor, first convert it to float value
@@ -88,20 +89,20 @@ class BackwardLayer(Layer):
         self,
         gradient: Tensor,
         input: Union[None, Tensor] = None,
-        training: bool = None,
+        training: Union[bool, None] = None,
         mask: Union[None, Tensor] = None,
     ) -> Union[Tensor, List[Tensor]]:
         if self.layer_backward:
             return self.layer_backward(gradient)
         raise NotImplementedError()
 
-    def build(input_shape: tuple[int]):
+    def build(self, input_shape: tuple[int]) -> None:
         super().build(input_shape)
 
     def call(
         self,
         inputs: Union[Tensor, List[Tensor]],
-        training: bool = None,
+        training: Union[bool, None] = None,
         mask: Union[None, Tensor] = None,
     ) -> Union[Tensor, List[Tensor]]:
         layer_input = None
@@ -124,7 +125,7 @@ class BackwardLayer(Layer):
                 output = [
                     K.reshape(
                         output[i],
-                        (-1,) + tuple(n_out) + self.input_dim_wo_batch[i],
+                        (-1,) + to_tuple(n_out) + to_tuple(self.input_dim_wo_batch[i]),
                     )
                     for i in range(self.n_input)
                 ]
@@ -134,7 +135,7 @@ class BackwardLayer(Layer):
         return output
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls: Any, config: Dict) -> Type[Layer]:
         layer_config = config.pop("layer")
         layer = keras.saving.deserialize_keras_object(layer_config)
 
@@ -165,10 +166,18 @@ class BackwardLayer(Layer):
             **config,
         )
 
-    def compute_output_shape(self, input_shape):
+    def compute_output_shape(
+        self, input_shape: Tuple[Union[int, Tuple[int]]]
+    ) -> Union[Tuple[Tuple[int, ...], ...], Tuple[int, ...]]:
         if isinstance(self.input_dim_wo_batch[0], tuple):
             return tuple(
-                (1,) + input_dim_wo_batch_i for input_dim_wo_batch_i in self.input_dim_wo_batch
+                (1,)
+                + (
+                    input_dim_wo_batch_i
+                    if isinstance(input_dim_wo_batch_i, tuple)
+                    else (input_dim_wo_batch_i,)
+                )
+                for input_dim_wo_batch_i in self.input_dim_wo_batch
             )
         return (1,) + self.input_dim_wo_batch
 
@@ -278,7 +287,7 @@ class BackwardWithActivation(BackwardNonLinearLayer):
         layer: Layer,
         backward_linear: Type[BackwardLinearLayer],
         backward_activation: Type[BackwardNonLinearLayer],
-        **kwargs,
+        **kwargs: Any,
     ):
         super().__init__(layer=layer, **kwargs)
         activation_name = layer.get_config()["activation"]
@@ -304,7 +313,7 @@ class BackwardWithActivation(BackwardNonLinearLayer):
             input_shape_wo_batch=self.input_dim_wo_batch,
         )
 
-        self.layer_backward = backward_linear(
+        self.layer_backward: Callable[..., Any] = backward_linear(
             self.layer_wo_activation,
             input_dim_wo_batch=self.input_dim_wo_batch,
             output_dim_wo_batch=self.output_dim_wo_batch,
@@ -315,7 +324,7 @@ class BackwardWithActivation(BackwardNonLinearLayer):
     def call(
         self,
         inputs: Union[Tensor, List[Tensor]],
-        training: bool = None,
+        training: Union[bool, None] = None,
         mask: Union[None, Tensor] = None,
     ) -> Union[Tensor, List[Tensor]]:
         # apply locally the chain rule

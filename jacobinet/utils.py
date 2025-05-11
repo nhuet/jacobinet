@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import Iterable, List, Tuple, Union
 
 from keras import KerasTensor as Tensor
 
@@ -29,3 +29,32 @@ def to_list(tensor: Union[Tensor, List[Tensor]]) -> List[Tensor]:
     if isinstance(tensor, list):
         return tensor
     return [tensor]
+
+
+def to_tuple(x: Union[int, Iterable[int]]) -> Tuple[int, ...]:
+    """
+    Convert an integer or iterable of integers into a tuple of integers.
+
+    This utility function ensures that the input is returned as a tuple of integers,
+    regardless of whether a single integer or an iterable (like a list or tuple) of integers is provided.
+
+    Parameters
+    ----------
+    x : int or Iterable[int]
+        The input value to be converted. If an `int` is provided, it is wrapped in a tuple.
+        If an iterable of integers is provided, it is converted to a tuple.
+
+    Returns
+    -------
+    Tuple[int, ...]
+        A tuple of integers.
+
+    Examples
+    --------
+    >>> to_tuple(5)
+    (5,)
+
+    >>> to_tuple([1, 2, 3])
+    (1, 2, 3)
+    """
+    return (x,) if isinstance(x, int) else tuple(x)
