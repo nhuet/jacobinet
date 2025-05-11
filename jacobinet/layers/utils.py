@@ -1,6 +1,7 @@
 from typing import Callable, List, Tuple, Union
 
 import keras.ops as K  # type:ignore
+from jacobinet.utils import to_tuple
 from keras import KerasTensor as Tensor
 from keras.layers import (  # type:ignore
     Cropping1D,
@@ -53,7 +54,7 @@ def compute_output_pad(
 
     w_pad = (w - k_w + 2 * p) / s_w + 1 - w
     h_pad = (h - k_h + 2 * p) / s_h + 1 - h
-    return (w_pad, h_pad)
+    return (int(w_pad), int(h_pad))
 
 
 def pooling_layer2D(
@@ -184,6 +185,16 @@ def pooling_layer3D(
                                                 If no padding or cropping is needed, an empty list is returned.
 
     """
+    padding: Union[
+        Tuple[Tuple[int, int], Tuple[int, int]],  # 2 times
+        Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int]],  # 3 times
+        Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int], Tuple[int, int]],  # 4 times
+    ]
+    cropping: Union[
+        Tuple[Tuple[int, int], Tuple[int, int]],  # 2 times
+        Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int]],  # 3 times
+        Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int], Tuple[int, int]],  # 4 times
+    ]
     if d_pad or w_pad or h_pad:
         # add padding
         if d_pad >= 0 and w_pad >= 0 and h_pad >= 0:
@@ -328,7 +339,7 @@ def reshape_to_batch(
         n_out = list(input_tensor.shape[: -len(layer_output_shape[1:])][1:])
         return (
             True,
-            K.reshape(input_tensor, (-1,) + layer_output_shape[1:]),
+            K.reshape(input_tensor, (-1,) + to_tuple(layer_output_shape[1:])),
             n_out,
         )
     else:
