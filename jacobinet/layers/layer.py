@@ -88,9 +88,9 @@ class BackwardLayer(Layer):
     def call_on_reshaped_gradient(
         self,
         gradient: Tensor,
-        input: Union[None, Tensor] = None,
-        training: Union[bool, None] = None,
-        mask: Union[None, Tensor] = None,
+        input: Optional[Tensor] = None,
+        training: Optional[bool] = None,
+        mask: Optional[Tensor] = None,
     ) -> Union[Tensor, List[Tensor]]:
         if self.layer_backward:
             return self.layer_backward(gradient)

@@ -1,6 +1,9 @@
+from typing import Any, Optional
+
 import keras
 import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
+from keras import KerasTensor as Tensor
 from keras.layers import EinsumDense, Layer  # type: ignore
 from keras.src import ops
 
@@ -27,11 +30,17 @@ class BackwardEinsumDense(BackwardLinearLayer):
     def __init__(
         self,
         layer: EinsumDense,
-        **kwargs,
+        **kwargs: Any,
     ):
         super().__init__(layer=layer, **kwargs)
 
-    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
+    def call_on_reshaped_gradient(
+        self,
+        gradient: Tensor,
+        input: Optional[Tensor] = None,
+        training: Optional[bool] = None,
+        mask: Optional[Tensor] = None,
+    ) -> Tensor:
         output = ops.einsum(self.layer.equation, gradient, K.transpose(self.layer.kernel))
 
         return output

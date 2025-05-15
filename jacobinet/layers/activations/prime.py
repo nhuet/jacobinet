@@ -71,9 +71,10 @@ def deserialize(name: str) -> Callable[..., list[Tensor]]:
         return silu_prime
     elif name == HARD_SWISH:
         return hard_silu_prime
+    raise ValueError("unknown activation name {}".format(name))
 
 
-def softmax_prime(inputs: Tensor):
+def softmax_prime(inputs: Tensor) -> Tensor:
     """
     Computes the derivative of the Softmax activation function.
 

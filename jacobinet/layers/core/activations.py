@@ -1,3 +1,5 @@
+from typing import Any, Optional
+
 import keras
 import keras.ops as K  # type: ignore
 from jacobinet.layers.activations.prime import deserialize
@@ -25,13 +27,19 @@ class BackwardActivation(BackwardNonLinearLayer):
     def __init__(
         self,
         layer: Activation,
-        **kwargs,
+        **kwargs: Any,
     ):
         super().__init__(layer=layer, **kwargs)
         activation_name = layer.get_config()["activation"]
         self.layer_backward = deserialize(activation_name)
 
-    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
+    def call_on_reshaped_gradient(
+        self,
+        gradient: Tensor,
+        input: Optional[Tensor] = None,
+        training: Optional[bool] = None,
+        mask: Optional[Tensor] = None,
+    ) -> Tensor:
         backward_output: Tensor = self.layer_backward(input)
         output = gradient * backward_output
         return output

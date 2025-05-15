@@ -1,3 +1,5 @@
+from typing import Any, Optional
+
 import keras
 import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardNonLinearLayer
@@ -26,11 +28,17 @@ class BackwardELU(BackwardNonLinearLayer):
     def __init__(
         self,
         layer: ELU,
-        **kwargs,
+        **kwargs: Any,
     ):
         super().__init__(layer=layer, **kwargs)
 
-    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
+    def call_on_reshaped_gradient(
+        self,
+        gradient: Tensor,
+        input: Optional[Tensor] = None,
+        training: Optional[bool] = None,
+        mask: Optional[Tensor] = None,
+    ) -> Tensor:
         backward_output: Tensor = elu_prime(input, alpha=self.layer.alpha)
         output = gradient * backward_output
         return output

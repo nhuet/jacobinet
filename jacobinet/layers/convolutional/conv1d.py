@@ -1,3 +1,5 @@
+from typing import List, Tuple, Type, Union
+
 import keras
 import keras.ops as K  # type: ignore
 from jacobinet.layers.core.activations import BackwardActivation
@@ -9,7 +11,9 @@ from keras.layers import Conv1D, Conv1DTranspose, Input  # type: ignore
 from keras.models import Sequential  # type: ignore
 
 
-def init_backward_conv1D(layer, input_dim_wo_batch, output_dim_wo_batch):
+def init_backward_conv1D(
+    layer: Type[Conv1D], input_dim_wo_batch: Tuple[int], output_dim_wo_batch: Tuple[int]
+) -> Union[Type[Conv1D], Type[Sequential]]:
     dico_conv = layer.get_config()
     dico_conv.pop("groups")
     # input_shape = list(layer.input.shape[1:])

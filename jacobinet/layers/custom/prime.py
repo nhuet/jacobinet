@@ -4,7 +4,7 @@ import keras.ops as K  # type: ignore
 from keras import KerasTensor as Tensor
 
 
-def max_prime(inputs: Tensor, axis: int):
+def max_prime(inputs: Tensor, axis: int) -> Tensor:
     """
     Computes the derivative of the max operation with respect to the inputs along a specified axis.
 
@@ -32,7 +32,7 @@ def max_prime(inputs: Tensor, axis: int):
     return K.one_hot(indices, dim_i, axis=axis)
 
 
-def global_max_prime(inputs: Tensor, axis: List[int]):
+def global_max_prime(inputs: Tensor, axis: List[int]) -> Tensor:
     """
     Computes the derivative of the global max operation with respect to the inputs along multiple axes.
 
