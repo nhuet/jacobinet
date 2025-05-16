@@ -1,6 +1,9 @@
+from typing import Any, Optional
+
 import keras
 import keras.ops as K  # type: ignore
 from jacobinet.layers.merging.base_merge import BackwardMergeLinearLayer
+from keras import KerasTensor as Tensor  # type: ignore
 from keras.layers import Concatenate, Layer  # type: ignore
 
 
@@ -23,14 +26,20 @@ class BackwardConcatenate(BackwardMergeLinearLayer):
     def __init__(
         self,
         layer: Concatenate,
-        **kwargs,
+        **kwargs: Any,
     ):
         super().__init__(layer=layer, **kwargs)
         self.dims = [
             ((1,) + layer_i_shape)[self.layer.axis] for layer_i_shape in self.input_dim_wo_batch
         ]
 
-    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
+    def call_on_reshaped_gradient(
+        self,
+        gradient: Tensor,
+        input: Optional[Tensor] = None,
+        training: Optional[bool] = None,
+        mask: Optional[Tensor] = None,
+    ) -> Tensor:
         return K.split(
             gradient,
             indices_or_sections=K.cumsum(self.dims[:-1]),

@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, List, Optional
 
 import keras
 import keras.ops as K  # type: ignore
@@ -35,7 +35,7 @@ class BackwardDepthwiseConv2D(BackwardLinearLayer):
     def __init__(
         self,
         layer: DepthwiseConv2D,
-        **kwargs,
+        **kwargs: Any,
     ):
         super().__init__(layer=layer, **kwargs)
 
@@ -115,7 +115,13 @@ class BackwardDepthwiseConv2D(BackwardLinearLayer):
         else:
             self.inner_models = conv_transpose_list
 
-    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
+    def call_on_reshaped_gradient(
+        self,
+        gradient: Tensor,
+        input: Optional[Tensor] = None,
+        training: Optional[bool] = None,
+        mask: Optional[Tensor] = None,
+    ) -> Tensor:
         output = call_backward_depthwise2d(
             gradient,
             self.layer,
@@ -149,7 +155,7 @@ class BackwardDepthwiseConv2DWithActivation(BackwardWithActivation):
     def __init__(
         self,
         layer: DepthwiseConv2D,
-        **kwargs,
+        **kwargs: Any,
     ):
         super().__init__(
             layer=layer,

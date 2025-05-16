@@ -1,3 +1,5 @@
+from typing import Any
+
 import keras
 from jacobinet.layers.layer import BackwardLinearLayer
 from keras.layers import Layer  # type: ignore
@@ -24,7 +26,7 @@ class BackwardReshape(BackwardLinearLayer):
     def __init__(
         self,
         layer: Reshape,
-        **kwargs,
+        **kwargs: Any,
     ):
         super().__init__(layer=layer, **kwargs)
         self.layer_backward = Reshape(target_shape=self.input_dim_wo_batch)

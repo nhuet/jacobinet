@@ -1,5 +1,5 @@
 import math
-from typing import List
+from typing import Any, List, Optional, Union
 
 from keras.layers import ZeroPadding2D  # type: ignore
 from keras.layers import Input, Reshape
@@ -70,7 +70,13 @@ class ConstantPadding2D(ZeroPadding2D):
           `(batch_size, channels, padded_height, padded_width)`
     """
 
-    def __init__(self, const=0.0, padding=(1, 1), data_format=None, **kwargs):
+    def __init__(
+        self,
+        const: Union[float, int] = 0.0,
+        padding: tuple[int, ...] = (1, 1),
+        data_format: Optional[str] = None,
+        **kwargs: Any,
+    ):
         super().__init__(padding=padding, data_format=data_format, **kwargs)
         self.const = const
 

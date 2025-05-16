@@ -1,3 +1,5 @@
+from typing import Any
+
 import keras
 import numpy as np
 from jacobinet.layers.layer import BackwardLinearLayer
@@ -25,7 +27,7 @@ class BackwardPermute(BackwardLinearLayer):
     def __init__(
         self,
         layer: Permute,
-        **kwargs,
+        **kwargs: Any,
     ):
         super().__init__(layer=layer, **kwargs)
         dims = layer.dims

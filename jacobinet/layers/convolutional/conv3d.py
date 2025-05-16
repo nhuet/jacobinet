@@ -1,3 +1,5 @@
+from typing import Any
+
 import keras
 import keras.ops as K  # type: ignore
 from jacobinet.layers.core.activations import BackwardActivation
@@ -28,7 +30,7 @@ class BackwardConv3D(BackwardLinearLayer):
     def __init__(
         self,
         layer: Conv3D,
-        **kwargs,
+        **kwargs: Any,
     ):
         super().__init__(layer=layer, **kwargs)
         dico_conv = layer.get_config()
@@ -92,7 +94,7 @@ class BackwardConv3DWithActivation(BackwardWithActivation):
     def __init__(
         self,
         layer: Conv3D,
-        **kwargs,
+        **kwargs: Any,
     ):
         super().__init__(
             layer=layer,

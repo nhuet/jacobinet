@@ -1,4 +1,4 @@
-from typing import List, Tuple, Type, Union
+from typing import Any, List, Tuple, Type, Union
 
 import keras
 import keras.ops as K  # type: ignore
@@ -35,6 +35,9 @@ def init_backward_conv1D(
     input_shape_wo_batch = input_dim_wo_batch
     input_shape_wo_batch_wo_pad = list(layer_backward(Input(output_dim_wo_batch))[0].shape)
 
+    assert len(input_shape_wo_batch_wo_pad) > 2  # mypy error is raised without
+    assert len(input_shape_wo_batch) > 2
+
     if layer.data_format == "channels_first":
         w_pad = input_shape_wo_batch[1] - input_shape_wo_batch_wo_pad[1]
     else:
@@ -67,7 +70,7 @@ class BackwardConv1D(BackwardLinearLayer):
     def __init__(
         self,
         layer: Conv1D,
-        **kwargs,
+        **kwargs: Any,
     ):
         super().__init__(layer=layer, **kwargs)
         self.layer_backward = init_backward_conv1D(
@@ -94,7 +97,7 @@ class BackwardConv1DWithActivation(BackwardWithActivation):
     def __init__(
         self,
         layer: Conv1D,
-        **kwargs,
+        **kwargs: Any,
     ):
         super().__init__(
             layer=layer,

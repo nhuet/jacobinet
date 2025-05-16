@@ -1,9 +1,10 @@
-from typing import List
+from typing import Any, List, Optional
 
 import keras
 import keras.ops as K  # type: ignore
 from jacobinet.layers.layer import BackwardLinearLayer
 from jacobinet.layers.utils import pooling_layer3D
+from keras import KerasTensor as Tensor
 from keras.layers import (  # type: ignore
     Conv3DTranspose,
     DepthwiseConv3D,
@@ -33,7 +34,7 @@ class BackwardDepthwiseConv3D(BackwardLinearLayer):
     def __init__(
         self,
         layer: DepthwiseConv3D,
-        **kwargs,
+        **kwargs: Any,
     ):
         super().__init__(layer=layer, **kwargs)
 
@@ -124,7 +125,13 @@ class BackwardDepthwiseConv3D(BackwardLinearLayer):
         else:
             self.inner_models = conv_transpose_list
 
-    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
+    def call_on_reshaped_gradient(
+        self,
+        gradient: Tensor,
+        input: Optional[Tensor] = None,
+        training: Optional[bool] = None,
+        mask: Optional[Tensor] = None,
+    ) -> Tensor:
         outputs = self.op_reshape(
             gradient
         )  # (batch, d_m, c_in, d_out, w_out, h_out) if data_format=channel_first

@@ -1,3 +1,5 @@
+from typing import Any
+
 import keras
 from jacobinet.layers.layer import BackwardLinearLayer
 from keras.layers import Layer  # type: ignore
@@ -24,7 +26,7 @@ class BackwardCropping1D(BackwardLinearLayer):
     def __init__(
         self,
         layer: Cropping1D,
-        **kwargs,
+        **kwargs: Any,
     ):
         super().__init__(layer=layer, **kwargs)
         dico_cropping = layer.get_config()

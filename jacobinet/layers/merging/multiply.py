@@ -1,6 +1,9 @@
+from typing import List, Optional
+
 import keras
 import keras.ops as K  # type: ignore
 from jacobinet.layers.merging.base_merge import BackwardMergeNonLinearLayer
+from keras import KerasTensor as Tensor  # type: ignore
 from keras.layers import Layer, Multiply  # type: ignore
 
 
@@ -20,7 +23,13 @@ class BackwardMultiply(BackwardMergeNonLinearLayer):
     output = backward_layer(input_tensor)
     """
 
-    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
+    def call_on_reshaped_gradient(
+        self,
+        gradient: Tensor,
+        input: List[Tensor],
+        training: Optional[bool] = None,
+        mask: Optional[Tensor] = None,
+    ) -> List[Tensor]:
         layer_input_0 = input[0]
         layer_input_1 = input[1]
 

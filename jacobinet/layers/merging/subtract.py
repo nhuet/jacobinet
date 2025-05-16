@@ -1,5 +1,8 @@
+from typing import Any, List, Optional
+
 import keras
 from jacobinet.layers.merging.base_merge import BackwardMergeLinearLayer
+from keras import KerasTensor as Tensor  # type: ignore
 from keras.layers import Layer, Subtract  # type: ignore
 
 
@@ -22,17 +25,18 @@ class BackwardSubtract(BackwardMergeLinearLayer):
     def __init__(
         self,
         layer: Subtract,
-        **kwargs,
+        **kwargs: Any,
     ):
         super().__init__(layer=layer, **kwargs)
 
-    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
+    def call_on_reshaped_gradient(
+        self,
+        gradient: Tensor,
+        input: Optional[List[Tensor]] = None,
+        training: Optional[bool] = None,
+        mask: Optional[Tensor] = None,
+    ) -> List[Tensor]:
         return [gradient, -gradient]
-
-    """
-    def call(self, inputs, training=None, mask=None):
-        return [inputs, - inputs]
-    """
 
 
 def get_backward_Subtract(layer: Subtract) -> Layer:

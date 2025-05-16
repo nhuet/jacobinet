@@ -1,3 +1,5 @@
+from typing import Optional
+
 import keras
 from jacobinet.layers.merging.base_merge import BackwardMergeLinearLayer
 from keras import KerasTensor as Tensor  # type: ignore
@@ -20,7 +22,13 @@ class BackwardAverage(BackwardMergeLinearLayer):
     output = backward_layer(input_tensor)
     """
 
-    def call_on_reshaped_gradient(self, gradient, input=None, training=None, mask=None):
+    def call_on_reshaped_gradient(
+        self,
+        gradient: Tensor,
+        input: Optional[Tensor] = None,
+        training: Optional[bool] = None,
+        mask: Optional[Tensor] = None,
+    ) -> Tensor:
         coeff = 1.0 / self.n_input
         return [coeff * gradient] * self.n_input
 

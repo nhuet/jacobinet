@@ -1,3 +1,5 @@
+from typing import Any
+
 import keras
 import numpy as np
 from jacobinet.layers.layer import BackwardLinearLayer
@@ -26,7 +28,7 @@ class BackwardFlatten(BackwardLinearLayer):
     def __init__(
         self,
         layer: Flatten,
-        **kwargs,
+        **kwargs: Any,
     ):
         super().__init__(layer=layer, **kwargs)
         input_shape_wo_batch = self.input_dim_wo_batch
