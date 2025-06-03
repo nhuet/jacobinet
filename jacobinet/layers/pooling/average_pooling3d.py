@@ -56,7 +56,7 @@ class BackwardAveragePooling3D(BackwardLinearLayer):
             trainable=False,
         )
         kernel_ = np.ones(pool_size + [1, 1]) / np.prod(pool_size)
-        layer_t.kernel = keras.Variable(kernel_)
+        layer_t.kernel = keras.Variable(kernel_, dtype=keras.config.floatx())
         layer_t.built = True
 
         # shape of transposed input
