@@ -35,8 +35,8 @@ def init_backward_conv1D(
     input_shape_wo_batch = input_dim_wo_batch
     input_shape_wo_batch_wo_pad = list(layer_backward(Input(output_dim_wo_batch))[0].shape)
 
-    assert len(input_shape_wo_batch_wo_pad) > 2  # mypy error is raised without
-    assert len(input_shape_wo_batch) > 2
+    assert len(input_shape_wo_batch_wo_pad) >= 2  # mypy error is raised without
+    assert len(input_shape_wo_batch) >= 2
 
     if layer.data_format == "channels_first":
         w_pad = input_shape_wo_batch[1] - input_shape_wo_batch_wo_pad[1]

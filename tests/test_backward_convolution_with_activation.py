@@ -15,6 +15,8 @@ from keras.layers import (
     DepthwiseConv2D,
     Input,
     Reshape,
+    SeparableConv1D,
+    SeparableConv2D,
 )
 from keras.models import Sequential
 
@@ -79,6 +81,35 @@ def _test_backward_Conv2D(
     serialize_model([input_dim, 1], backward_model)
 
 
+# pool_size, strides=None, padding="valid", data_format=None
+def _test_backward_SeparableConv2D(
+    input_shape,
+    filters,
+    kernel_size,
+    strides,
+    padding,
+    use_bias,
+    activation="relu",
+):
+    # data_format == 'channels_first'
+    layer = SeparableConv2D(
+        filters=filters,
+        kernel_size=kernel_size,
+        strides=strides,
+        padding=padding,
+        use_bias=use_bias,
+        activation=activation,
+    )
+    input_dim = np.prod(input_shape)
+    model = Sequential([Reshape(input_shape), layer, Reshape((-1,)), Dense(1)])
+    _ = model(np.ones(input_dim)[None])
+    backward_layer = get_backward(layer)  # check it is running
+    backward_model = get_backward_sequential(model)
+
+    compute_backward_model((input_dim,), model, backward_model)
+    serialize_model([input_dim, 1], backward_model)
+
+
 def _test_backward_Conv1D(
     input_shape,
     filters,
@@ -90,6 +121,33 @@ def _test_backward_Conv1D(
 ):
     # data_format == 'channels_first'
     layer = Conv1D(
+        filters=filters,
+        kernel_size=kernel_size,
+        strides=strides,
+        padding=padding,
+        use_bias=use_bias,
+        activation=activation,
+    )
+    input_dim = np.prod(input_shape)
+    model = Sequential([Reshape(input_shape), layer, Reshape((-1,)), Dense(1)])
+    _ = model(np.ones(input_dim)[None])
+    backward_layer = get_backward(layer)  # check it is running
+    backward_model = get_backward_sequential(model)
+    compute_backward_model((input_dim,), model, backward_model)
+    serialize_model([input_dim, 1], backward_model)
+
+
+def _test_backward_SeparableConv1D(
+    input_shape,
+    filters,
+    kernel_size,
+    strides,
+    padding,
+    use_bias,
+    activation="relu",
+):
+    # data_format == 'channels_first'
+    layer = SeparableConv1D(
         filters=filters,
         kernel_size=kernel_size,
         strides=strides,
@@ -223,6 +281,134 @@ def _test_backward_DepthwiseConv1D(
     np.testing.assert_almost_equal(output_model, output_model_split, err_msg="corrupted weights")
 
     serialize_model([input_dim, 1], backward_model)
+
+
+@pytest.mark.parametrize(
+    "activation, data_format",
+    [
+        ("relu", "channels_first"),
+        ("sigmoid", "channels_first"),
+        ("tanh", "channels_first"),
+        ("relu", "channels_last"),
+        ("sigmoid", "channels_last"),
+        ("tanh", "channels_last"),
+    ],
+)
+def test_backward_SeparableConv1D(activation, data_format):
+    input_shape = (3, 32)
+    kernel_size = (2,)
+    strides = 1
+    filters = 2
+    padding = "same"
+    use_bias = False
+    _test_backward_SeparableConv1D(
+        input_shape,
+        filters,
+        kernel_size,
+        strides,
+        padding,
+        use_bias,
+        activation=activation,
+    )
+
+    input_shape = (1, 31)
+    kernel_size = (2,)
+    strides = (1,)
+    filters = 2
+    padding = "valid"
+    use_bias = False
+    _test_backward_SeparableConv1D(
+        input_shape,
+        filters,
+        kernel_size,
+        strides,
+        padding,
+        use_bias,
+        activation=activation,
+    )
+
+    input_shape = (
+        4,
+        32,
+    )
+    kernel_size = (4,)
+    strides = (3,)
+    filters = 2
+    padding = "same"
+    use_bias = False
+    _test_backward_SeparableConv1D(
+        input_shape,
+        filters,
+        kernel_size,
+        strides,
+        padding,
+        use_bias,
+        activation=activation,
+    )
+
+
+@pytest.mark.parametrize(
+    "activation, data_format",
+    [
+        ("relu", "channels_first"),
+        ("sigmoid", "channels_first"),
+        ("tanh", "channels_first"),
+        ("relu", "channels_last"),
+        ("sigmoid", "channels_last"),
+        ("tanh", "channels_last"),
+    ],
+)
+def test_backward_Conv1D(activation, data_format):
+    input_shape = (3, 32)
+    kernel_size = (2,)
+    strides = 1
+    filters = 2
+    padding = "same"
+    use_bias = False
+    _test_backward_Conv1D(
+        input_shape,
+        filters,
+        kernel_size,
+        strides,
+        padding,
+        use_bias,
+        activation=activation,
+    )
+
+    input_shape = (1, 31)
+    kernel_size = (2,)
+    strides = (1,)
+    filters = 2
+    padding = "valid"
+    use_bias = False
+    _test_backward_Conv1D(
+        input_shape,
+        filters,
+        kernel_size,
+        strides,
+        padding,
+        use_bias,
+        activation=activation,
+    )
+
+    input_shape = (
+        4,
+        32,
+    )
+    kernel_size = (4,)
+    strides = (3,)
+    filters = 2
+    padding = "same"
+    use_bias = False
+    _test_backward_Conv1D(
+        input_shape,
+        filters,
+        kernel_size,
+        strides,
+        padding,
+        use_bias,
+        activation=activation,
+    )
 
 
 @pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
@@ -539,14 +725,18 @@ def test_backward_Conv2D(activation, data_format):
         ("tanh", "channels_last"),
     ],
 )
-def Atest_backward_Conv1D(activation, data_format):
-    input_shape = (3, 32)
-    kernel_size = (2,)
-    strides = 1
+def test_backward_SeparableConv2D(activation, data_format):
+    keras.config.set_image_data_format(data_format)
+    if data_format == "channels_first":
+        input_shape = (3, 32, 32)
+    else:
+        input_shape = (32, 32, 3)
+    kernel_size = (2, 2)
+    strides = (1, 1)
     filters = 2
     padding = "same"
     use_bias = False
-    _test_backward_Conv1D(
+    _test_backward_SeparableConv2D(
         input_shape,
         filters,
         kernel_size,
@@ -555,14 +745,16 @@ def Atest_backward_Conv1D(activation, data_format):
         use_bias,
         activation=activation,
     )
-
-    input_shape = (1, 31)
-    kernel_size = (2,)
-    strides = (1,)
+    if data_format == "channels_first":
+        input_shape = (1, 31, 31)
+    else:
+        input_shape = (31, 31, 1)
+    kernel_size = (2, 2)
+    strides = (1, 1)
     filters = 2
     padding = "valid"
     use_bias = False
-    _test_backward_Conv1D(
+    _test_backward_SeparableConv2D(
         input_shape,
         filters,
         kernel_size,
@@ -571,17 +763,34 @@ def Atest_backward_Conv1D(activation, data_format):
         use_bias,
         activation=activation,
     )
-
-    input_shape = (
-        4,
-        32,
-    )
-    kernel_size = (4,)
-    strides = (3,)
+    if data_format == "channels_first":
+        input_shape = (1, 32, 32)
+    else:
+        input_shape = (32, 32, 1)
+    kernel_size = (2, 2)
+    strides = (3, 2)
     filters = 2
     padding = "same"
     use_bias = False
-    _test_backward_Conv1D(
+    _test_backward_SeparableConv2D(
+        input_shape,
+        filters,
+        kernel_size,
+        strides,
+        padding,
+        use_bias,
+        activation=activation,
+    )
+    if data_format == "channels_first":
+        input_shape = (4, 32, 32)
+    else:
+        input_shape = (32, 32, 4)
+    kernel_size = (4, 3)
+    strides = (3, 2)
+    filters = 2
+    padding = "same"
+    use_bias = False
+    _test_backward_SeparableConv2D(
         input_shape,
         filters,
         kernel_size,

@@ -42,6 +42,8 @@ from .convolutional import (
     get_backward_Conv2D,
     get_backward_DepthwiseConv1D,
     get_backward_DepthwiseConv2D,
+    get_backward_SeparableConv1D,
+    get_backward_SeparableConv2D,
 )
 from .core import get_backward_Activation, get_backward_Dense, get_backward_EinsumDense
 from .layer import (
