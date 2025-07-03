@@ -1,6 +1,7 @@
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 import keras
+import keras.ops as K
 import numpy as np
 from jacobinet.attacks.base_attacks import AdvLayer, AdvModel, get_adv_model_base
 from jacobinet.layers.layer import BackwardLayer
@@ -47,23 +48,28 @@ class FastGradientSign(AdvLayer):
         super().__init__(*args, **kwargs)
         self.epsilon = keras.Variable(epsilon, trainable=False)
 
-    # @keras.ops.custom_gradient
+    def get_adv(self, x, grad_x):
+        avd_x: Optional[Tensor]
+        if self.p in [np.inf, 1]:
+            adv_x = x + self.epsilon * keras.ops.sign(grad_x)
+        elif self.p == 2.0:
+            x_dim_wo_batch: int = np.prod(x.shape[1:])
+            grad_x_flat: Tensor = K.reshape(grad_x, (-1, x_dim_wo_batch))
+            adv_x = x + self.epsilon * (grad_x) / (
+                K.sqrt(K.sum(grad_x_flat**2)) + keras.config.epsilon()
+            )
+        else:
+            raise ValueError("unknown norm p={}".format(self.p))
+        return adv_x
+
     def call(self, inputs, training=None, mask=None):
         # inputs = [x and \delta f(x)]
         x, grad_x = inputs[:2]
 
-        """
-        def grad(*args, upstream=None):
-            import pdb
-
-            pdb.set_trace()
-            return keras.ops.tanh(upstream)
-        """
-
         # project given lp norm
-        adv_x = x + self.epsilon * keras.ops.sign(-grad_x)
+        adv_x = self.get_adv(x=x, grad_x=grad_x)
         adv_x = self.project_lp_ball(adv_x)
-        # import pdb; pdb.set_trace()
+        # clip inputs between lower and upper
         if len(inputs) > 2:
             lower, upper = inputs[:2]
             return keras.ops.minimum(keras.ops.maximum(adv_x, lower), upper)

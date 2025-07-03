@@ -51,20 +51,10 @@ class PGD_Cell(keras.Layer):
             lower = states[2]
             upper = states[3]
         # get adversarial attack using fgsm_model
-        try:
-            adv_x = self.fgsm_model([x, y] + list(states[2:]))
-        except KeyError:
-            import pdb
-
-            pdb.set_trace()
-        # clip projected sample hard coding for now
-        adv_x = K.maximum(adv_x, x_init - 0.31)  # why ????
-        adv_x = K.minimum(adv_x, x_init + 0.31)
-
+        adv_x = self.fgsm_model([x, y] + list(states[2:]))
         if len(states) > 2:
             adv_x = K.maximum(adv_x, lower)
             adv_x = K.minimum(adv_x, upper)
-            return adv_x, [adv_x, x_init, lower, upper]
 
         return adv_x, [adv_x, x_init] + list(states[2:])
 
@@ -150,15 +140,17 @@ class ProjectedGradientDescent(AdvLayer):
             input_shape_wo_batch = x.shape[1:]
             noise = keras.random.uniform(
                 input_shape_wo_batch,
-                minval=-0.3,
-                maxval=0.3,
+                minval=-self.radius,
+                maxval=self.radius,
                 dtype=None,
                 seed=None,
             )
             x_0 = x + K.expand_dims(noise, 0)
             # clip
-            x_0 = K.maximum(x_0, x - 0.3)
-            x_0 = K.minimum(x_0, x + 0.3)
+            x_0 = K.maximum(x_0, x - self.radius)
+            x_0 = K.minimum(x_0, x + self.radius)
+            x_0 = K.maximum(x_0, self.lower)
+            x_0 = K.maximum(x_0, self.upper)
         else:
             x_0 = x
 
