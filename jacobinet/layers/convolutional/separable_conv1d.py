@@ -93,6 +93,7 @@ def split_SeparableConv1D(
     use_bias = layer.use_bias
     depth_multiplier = layer.depth_multiplier
     name = layer.name
+    data_format = layer.data_format
 
     layer_depthwise = DepthwiseConv1D(
         kernel_size=kernel_size,
@@ -100,6 +101,7 @@ def split_SeparableConv1D(
         padding=padding,
         depth_multiplier=depth_multiplier,
         use_bias=False,
+        data_format=data_format,
         name=None if not name else name + "_depthwise",
     )
     layer_conv = Conv1D(
@@ -107,6 +109,7 @@ def split_SeparableConv1D(
         kernel_size=(1,),
         padding="same",
         use_bias=use_bias,
+        data_format=data_format,
         name=None if not name else name + "_pointwise",
     )
 

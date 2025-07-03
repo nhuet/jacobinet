@@ -70,7 +70,9 @@ def _test_backward_SeparableConv2D(input_shape, filters, kernel_size, strides, p
     serialize(layer, backward_layer)
 
 
-def _test_backward_Conv1D(input_shape, filters, kernel_size, strides, padding, use_bias):
+def _test_backward_Conv1D(
+    input_shape, filters, kernel_size, strides, padding, use_bias, data_format
+):
     # data_format == 'channels_first'
     layer = Conv1D(
         filters=filters,
@@ -78,6 +80,7 @@ def _test_backward_Conv1D(input_shape, filters, kernel_size, strides, padding, u
         strides=strides,
         padding=padding,
         use_bias=use_bias,
+        data_format=data_format,
     )
     model_layer = Sequential([layer])
     _ = model_layer(np.ones(input_shape)[None])
@@ -87,7 +90,9 @@ def _test_backward_Conv1D(input_shape, filters, kernel_size, strides, padding, u
     serialize(layer, backward_layer)
 
 
-def _test_backward_SeparableConv1D(input_shape, filters, kernel_size, strides, padding, use_bias):
+def _test_backward_SeparableConv1D(
+    input_shape, filters, kernel_size, strides, padding, use_bias, data_format
+):
     # data_format == 'channels_first'
     layer = SeparableConv1D(
         filters=filters,
@@ -95,6 +100,7 @@ def _test_backward_SeparableConv1D(input_shape, filters, kernel_size, strides, p
         strides=strides,
         padding=padding,
         use_bias=use_bias,
+        data_format=data_format,
     )
     model_layer = Sequential([layer])
     _ = model_layer(np.ones(input_shape)[None])
@@ -126,7 +132,7 @@ def _test_backward_DepthwiseConv2D(
 
 # pool_size, strides=None, padding="valid", data_format=None
 def _test_backward_DepthwiseConv1D(
-    input_shape, depth_multiplier, kernel_size, strides, padding, use_bias
+    input_shape, depth_multiplier, kernel_size, strides, padding, use_bias, data_format
 ):
     # data_format == 'channels_first'
     layer = DepthwiseConv1D(
@@ -135,6 +141,7 @@ def _test_backward_DepthwiseConv1D(
         strides=strides,
         padding=padding,
         use_bias=use_bias,
+        data_format=data_format,
     )
     model_layer = Sequential([layer])
     _ = model_layer(np.ones(input_shape)[None])
@@ -211,7 +218,7 @@ def test_backward_DepthwiseConv1D(data_format):
     padding = "valid"
     use_bias = False
     _test_backward_DepthwiseConv1D(
-        input_shape, depth_multiplier, kernel_size, strides, padding, use_bias
+        input_shape, depth_multiplier, kernel_size, strides, padding, use_bias, data_format
     )
     if data_format == "channels_first":
         input_shape = (10, 31)
@@ -223,7 +230,7 @@ def test_backward_DepthwiseConv1D(data_format):
     padding = "valid"
     use_bias = False
     _test_backward_DepthwiseConv1D(
-        input_shape, depth_multiplier, kernel_size, strides, padding, use_bias
+        input_shape, depth_multiplier, kernel_size, strides, padding, use_bias, data_format
     )
     if data_format == "channels_first":
         input_shape = (1, 32)
@@ -235,7 +242,7 @@ def test_backward_DepthwiseConv1D(data_format):
     padding = "same"
     use_bias = False
     _test_backward_DepthwiseConv1D(
-        input_shape, depth_multiplier, kernel_size, strides, padding, use_bias
+        input_shape, depth_multiplier, kernel_size, strides, padding, use_bias, data_format
     )
     if data_format == "channels_first":
         input_shape = (11, 32)
@@ -247,7 +254,7 @@ def test_backward_DepthwiseConv1D(data_format):
     padding = "same"
     use_bias = False
     _test_backward_DepthwiseConv1D(
-        input_shape, depth_multiplier, kernel_size, strides, padding, use_bias
+        input_shape, depth_multiplier, kernel_size, strides, padding, use_bias, data_format
     )
 
 
@@ -404,7 +411,9 @@ def test_backward_Conv1D(data_format):
     filters = 2
     padding = "same"
     use_bias = False
-    _test_backward_Conv1D(input_shape, filters, kernel_size, strides, padding, use_bias)
+    _test_backward_Conv1D(
+        input_shape, filters, kernel_size, strides, padding, use_bias, data_format
+    )
 
     if data_format == "channels_first":
         input_shape = (1, 31)
@@ -415,7 +424,9 @@ def test_backward_Conv1D(data_format):
     filters = 2
     padding = "valid"
     use_bias = False
-    _test_backward_Conv1D(input_shape, filters, kernel_size, strides, padding, use_bias)
+    _test_backward_Conv1D(
+        input_shape, filters, kernel_size, strides, padding, use_bias, data_format
+    )
 
     if data_format == "channels_first":
         input_shape = (4, 32)
@@ -426,7 +437,9 @@ def test_backward_Conv1D(data_format):
     filters = 2
     padding = "same"
     use_bias = False
-    _test_backward_Conv1D(input_shape, filters, kernel_size, strides, padding, use_bias)
+    _test_backward_Conv1D(
+        input_shape, filters, kernel_size, strides, padding, use_bias, data_format
+    )
 
 
 @pytest.mark.parametrize("data_format", ["channels_first", "channels_last"])
@@ -441,7 +454,9 @@ def test_backward_SeparableConv1D(data_format):
     filters = 2
     padding = "same"
     use_bias = False
-    _test_backward_SeparableConv1D(input_shape, filters, kernel_size, strides, padding, use_bias)
+    _test_backward_SeparableConv1D(
+        input_shape, filters, kernel_size, strides, padding, use_bias, data_format
+    )
 
     if data_format == "channels_first":
         input_shape = (1, 31)
@@ -452,7 +467,9 @@ def test_backward_SeparableConv1D(data_format):
     filters = 2
     padding = "valid"
     use_bias = False
-    _test_backward_SeparableConv1D(input_shape, filters, kernel_size, strides, padding, use_bias)
+    _test_backward_SeparableConv1D(
+        input_shape, filters, kernel_size, strides, padding, use_bias, data_format
+    )
 
     if data_format == "channels_first":
         input_shape = (4, 32)
@@ -463,4 +480,6 @@ def test_backward_SeparableConv1D(data_format):
     filters = 2
     padding = "same"
     use_bias = False
-    _test_backward_SeparableConv1D(input_shape, filters, kernel_size, strides, padding, use_bias)
+    _test_backward_SeparableConv1D(
+        input_shape, filters, kernel_size, strides, padding, use_bias, data_format
+    )
