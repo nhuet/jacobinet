@@ -7,12 +7,10 @@ import torch
 # from jacobinet.models.model import get_backward_functional
 from jacobinet.models import clone_to_backward
 from keras.layers import (
-    Activation,
     AveragePooling2D,
     Conv2D,
     Dense,
     DepthwiseConv2D,
-    Flatten,
     Input,
     MaxPooling2D,
     ReLU,

@@ -164,3 +164,49 @@ def compute_output(input_, layers):
         else:
             output = layer(output)
     return output
+
+
+def compute_lipschitz(
+    input_shape,
+    model,
+    lipschitz_model,
+    axis=-1,
+    value="rand",
+):
+    if value == "rand":
+        input_np = np.asarray(
+            100.0 * np.random.rand(np.prod(input_shape)) - 50.0,
+            dtype="float32",
+        )
+    elif value == "zeros":
+        input_np = np.asarray(0.0 * np.random.rand(np.prod(input_shape)) - 0.0, dtype="float32")
+    elif value == "ones":
+        input_np = np.asarray(0.0 * np.random.rand(np.prod(input_shape)) + 1.0, dtype="float32")
+    else:
+        raise ValueError("unknown value {}".format(value))
+    # input_ = torch.randn(np.prod(input_shape), requires_grad=True)
+    input_ = torch.tensor(input_np, requires_grad=True)
+    input_reshape = torch.reshape(input_, [1] + list(input_shape))
+    output = model(input_reshape)
+    # consider a single output
+    select_output = output[0, 0]
+    select_output.backward()
+    gradient = input_.grad.cpu().detach().numpy()
+
+    """
+    if grad_value is None:
+        gradient_value = np.eye(output.shape[-1])
+        mask_output = torch.Tensor(gradient_value[index_output])[None]
+    else:
+        mask_output = grad_value
+
+    if is_linear(backward_model):
+        gradient_ = backward_model(mask_output).cpu().detach().numpy()
+    else:
+        if isinstance(backward_model.input, list) and len(backward_model.input) == 2:
+            gradient_ = backward_model([input_reshape, mask_output]).cpu().detach().numpy()
+        else:
+            gradient_ = backward_model(input_reshape).cpu().detach().numpy()
+    gradient = np.reshape(gradient, input_shape)
+    assert_almost_equal(gradient, gradient_[0])
+    """

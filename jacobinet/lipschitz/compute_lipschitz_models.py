@@ -6,9 +6,11 @@ from jacobinet.models import BackwardModel, BackwardSequential
 
 
 # from model
-def get_lipschitz_model(backward_model: Union[BackwardModel, BackwardSequential], p: float):
+def get_lipschitz_model(
+    backward_model: Union[BackwardModel, BackwardSequential], p: float
+) -> LipschitzModel:
     """
-    Creates a `LipschitzModel` that computes the Lipschitz constant for the given backward model.
+    Creates a `LipschitzModel` that computes the Lipschitz constant for the given backward model at a given input.
 
     This function wraps the provided `backward_model` with a `LipschitzModel`, where the output of
     the model is processed using the specified Lipschitz norm (`p`). It supports both single-output
