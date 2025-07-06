@@ -1,11 +1,16 @@
+from typing import Callable
+
 import keras  # type:ignore
+import keras.ops as K
 import numpy as np
+from keras import KerasTensor as Tensor
 from keras.layers import Layer  # type:ignore
 from keras.losses import CategoricalCrossentropy, Loss  # type:ignore
 
 CATEGORICAL_CROSSENTROPY = "categorical_crossentropy"
 MEAN_SQUARED_ERROR = "mean_squared_error"
 MEAN_ABSOLUTE_ERROR = "mean_absolute_error"
+LOGITS = "logits"
 # MeanSquaredError
 # MeanAbsoluteError
 # MeanAbsoluteError
@@ -35,7 +40,9 @@ def deserialize(name: str) -> Loss:
     """
     name = name.lower()
     if name == CATEGORICAL_CROSSENTROPY:
-        return keras.losses.CategoricalCrossentropy()
+        return keras.losses.CategoricalCrossentropy(from_logits=True)
+    if name == LOGITS:
+        return Logits()
     raise ValueError("unknown loss")
 
 
@@ -73,7 +80,37 @@ class Loss_Layer(Layer):
 
         return keras.ops.zeros_like(y_true_flatten[:, :1]) + loss
 
-    # serialization to do
+
+class Logits(Loss):
+    def call(self, y_true: Tensor, y_pred: Tensor) -> Tensor:
+        return K.sum(y_pred * y_true, -1)
+
+
+class Logits_Layer(Loss_Layer):
+    """
+    A custom Keras layer that computes a scalar output (logit) from the dot product
+    between true labels (one-hot encoded) and predicted probabilities.
+
+    This layer wraps the `Logits` function and computes the loss or score
+    by applying it to the inputs during the forward pass. It is intended for use
+    with classification tasks where predictions are compared to one-hot encoded labels.
+
+    Inherits from:
+        Loss_Layer: A base class for custom loss layers.
+
+    Args:
+        loss (Logits): A callable that computes a logit score or loss
+                       between the true labels and predictions.
+        **kwargs: Additional keyword arguments passed to the parent class (`Loss_Layer`).
+
+    Example:
+        ```python
+        logits_layer = Logits_Layer(loss=logits_instance)
+        result = logits_layer([y_true, y_pred])
+        ```
+    """
+
+    loss: Logits.__class__
 
 
 @keras.saving.register_keras_serializable()
@@ -105,6 +142,7 @@ class CategoricalCrossentropy_Layer(Loss_Layer):
 default_mapping_loss2layer: dict[type[Loss], type[Loss_Layer]] = {
     # convolution
     CategoricalCrossentropy: CategoricalCrossentropy_Layer,
+    Logits: Logits_Layer,
 }
 
 

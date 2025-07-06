@@ -37,15 +37,17 @@ class BackwardCrossentropy(BackwardLoss):
             y_true, y_pred = input
             n_class = y_pred.shape[self.layer.loss.axis]
             softmax = K.softmax(y_pred, axis=self.layer.loss.axis)
-            gradient_ = K.eye(n_class)[None] * K.expand_dims((1 - softmax), self.layer.loss.axis)
 
-            grad_crossentropy = K.sum(
-                K.expand_dims(y_true, self.layer.loss.axis) * gradient_,
-                self.layer.loss.axis,
-            )  # (None, n_class)
+            grad_y_true = -y_pred + K.log(
+                K.sum(K.exp(y_pred), axis=self.layer.loss.axis, keepdims=True)
+            )
+            grad_y_pred = (
+                -y_true + K.sum(y_true, axis=self.layer.loss.axis, keepdims=True) * softmax
+            )
 
-            grad_y_true = gradient * K.log(softmax)
-            grad_y_pred = gradient * grad_crossentropy
+            # multiply by gradient
+            grad_y_true = grad_y_true * gradient
+            grad_y_pred = grad_y_pred * gradient
 
             return [grad_y_true, grad_y_pred]
         else:

@@ -4,7 +4,8 @@ import keras
 import numpy as np
 import torch  # type: ignore
 from jacobinet.models import is_linear
-from keras.models import Sequential  # type: ignore
+from keras.layers import Conv2D, Dense, Flatten, Input, Reshape  # type: ignore
+from keras.models import Model, Sequential  # type: ignore
 from numpy.testing import assert_almost_equal
 
 
@@ -210,3 +211,41 @@ def compute_lipschitz(
     gradient = np.reshape(gradient, input_shape)
     assert_almost_equal(gradient, gradient_[0])
     """
+
+
+def get_toy_model_sequential(input_shape_wo_batch, output_dim_wo_batch):
+    model = Sequential(
+        [
+            Input(shape=input_shape_wo_batch),
+            Dense(784),
+            Reshape((1, 28, 28)),
+            Conv2D(64, kernel_size=(3, 3), activation="relu"),
+            # layers.MaxPooling2D(pool_size=(2, 2)),
+            Conv2D(64, kernel_size=(3, 3), activation="relu"),
+            # layers.Conv2D(64, kernel_size=(3, 3), activation="relu"),
+            Flatten(),
+            Dense(output_dim_wo_batch),
+        ]
+    )
+    _ = model(np.ones((1,) + input_shape_wo_batch, dtype="float32"))
+    return model
+
+
+def get_toy_model_functional(input_shape_wo_batch, output_dim_wo_batch):
+    layers = [
+        Dense(784),
+        Reshape((1, 28, 28)),
+        Conv2D(64, kernel_size=(3, 3), activation="relu"),
+        # layers.MaxPooling2D(pool_size=(2, 2)),
+        Conv2D(64, kernel_size=(3, 3), activation="relu"),
+        # layers.Conv2D(64, kernel_size=(3, 3), activation="relu"),
+        Flatten(),
+        Dense(output_dim_wo_batch),
+    ]
+    x = Input(shape=input_shape_wo_batch)
+    y = x
+    for layer in layers:
+        y = layer(y)
+    model = Model(x, y)
+    _ = model(np.ones((1,) + input_shape_wo_batch, dtype="float32"))
+    return model

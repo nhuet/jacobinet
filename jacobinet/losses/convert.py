@@ -4,11 +4,13 @@ from jacobinet.losses import BackwardLoss
 from keras.losses import CategoricalCrossentropy  # type:ignore
 
 from .categorical_crossentropy import get_backward_CategoricalCrossentropy
-from .loss import CategoricalCrossentropy_Layer, Loss_Layer
+from .logits import get_backward_Logits
+from .loss import CategoricalCrossentropy_Layer, Logits_Layer, Loss_Layer
 
 default_mapping_keras2backward_loss: dict[type[Loss_Layer], type[callable]] = {
     # convolution
     CategoricalCrossentropy_Layer: get_backward_CategoricalCrossentropy,
+    Logits_Layer: get_backward_Logits,
 }
 
 
