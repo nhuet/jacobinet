@@ -68,7 +68,7 @@ class FastGradientSign(AdvLayer):
 
         # project given lp norm
         adv_x = self.get_adv(x=x, grad_x=grad_x)
-        adv_x = self.project_lp_ball(adv_x)
+
         # clip inputs between lower and upper
         if len(inputs) > 2:
             lower, upper = inputs[:2]
@@ -89,6 +89,8 @@ class FastGradientSign(AdvLayer):
 def get_fgsm_model(
     model,
     loss: Union[str, Loss, Layer] = "categorical_crossentropy",
+    epsilon: float = 0,
+    p: float = np.inf,
     mapping_keras2backward_classes: Dict[type[Layer], type[BackwardLayer]] = {},  # define type
     mapping_keras2backward_losses: Dict[type[Layer], type[BackwardLoss]] = {},
     **kwargs,
@@ -126,7 +128,6 @@ def get_fgsm_model(
             lower=-1.0,
             upper=1.0,
             p=2,
-            radius=0.2
         )
 
     In this example, the `get_fgsm_model` function is used to create an adversarial model using the FGSM attack.
@@ -145,31 +146,16 @@ def get_fgsm_model(
     adv_pred: List[Tensor] = to_list(base_adv_model.outputs)
     lower = -np.inf
     upper = np.inf
-    p = -1
-    radius = np.inf
     bounds = []
     if "lower" in kwargs and "upper" in kwargs:
         lower = kwargs["lower"]
         upper = kwargs["upper"]
         bounds = [lower, upper]
-    if "p" in kwargs:
-        p = kwargs["p"]
-    if "radius" in kwargs:
-        radius = kwargs["radius"]
 
-    # use lp norm as well
-    if "epsilon" in kwargs:
-        fgsm_layer = FastGradientSign(
-            epsilon=kwargs["epsilon"],
-            p=p,
-            radius=radius,
-        )
-    else:
-        fgsm_layer = FastGradientSign(
-            epsilon=kwargs["epsilon"],
-            p=p,
-            radius=radius,
-        )
+    fgsm_layer = FastGradientSign(
+        epsilon=epsilon,
+        p=p,
+    )
 
     output = fgsm_layer(inputs[:-1] + adv_pred + bounds)
 

@@ -59,7 +59,7 @@ def get_model_with_loss(
     gt_input = Input(gt_shape)
 
     loss_layer: Layer
-    if type(loss) == "str":
+    if isinstance(loss, str):
         loss: Loss = deserialize(loss)
         # convert loss which is a Loss object into a keras Layer
         loss_layer = get_loss_as_layer(loss)
@@ -130,7 +130,8 @@ def get_adv_model_base(
             "actually not working wih multiple inputs. Raise a dedicated PR if needed"
         )
 
-    if loss == "logits":
+    if loss == "logits____":
+        # no sense ...
         # simple backward
         backward_model_base_attack = clone_to_backward(
             model=model,
@@ -153,7 +154,7 @@ def get_adv_model_base(
         backward_model_base_attack = clone_to_backward(
             model=model_with_loss,
             mapping_keras2backward_classes=mapping_keras2backward_classes,
-            gradient=keras.Variable(np.ones((1, 1))),
+            gradient=keras.Variable(np.ones((1, 1), dtype="float32")),
             input_mask=input_mask,
         )
     # convert it into an AdvModel
@@ -180,7 +181,6 @@ class AdvLayer(Layer):
         lower: float = -np.inf,
         upper: float = np.inf,
         p: float = -1,
-        radius: float = np.inf,
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -188,7 +188,6 @@ class AdvLayer(Layer):
         self.lower = lower
         self.upper = upper
         self.p = p
-        self.radius = radius
 
     # @keras.ops.custom_gradient
     def call(self, inputs, training=None, mask=None):
@@ -228,31 +227,6 @@ class AdvLayer(Layer):
     def get_radius(self):
         return self.radius
 
-    def project_lp_ball(self, x):
-        if self.p == -1:
-            # no projection, return identity
-            return x
-
-        if self.p == np.inf:
-            # project on l_inf norm: equivalent to clipping
-            return K.clip(x, -self.radius, self.radius)
-
-        axis = np.arange(len(x.shape) - 1) + 1
-        if self.p == 2:
-            # compute l2 norm and normalize with it
-            if self.radius < np.inf:
-                norm_2 = K.sum(K.sqrt(x**2), axis=axis, keepdims=True)
-                return self.radius * x / norm_2
-            return x
-        elif self.p == 1:
-            # compute l1 norm and normalize with it
-            if self.radius < np.inf:
-                norm_1 = K.sum(K.abs(x), axis=axis, keepdims=True)
-                return x / norm_1
-            return x
-        else:
-            raise ValueError("unknown lp norm p={}".format(self.p))
-
 
 class AdvModel(keras.Model):
     """
@@ -276,6 +250,8 @@ class AdvModel(keras.Model):
         layer_adv: AdvLayer,
         backward_model: BackwardModel,
         method="fgsm",  # replace by Enum
+        radius=np.inf,
+        p=np.inf,
         *args,
         **kwargs: Any,
     ):
@@ -283,6 +259,8 @@ class AdvModel(keras.Model):
         self.backward_model = backward_model
         self.method = method
         self.layer_adv = layer_adv
+        self.radius = radius
+        self.p = p
 
     def get_config(self):
         config = super().get_config()

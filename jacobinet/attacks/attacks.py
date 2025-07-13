@@ -1,5 +1,6 @@
 from typing import Callable, Union
 
+import numpy as np
 from jacobinet.attacks.base_attacks import AdvModel
 from jacobinet.attacks.fgsm import get_fgsm_model
 from jacobinet.attacks.pgd import get_pgd_model
@@ -21,6 +22,8 @@ def get_adv_model(
     mapping_keras2backward_classes={},
     mapping_keras2backward_losses={},
     mapping_attack={},  # in case the user wants to define its own attack
+    epsilon: float = 1,
+    p: float = np.inf,
     **kwargs,
 ) -> AdvModel:
     """
@@ -56,6 +59,8 @@ def get_adv_model(
     return get_method_adv(
         model,
         loss=loss,
+        epsilon=epsilon,
+        p=p,
         mapping_keras2backward_classes=mapping_keras2backward_classes,
         mapping_keras2backward_losses=mapping_keras2backward_losses,
         **kwargs,
